@@ -7,12 +7,17 @@ exports.App = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const yamljs_1 = __importDefault(require("yamljs"));
 const morgan_1 = __importDefault(require("morgan"));
 const DIContainer_1 = require("./infrastructure/di/DIContainer");
 const AuthRouter_1 = require("./presentation/router/AuthRouter");
+const path_1 = __importDefault(require("path"));
 class App {
     constructor() {
+        const swaggerDocument = yamljs_1.default.load(path_1.default.join(__dirname, '/docs/swagger.yaml'));
         this.app = (0, express_1.default)();
+        this.app.use("/docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
         this.diContainer = DIContainer_1.DIContainer.getInstance();
         this.setupMiddleware();
         this.setupRoutes();
