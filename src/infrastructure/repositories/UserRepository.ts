@@ -16,14 +16,14 @@ export class UserRepository implements IUserRepository {
   `;
 
     const values = [
-      user.email,                   
-      user.mobileNumber,            
-      user.password,                
-      user.userType,                
-      user.isActive,                 
+      user.email,                   // $1 - email (موجود في كلا النوعين)
+      user.mobileNumber,            // $2 - mobile_number
+      user.password,                // $3 - password
+      user.userType,                // $4 - user_type
+      user.isActive,                // $5 - is_active
       user.userType === UserType.CUSTOMER ? (user as Customer).name : null,  // $6 - name
-      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,  
-      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null 
+      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,  // $7 - restaurant_name
+      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null // $8 - organization_number
     ];
 
     const result = await this.db.query(query, values);
@@ -137,26 +137,26 @@ export class UserRepository implements IUserRepository {
   private mapRowToUser(row: any): User {
     const baseUser = {
       id: row.id,
+      email: row.email,          // إضافة email هنا
       mobileNumber: row.mobile_number,
       password: row.password,
       userType: row.user_type,
       isActive: row.is_active,
-      createdAt: row.created_at,    // Fixed typo
-      updatedAt: row.updated_at     // Fixed typo: was 'update_ar'
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
     };
 
     if (row.user_type === UserType.CUSTOMER) {
       return {
         ...baseUser,
         name: row.name,
-        email: row.email,
         userType: UserType.CUSTOMER,
       } as Customer;
     } else {
       return {
         ...baseUser,
-        organizationNumber: row.organization_number,
         restaurantName: row.restaurant_name,
+        organizationNumber: row.organization_number,
         userType: UserType.RESTAURANT_OWNER
       } as restaurantOwner;
     }
