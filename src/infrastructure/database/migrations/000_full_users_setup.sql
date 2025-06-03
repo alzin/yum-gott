@@ -1,6 +1,18 @@
+-- Migration to fix the schema and allow email for restaurant owners
+-- This replaces the original 001_create_users_table.sql
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TYPE user_type AS ENUM ('customer', 'restaurant_owner');
+-- Safe enum creation
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_type') THEN
+        CREATE TYPE user_type AS ENUM ('customer', 'restaurant_owner');
+    END IF;
+END$$;
+
+-- Drop the existing table if it exists
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -19,16 +31,18 @@ CREATE TABLE users (
     restaurant_name VARCHAR(255),
     organization_number VARCHAR(50),
     
-    -- UPDATED CONSTRAINTS: Both user types now require email
+    -- Updated constraints to allow email for both user types
     CONSTRAINT customer_fields_check CHECK (
-        (user_type = 'customer' AND name IS NOT NULL AND email IS NOT NULL AND restaurant_name IS NULL AND organization_number IS NULL) OR
-        (user_type = 'restaurant_owner' AND restaurant_name IS NOT NULL AND organization_number IS NOT NULL AND email IS NOT NULL AND name IS NULL)
+        (user_type = 'customer' AND name IS NOT NULL AND restaurant_name IS NULL AND organization_number IS NULL) OR
+        (user_type = 'restaurant_owner' AND restaurant_name IS NOT NULL AND organization_number IS NOT NULL AND name IS NULL)
     ),
     
+    -- Email can be present for both customer and restaurant_owner
     CONSTRAINT unique_email CHECK (email IS NULL OR email != ''),
     CONSTRAINT unique_organization_number CHECK (organization_number IS NULL OR organization_number != '')
 );
 
+-- Create indexes
 CREATE UNIQUE INDEX idx_users_email ON users(email) WHERE email IS NOT NULL;
 CREATE UNIQUE INDEX idx_users_organization_number ON users(organization_number) WHERE organization_number IS NOT NULL;
 CREATE INDEX idx_users_mobile_number ON users(mobile_number);

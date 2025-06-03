@@ -10,8 +10,8 @@ export interface BaseUser {
     userType: UserType;
     isActive: boolean;
     createdAt?: Date;
-    updatedAt?: Date; // FIXED TYPO: was 'updateAt'
-}
+    updatedAt?: Date;
+};
 
 export interface Customer extends BaseUser {
     name: string;
@@ -22,8 +22,8 @@ export interface Customer extends BaseUser {
 export interface restaurantOwner extends BaseUser {
     restaurantName: string;
     organizationNumber: string;
-    email: string; // ADD EMAIL FIELD TO RESTAURANT OWNER
-    userType: UserType.RESTAURANT_OWNER;
+    email: string; // Added email field for restaurant owners
+    userType: UserType.RESTAURANT_OWNER
 }
 
 export type User = Customer | restaurantOwner;

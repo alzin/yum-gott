@@ -5,7 +5,7 @@ import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 export interface RegisterRestaurantOwnerRequest {
   restaurantName: string;
   organizationNumber: string;
-  email: string; 
+  email: string; // Added email field
   mobileNumber: string;
   password: string;
 }
@@ -32,7 +32,7 @@ export class RegisterRestaurantOwnerUseCase {
       throw new Error('User already exists with this mobile number');
     }
 
-    // ADD EMAIL EXISTENCE CHECK
+    // Check if email already exists
     const emailExists = await this.userRepository.existsByEmail(request.email);
     if (emailExists) {
       throw new Error('User already exists with this email');
@@ -48,7 +48,7 @@ export class RegisterRestaurantOwnerUseCase {
     return {
       restaurantName: request.restaurantName,
       organizationNumber: request.organizationNumber,
-      email: request.email, // ADD EMAIL TO THE CREATION
+      email: request.email, // Include email in restaurant owner creation
       mobileNumber: request.mobileNumber,
       password: hashedPassword,
       userType: UserType.RESTAURANT_OWNER,

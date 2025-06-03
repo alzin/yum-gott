@@ -15,20 +15,18 @@ export class UserRepository implements IUserRepository {
       RETURNING *
     `;
     
-    // FIX THE ENUM BUG: Ensure user_type is a string, not boolean
     const values = [
       user.mobileNumber,
       user.password,
-      user.userType, // This should be a string from UserType enum
-      user.isActive, // This should be a boolean
+      user.userType,
+      user.isActive,
       user.userType === UserType.CUSTOMER ? (user as Customer).name : null,
-      user.userType === UserType.CUSTOMER ? (user as Customer).email : 
-        user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).email : null, // HANDLE EMAIL FOR BOTH TYPES
+      // Both customer and restaurant owner can have email now
+      user.userType === UserType.CUSTOMER ? (user as Customer).email : (user as restaurantOwner).email,
       user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,
       user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null
     ];
 
-    console.log('Creating user with values:', values); // DEBUG LOG
     const result = await this.db.query(query, values);
     return this.mapRowToUser(result.rows[0]) as T;
   }
@@ -104,7 +102,7 @@ export class UserRepository implements IUserRepository {
         fields.push(`organization_number = $${paramCount++}`);
         values.push(owner.organizationNumber);
       }
-      // ADD EMAIL UPDATE FOR RESTAURANT OWNER
+      // Handle email updates for restaurant owners
       if (owner.email) {
         fields.push(`email = $${paramCount++}`);
         values.push(owner.email);
@@ -169,7 +167,7 @@ export class UserRepository implements IUserRepository {
         ...baseUser,
         organizationNumber: row.organization_number,
         restaurantName: row.restaurant_name,
-        email: row.email, // ADD EMAIL MAPPING FOR RESTAURANT OWNER
+        email: row.email, // Include email for restaurant owners
         userType: UserType.RESTAURANT_OWNER
       } as restaurantOwner;
     }

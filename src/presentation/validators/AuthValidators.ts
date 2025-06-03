@@ -57,7 +57,7 @@ export class AuthValidators {
         .matches(/^[A-Z0-9]+$/)
         .withMessage('Organization number must contain only uppercase letters and numbers'),
 
-      // ADD EMAIL VALIDATION FOR RESTAURANT OWNER
+      // Added email validation for restaurant owners
       body('email')
         .trim()
         .notEmpty()
