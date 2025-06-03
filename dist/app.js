@@ -15,7 +15,7 @@ const AuthRouter_1 = require("./presentation/router/AuthRouter");
 const path_1 = __importDefault(require("path"));
 class App {
     constructor() {
-        const swaggerDocument = yamljs_1.default.load(path_1.default.join(__dirname, "docs/swagger.yaml"));
+        const swaggerDocument = yamljs_1.default.load(path_1.default.join(__dirname, "/docs/swagger.yaml"));
         this.app = (0, express_1.default)();
         this.app.use("/docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
         this.diContainer = DIContainer_1.DIContainer.getInstance();
