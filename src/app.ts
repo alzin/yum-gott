@@ -1,16 +1,22 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import swaggerUi from "swagger-ui-express";
+import YAML from 'yamljs';
 import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter } from './presentation/router/AuthRouter';
+import path from "path";
+
 
 export class App {
   private app: Application;
   private diContainer: DIContainer;
 
   constructor() {
+    const swaggerDocument = YAML.load(path.join(__dirname, "../docs/swagger.yaml"));
     this.app = express();
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     this.diContainer = DIContainer.getInstance();
     this.setupMiddleware();
     this.setupRoutes();

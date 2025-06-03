@@ -8,7 +8,9 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "pg": "^8.16.0"
+    "pg": "^8.16.0",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "name": "yom_gott",
   "version": "1.0.0",
@@ -33,6 +35,8 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.15.29",
     "@types/pg": "^8.15.2",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
