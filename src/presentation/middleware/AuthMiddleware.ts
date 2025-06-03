@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
-import { JwtPayload } from 'jsonwebtoken';
+import { JWTpayload } from '@/domain/entities/AuthToken'; // Fixed import - use domain JWTpayload
+
 export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
+  user?: JWTpayload; // Use domain JWTpayload instead of jwt.JwtPayload
 }
 
 export class AuthMiddleware {
@@ -13,7 +14,10 @@ export class AuthMiddleware {
       const authHeader = req.headers.authorization;
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ error: 'Access token required' });
+        res.status(401).json({ 
+          success: false,
+          message: 'Access token required' 
+        });
         return;
       }
 
@@ -23,7 +27,10 @@ export class AuthMiddleware {
       req.user = payload;
       next();
     } catch (error) {
-      res.status(401).json({ error: 'Invalid or expired token' });
+      res.status(401).json({ 
+        success: false,
+        message: 'Invalid or expired token' 
+      });
     }
   };
 }

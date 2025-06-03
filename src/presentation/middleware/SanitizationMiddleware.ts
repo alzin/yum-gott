@@ -63,7 +63,7 @@ export class SanitizationMiddleware {
    */
   static sanitizeLoginRequest() {
     return SanitizationMiddleware.allowedFields([
-      'mobileNumber',
+      'email',
       'password'
     ]);
   }

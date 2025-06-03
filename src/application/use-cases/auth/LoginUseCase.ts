@@ -43,6 +43,7 @@ export class LoginUseCase {
     const jwtPayload: JWTpayload = {
       userId: user.id!,
       userType: user.userType,
+      email: request.email // Use email instead of mobileNumber in JWT payload
     };
 
     const authToken = await this.authRepository.generateToken(jwtPayload);
