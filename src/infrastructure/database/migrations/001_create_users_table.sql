@@ -20,10 +20,10 @@ CREATE TABLE users (
     organization_number VARCHAR(50),
     
     -- Constraints
-    CONSTRAINT customer_fields_check CHECK (
-        (user_type = 'customer' AND name IS NOT NULL AND restaurant_name IS NULL AND organization_number IS NULL) OR
-        (user_type = 'restaurant_owner' AND restaurant_name IS NOT NULL AND organization_number IS NOT NULL AND name IS NULL)
-    ),
+ CONSTRAINT customer_fields_check CHECK (
+    (user_type = 'customer' AND name IS NOT NULL AND restaurant_name IS NULL AND organization_number IS NULL) OR
+    (user_type = 'restaurant_owner' AND restaurant_name IS NOT NULL AND organization_number IS NOT NULL AND name IS NULL)
+)
     
     CONSTRAINT unique_organization_number CHECK (organization_number IS NULL OR organization_number != '')
 );

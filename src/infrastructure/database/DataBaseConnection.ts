@@ -13,9 +13,9 @@ export class DatabaseConnection {
 
     this.pool = new Pool({
       connectionString,
-      ssl: {
+      ssl: process.env.NODE_ENV === 'production' ? {
         rejectUnauthorized: false,
-      },
+      } : false, // Disable SSL in development
     });
   }
 

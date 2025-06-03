@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { AuthController } from '../controller/AuthController';
 import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
+import { SanitizationMiddleware } from '../middleware/SanitizationMiddleware';
 
 export class AuthRouter {
   private router: Router;
@@ -15,6 +16,7 @@ export class AuthRouter {
     // Customer registration
     this.router.post(
       '/register/customer',
+      SanitizationMiddleware.sanitizeCustomerRegistration(),
       AuthValidators.registerCustomer(),
       ValidationMiddleware.handleValidationErrors(),
       this.authController.registerCustomer
@@ -23,6 +25,7 @@ export class AuthRouter {
     // Restaurant owner registration
     this.router.post(
       '/register/restaurant-owner',
+      SanitizationMiddleware.sanitizeRestaurantOwnerRegistration(),
       AuthValidators.registerRestaurantOwner(),
       ValidationMiddleware.handleValidationErrors(),
       this.authController.registerRestaurantOwner
@@ -31,14 +34,12 @@ export class AuthRouter {
     // Login - supports both email and mobile number
     this.router.post(
       '/login',
+      SanitizationMiddleware.sanitizeLoginRequest(),
       AuthValidators.login(),
       ValidationMiddleware.handleValidationErrors(),
       this.authController.login
     );
   }
-
-
-  
 
   public getRouter(): Router {
     return this.router;

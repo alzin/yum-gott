@@ -15,15 +15,34 @@ export class UserRepository implements IUserRepository {
     RETURNING *
   `;
 
+    // Fix: Properly handle conditional field assignment based on user type
+    let name = null;
+    let restaurantName = null;
+    let organizationNumber = null;
+
+    if (user.userType === UserType.CUSTOMER) {
+      const customer = user as Customer;
+      name = customer.name;
+      // Ensure restaurant fields are explicitly null for customers
+      restaurantName = null;
+      organizationNumber = null;
+    } else if (user.userType === UserType.RESTAURANT_OWNER) {
+      const owner = user as restaurantOwner;
+      // Ensure customer fields are explicitly null for restaurant owners
+      name = null;
+      restaurantName = owner.restaurantName;
+      organizationNumber = owner.organizationNumber;
+    }
+
     const values = [
-      user.email,                   // $1 - email (موجود في كلا النوعين)
-      user.mobileNumber,            // $2 - mobile_number
-      user.password,                // $3 - password
-      user.userType,                // $4 - user_type
-      user.isActive,                // $5 - is_active
-      user.userType === UserType.CUSTOMER ? (user as Customer).name : null,  // $6 - name
-      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,  // $7 - restaurant_name
-      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null // $8 - organization_number
+      user.mobileNumber,
+      user.password,
+      user.userType,
+      user.isActive,
+      user.userType === UserType.CUSTOMER ? (user as Customer).name : null,
+      user.userType === UserType.CUSTOMER ? (user as Customer).email : (user as restaurantOwner).email,
+      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,
+      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null
     ];
 
     const result = await this.db.query(query, values);
@@ -75,6 +94,11 @@ export class UserRepository implements IUserRepository {
         fields.push(`organization_number = $${paramCount++}`);
         values.push(owner.organizationNumber);
       }
+      if (owner.email) {
+        fields.push(`email = $${paramCount++}`);
+        values.push(owner.email);
+      }
+
     }
 
     if (fields.length === 0) {
@@ -137,7 +161,7 @@ export class UserRepository implements IUserRepository {
   private mapRowToUser(row: any): User {
     const baseUser = {
       id: row.id,
-      email: row.email,          // إضافة email هنا
+      email: row.email,
       mobileNumber: row.mobile_number,
       password: row.password,
       userType: row.user_type,
@@ -157,6 +181,7 @@ export class UserRepository implements IUserRepository {
         ...baseUser,
         restaurantName: row.restaurant_name,
         organizationNumber: row.organization_number,
+        email: row.email,
         userType: UserType.RESTAURANT_OWNER
       } as restaurantOwner;
     }
