@@ -22,7 +22,7 @@ export class LoginUseCase {
   ) {}
 
   async execute(request: LoginRequest): Promise<LoginResponse> {
-    // Find user by email
+    // Find user by email only
     const user = await this.userRepository.findByEmail(request.email);
 
     if (!user) {
@@ -43,7 +43,6 @@ export class LoginUseCase {
     const jwtPayload: JWTpayload = {
       userId: user.id!,
       userType: user.userType,
-      email: user.email // Changed from mobileNumber to email
     };
 
     const authToken = await this.authRepository.generateToken(jwtPayload);

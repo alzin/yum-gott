@@ -7,14 +7,14 @@ export class SanitizationMiddleware {
   static allowedFields(allowedFields: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {
       const sanitizedBody: Record<string, any> = {};
-      
+
       // Only include allowed fields
       for (const field of allowedFields) {
         if (req.body.hasOwnProperty(field)) {
           sanitizedBody[field] = req.body[field];
         }
       }
-      
+
       // Replace request body with sanitized version
       req.body = sanitizedBody;
       next();
@@ -39,7 +39,7 @@ export class SanitizationMiddleware {
   static sanitizeCustomerRegistration() {
     return SanitizationMiddleware.allowedFields([
       'name',
-      'email', 
+      'email',
       'mobileNumber',
       'password'
     ]);
@@ -52,7 +52,7 @@ export class SanitizationMiddleware {
     return SanitizationMiddleware.allowedFields([
       'restaurantName',
       'organizationNumber',
-      'mobileNumber', 
+      'mobileNumber',
       'email',
       'password'
     ]);
@@ -63,7 +63,6 @@ export class SanitizationMiddleware {
    */
   static sanitizeLoginRequest() {
     return SanitizationMiddleware.allowedFields([
-      'email',
       'mobileNumber',
       'password'
     ]);
