@@ -1,23 +1,9 @@
+
 openapi: 3.0.3
 info:
-  title: Restaurant Platform API
+  title: Yum-Gott Platform - User API
   description: |
-    A comprehensive REST API for a restaurant platform that supports both customers and restaurant owners.
-    Built with Clean Architecture principles using Node.js, TypeScript, Express, and PostgreSQL.
-    
-    ## Features
-    - User authentication and authorization with JWT tokens
-    - Support for two user types: Customers and Restaurant Owners
-    - Secure password hashing with bcrypt
-    - Input validation with express-validator
-    - PostgreSQL database with proper constraints
-    - Clean Architecture with dependency injection
-    
-    ## Authentication
-    This API uses JWT (JSON Web Tokens) for authentication. Include the JWT token in the Authorization header:
-    ```
-    Authorization: Bearer <your_jwt_token>
-    ```
+    This API provides endpoints for user-related operations in the Yum-Gott business matching platform
   version: 1.0.0
   contact:
     name: API Support
@@ -25,12 +11,6 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-
-servers:
-  - url: http://localhost:3000
-    description: Development server
-  - url: https://api.restaurantplatform.com
-    description: Production server
 
 paths:
   /health:
@@ -138,10 +118,11 @@ paths:
               validOwner:
                 summary: Valid restaurant owner registration
                 value:
-                  restaurantName: "Delicious Bites Restaurant"
-                  organizationNumber: "ORG123456789"
-                  mobileNumber: "01987654321"
-                  password: "RestaurantPass123"
+                  restaurantName: "res"
+                  organizationNumber: "ORG123456"
+                  email: "restaurant@gmail.com"
+                  mobileNumber: "12345678902"
+                  password: "Pass123"
       responses:
         '201':
           description: Restaurant owner registered successfully
@@ -201,11 +182,7 @@ paths:
                 value:
                   email: "ahmed@example.com"
                   password: "SecurePass123"
-              loginWithMobile:
-                summary: Login with mobile number
-                value:
-                  mobileNumber: "01234567890"
-                  password: "SecurePass123"
+         
       responses:
         '200':
           description: Login successful
@@ -288,7 +265,7 @@ components:
       required:
         - restaurantName
         - organizationNumber
-        - email 
+        - email
         - mobileNumber
         - password
       properties:
@@ -297,26 +274,32 @@ components:
           minLength: 2
           maxLength: 255
           description: Name of the restaurant
-          example: "Delicious Bites Restaurant"
+          example: "res"
         organizationNumber:
           type: string
           minLength: 5
           maxLength: 50
           pattern: '^[A-Z0-9]+$'
           description: Organization registration number (uppercase letters and numbers)
-          example: "ORG123456789"
+          example: "ORG123456"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Restaurant owner's email address
+          example: "restaurant@gmail.com"
         mobileNumber:
           type: string
           pattern: '^[0-9]{10,15}$'
           description: Restaurant owner's mobile number (10-15 digits)
-          example: "01987654321"
+          example: "12345678902"
         password:
           type: string
           minLength: 6
           maxLength: 100
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
-          example: "RestaurantPass123"
+          example: "Pass123"
 
     LoginRequest:
       type: object
@@ -389,19 +372,24 @@ components:
           type: string
           format: uuid
           description: Unique restaurant owner identifier
-          example: "550e8400-e29b-41d4-a716-446655440001"
+          example: "7db9be8e-72d8-49dd-95e4-bb5419667984"
         restaurantName:
           type: string
           description: Name of the restaurant
-          example: "Delicious Bites Restaurant"
+          example: "res3"
         organizationNumber:
           type: string
           description: Organization registration number
-          example: "ORG123456789"
+          example: "O3RG1234563"
+        email:
+          type: string
+          format: email
+          description: Restaurant owner's email address
+          example: "restaurant@gmail.com"
         mobileNumber:
           type: string
           description: Restaurant owner's mobile number
-          example: "01987654321"
+          example: "123456789023"
         userType:
           type: string
           enum: ["restaurant_owner"]
@@ -415,12 +403,12 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp
-          example: "2024-12-03T10:30:00.000Z"
+          example: "2025-06-03T13:12:19.549Z"
         updatedAt:
           type: string
           format: date-time
           description: Account last update timestamp
-          example: "2024-12-03T10:30:00.000Z"
+          example: "2025-06-03T13:12:19.549Z"
 
     LoginResponse:
       type: object
