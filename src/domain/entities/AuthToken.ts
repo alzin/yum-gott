@@ -7,5 +7,5 @@ export interface AuthToken {
 export interface JWTpayload {
   userId: string;
   userType: string;
-  mobileNumber: string;
+  email: string; 
 }

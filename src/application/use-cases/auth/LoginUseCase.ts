@@ -5,8 +5,7 @@ import { IUserRepository } from "@/domain/repositories/IUserRepository";
 import { IAuthRepository } from "@/domain/repositories/IAuthRepository";
 
 export interface LoginRequest {
-  email?: string;
-  mobileNumber?: string;
+  email: string;
   password: string;
 }
 
@@ -23,14 +22,8 @@ export class LoginUseCase {
   ) {}
 
   async execute(request: LoginRequest): Promise<LoginResponse> {
-    // Find user by email or mobile number
-    let user: User | null = null;
-    
-    if (request.email) {
-      user = await this.userRepository.findByEmail(request.email);
-    } else if (request.mobileNumber) {
-      user = await this.userRepository.findByMobileNumber(request.mobileNumber);
-    }
+    // Find user by email
+    const user = await this.userRepository.findByEmail(request.email);
 
     if (!user) {
       throw new Error("Invalid credentials");
@@ -50,7 +43,7 @@ export class LoginUseCase {
     const jwtPayload: JWTpayload = {
       userId: user.id!,
       userType: user.userType,
-      mobileNumber: user.mobileNumber
+      email: user.email // Changed from mobileNumber to email
     };
 
     const authToken = await this.authRepository.generateToken(jwtPayload);

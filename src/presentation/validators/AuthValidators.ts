@@ -48,6 +48,16 @@ export class AuthValidators {
         .isLength({ min: 2, max: 255 })
         .withMessage('Restaurant name must be between 2 and 255 characters'),
 
+      body('email')
+        .trim()
+        .notEmpty()
+        .withMessage('Email is required')
+        .isEmail()
+        .withMessage('Invalid email format')
+        .normalizeEmail()
+        .isLength({ max: 255 })
+        .withMessage('Email must not exceed 255 characters'),
+
       body('organizationNumber')
         .trim()
         .notEmpty()
@@ -77,32 +87,18 @@ export class AuthValidators {
   static login(): ValidationChain[] {
     return [
       body('email')
-        .optional()
         .trim()
+        .notEmpty()
+        .withMessage('Email is required')
         .isEmail()
         .withMessage('Invalid email format')
         .normalizeEmail(),
-
-      body('mobileNumber')
-        .optional()
-        .trim()
-        .matches(/^[0-9]{10,15}$/)
-        .withMessage('Mobile number must be 10-15 digits'),
 
       body('password')
         .notEmpty()
         .withMessage('Password is required')
         .isLength({ min: 1 })
-        .withMessage('Password cannot be empty'),
-
-      // Custom validation to ensure either email or mobileNumber is provided
-      body()
-        .custom((value, { req }) => {
-          if (!req.body.email && !req.body.mobileNumber) {
-            throw new Error('Either email or mobile number is required');
-          }
-          return true;
-        })
+        .withMessage('Password cannot be empty')
     ];
   }
 }

@@ -5,25 +5,24 @@ export enum UserType {
 
 export interface BaseUser {
     id?: string;
+    email: string; 
     mobileNumber: string;
     password: string;
     userType: UserType;
     isActive: boolean;
     createdAt?: Date;
-    updateAt?: Date;
-};
+    updatedAt?: Date; 
+}
 
 export interface Customer extends BaseUser {
     name: string;
-    email: string;
     userType: UserType.CUSTOMER;
 }
-
 
 export interface restaurantOwner extends BaseUser {
     restaurantName: string;
     organizationNumber: string;
-    userType: UserType.RESTAURANT_OWNER
+    userType: UserType.RESTAURANT_OWNER;
 }
 
 export type User = Customer | restaurantOwner;
