@@ -14,7 +14,7 @@ export class App {
   private diContainer: DIContainer;
 
   constructor() {
-    const swaggerDocument = YAML.load(path.join(__dirname, "../docs/swagger.yaml"));
+    const swaggerDocument = YAML.load(path.join(__dirname, '/docs/swagger.yaml'));
     this.app = express();
     this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     this.diContainer = DIContainer.getInstance();
