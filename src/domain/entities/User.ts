@@ -5,24 +5,24 @@ export enum UserType {
 
 export interface BaseUser {
     id?: string;
-    email: string; 
     mobileNumber: string;
     password: string;
     userType: UserType;
     isActive: boolean;
     createdAt?: Date;
-    updatedAt?: Date; 
+    updatedAt?: Date; // FIXED TYPO: was 'updateAt'
 }
 
 export interface Customer extends BaseUser {
     name: string;
+    email: string;
     userType: UserType.CUSTOMER;
 }
 
 export interface restaurantOwner extends BaseUser {
     restaurantName: string;
     organizationNumber: string;
-    email:string;
+    email: string; // ADD EMAIL FIELD TO RESTAURANT OWNER
     userType: UserType.RESTAURANT_OWNER;
 }
 

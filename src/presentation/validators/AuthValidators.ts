@@ -35,18 +35,7 @@ export class AuthValidators {
         .isLength({ min: 6, max: 100 })
         .withMessage('Password must be between 6 and 100 characters')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
-
-      // Ensure restaurant owner specific fields are not present
-      body('restaurantName')
-        .not()
-        .exists()
-        .withMessage('Restaurant name should not be provided for customer registration'),
-
-      body('organizationNumber')
-        .not()
-        .exists()
-        .withMessage('Organization number should not be provided for customer registration')
+        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number')
     ];
   }
 
@@ -68,6 +57,17 @@ export class AuthValidators {
         .matches(/^[A-Z0-9]+$/)
         .withMessage('Organization number must contain only uppercase letters and numbers'),
 
+      // ADD EMAIL VALIDATION FOR RESTAURANT OWNER
+      body('email')
+        .trim()
+        .notEmpty()
+        .withMessage('Email is required')
+        .isEmail()
+        .withMessage('Invalid email format')
+        .normalizeEmail()
+        .isLength({ max: 255 })
+        .withMessage('Email must not exceed 255 characters'),
+
       body('mobileNumber')
         .trim()
         .notEmpty()
@@ -81,18 +81,7 @@ export class AuthValidators {
         .isLength({ min: 6, max: 100 })
         .withMessage('Password must be between 6 and 100 characters')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
-
-      // Ensure customer specific fields are not present
-      body('name')
-        .not()
-        .exists()
-        .withMessage('Name should not be provided for restaurant owner registration'),
-
-      body('email')
-        .not()
-        .exists()
-        .withMessage('Email should not be provided for restaurant owner registration')
+        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number')
     ];
   }
 
