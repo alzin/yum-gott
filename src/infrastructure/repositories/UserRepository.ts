@@ -8,22 +8,22 @@ export class UserRepository implements IUserRepository {
   async create<T extends User>(user: T): Promise<T> {
     const query = `
     INSERT INTO users (
-      mobile_number, password, user_type, is_active,
-      name, email, restaurant_name, organization_number
+      email, mobile_number, password, user_type, is_active,
+      name, restaurant_name, organization_number
     )
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *
   `;
 
     const values = [
-      user.mobileNumber,
-      user.password,
-      user.userType,
-      user.isActive,
-      user.userType === UserType.CUSTOMER ? (user as Customer).name : null,
-      user.email,
-      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,
-      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null
+      user.email,                   
+      user.mobileNumber,            
+      user.password,                
+      user.userType,                
+      user.isActive,                 
+      user.userType === UserType.CUSTOMER ? (user as Customer).name : null,  // $6 - name
+      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).restaurantName : null,  
+      user.userType === UserType.RESTAURANT_OWNER ? (user as restaurantOwner).organizationNumber : null 
     ];
 
     const result = await this.db.query(query, values);
