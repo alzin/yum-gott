@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterRestaurantOwnerUseCase = void 0;
-const User_1 = require("@/domain/entities/User");
+const User_1 = require("../../../domain/entities/User");
 class RegisterRestaurantOwnerUseCase {
     constructor(userRepository, passwordHasher) {
         this.userRepository = userRepository;

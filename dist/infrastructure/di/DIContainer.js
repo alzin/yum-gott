@@ -5,11 +5,11 @@ const DataBaseConnection_1 = require("../database/DataBaseConnection");
 const UserRepository_1 = require("../repositories/UserRepository");
 const AuthRepository_1 = require("../repositories/AuthRepository");
 const PasswordHasher_1 = require("../services/PasswordHasher");
-const RegisterCustomerUseCase_1 = require("@/application/use-cases/auth/RegisterCustomerUseCase");
-const RegisterResturantOwnerUseCases_1 = require("@/application/use-cases/auth/RegisterResturantOwnerUseCases");
-const LoginUseCase_1 = require("@/application/use-cases/auth/LoginUseCase");
-const AuthController_1 = require("@/presentation/controller/AuthController");
-const AuthMiddleware_1 = require("@/presentation/middleware/AuthMiddleware");
+const RegisterCustomerUseCase_1 = require("../../application/use-cases/auth/RegisterCustomerUseCase");
+const RegisterResturantOwnerUseCases_1 = require("../../application/use-cases/auth/RegisterResturantOwnerUseCases");
+const LoginUseCase_1 = require("../../application/use-cases/auth/LoginUseCase");
+const AuthController_1 = require("../../presentation/controller/AuthController");
+const AuthMiddleware_1 = require("../../presentation/middleware/AuthMiddleware");
 class DIContainer {
     constructor() {
         this.dependencies = new Map();
