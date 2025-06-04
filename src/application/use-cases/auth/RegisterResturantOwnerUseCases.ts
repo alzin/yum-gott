@@ -1,6 +1,9 @@
-import { RestaurantOwner } from '@/domain/entities/User';
+// import { RestaurantOwner } from '@/domain/entities/User';
 import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { PendingUser } from '@/domain/repositories/ICustomerRepository';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
+import { EmailService } from '@/infrastructure/services/EmailService';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface RegisterRestaurantOwnerRequest {
     restaurantName: string;
@@ -13,30 +16,35 @@ export interface RegisterRestaurantOwnerRequest {
 export class RegisterRestaurantOwnerUseCase {
     constructor(
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
-        private passwordHasher: IPasswordHasher
+        private passwordHasher: IPasswordHasher,
+        private emailService: EmailService
     ) {}
 
-    async execute(request: RegisterRestaurantOwnerRequest): Promise<RestaurantOwner> {
+    async execute(request: RegisterRestaurantOwnerRequest): Promise<void> {
         console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
         await this.checkExistingUser(request);
         
         const hashedPassword = await this.passwordHasher.hash(request.password);
         console.log('RegisterRestaurantOwnerUseCase: Password hashed');
         
-        const restaurantOwner: RestaurantOwner = {
+        const verificationToken = uuidv4();
+        const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        
+        const pendingUser: PendingUser = {
             restaurantName: request.restaurantName,
             organizationNumber: request.organizationNumber,
             email: request.email,
             mobileNumber: request.mobileNumber,
             password: hashedPassword,
-            isActive: true
+            userType: 'restaurant_owner', // Explicitly use literal type
+            verificationToken,
+            tokenExpiresAt
         };
         
-        console.log('RegisterRestaurantOwnerUseCase: Calling restaurantOwnerRepository.create');
-        const createdOwner = await this.restaurantOwnerRepository.create(restaurantOwner);
-        console.log('RegisterRestaurantOwnerUseCase: Restaurant owner created with ID', createdOwner.id);
-        
-        return createdOwner;
+        console.log('RegisterRestaurantOwnerUseCase: Creating pending user');
+        await this.restaurantOwnerRepository.createPending(pendingUser);
+        await this.emailService.sendVerificationEmail(request.email, verificationToken);
+        console.log('RegisterRestaurantOwnerUseCase: Verification email sent');
     }
 
     private async checkExistingUser(request: RegisterRestaurantOwnerRequest): Promise<void> {

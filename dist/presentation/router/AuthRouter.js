@@ -16,6 +16,8 @@ class AuthRouter {
         this.router.post('/register/customer', SanitizationMiddleware_1.SanitizationMiddleware.sanitizeCustomerRegistration(), AuthValidators_1.AuthValidators.registerCustomer(), ValidationMiddleware_1.ValidationMiddleware.handleValidationErrors(), this.authController.registerCustomer);
         // Restaurant owner registration
         this.router.post('/register/restaurant-owner', SanitizationMiddleware_1.SanitizationMiddleware.sanitizeRestaurantOwnerRegistration(), AuthValidators_1.AuthValidators.registerRestaurantOwner(), ValidationMiddleware_1.ValidationMiddleware.handleValidationErrors(), this.authController.registerRestaurantOwner);
+        // Email verification
+        this.router.get('/verify', this.authController.verifyEmail);
         // Login - supports both email and mobile number
         this.router.post('/login', SanitizationMiddleware_1.SanitizationMiddleware.sanitizeLoginRequest(), AuthValidators_1.AuthValidators.login(), ValidationMiddleware_1.ValidationMiddleware.handleValidationErrors(), this.authController.login);
     }

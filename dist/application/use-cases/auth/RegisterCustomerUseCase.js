@@ -1,38 +1,42 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterCustomerUseCase = void 0;
-const User_1 = require("../../../domain/entities/User");
+const uuid_1 = require("uuid");
 class RegisterCustomerUseCase {
-    constructor(userRepository, passwordHasher) {
-        this.userRepository = userRepository;
+    constructor(customerRepository, passwordHasher, emailService) {
+        this.customerRepository = customerRepository;
         this.passwordHasher = passwordHasher;
+        this.emailService = emailService;
     }
     async execute(request) {
-        // Validation is now handled at the presentation layer
         await this.checkExistingUser(request);
         const hashedPassword = await this.passwordHasher.hash(request.password);
-        const customer = this.createCustomer(request, hashedPassword);
-        return await this.userRepository.create(customer);
-    }
-    async checkExistingUser(request) {
-        const existingUser = await this.userRepository.findByMobileNumber(request.mobileNumber);
-        if (existingUser) {
-            throw new Error('User already exists with this mobile number');
-        }
-        const emailExists = await this.userRepository.existsByEmail(request.email);
-        if (emailExists) {
-            throw new Error('User already exists with this email');
-        }
-    }
-    createCustomer(request, hashedPassword) {
-        return {
+        const verificationToken = (0, uuid_1.v4)();
+        const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        const pendingUser = {
             name: request.name,
             email: request.email,
             mobileNumber: request.mobileNumber,
             password: hashedPassword,
-            userType: User_1.UserType.CUSTOMER,
-            isActive: true
+            userType: 'customer', // Explicitly use literal type
+            verificationToken: verificationToken,
+            tokenExpiresAt: tokenExpiresAt
         };
+        await this.customerRepository.createPending(pendingUser);
+        await this.emailService.sendVerificationEmail(request.email, verificationToken);
+    }
+    async checkExistingEmail(email) {
+        const emailExists = await this.customerRepository.existsByEmail(email);
+        if (emailExists) {
+            throw new Error('User already exists with this email');
+        }
+    }
+    async checkExistingUser(request) {
+        const existingUser = await this.customerRepository.findByMobileNumber(request.mobileNumber);
+        if (existingUser) {
+            throw new Error('User already exists with this mobile number');
+        }
+        await this.checkExistingEmail(request.email);
     }
 }
 exports.RegisterCustomerUseCase = RegisterCustomerUseCase;

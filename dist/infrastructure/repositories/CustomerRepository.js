@@ -1,11 +1,11 @@
-import { Customer } from "@/domain/entities/User";
-import { ICustomerRepository, PendingUser } from "@/domain/repositories/ICustomerRepository";
-import { DatabaseConnection } from "../database/DataBaseConnection";
-
-export class CustomerRepository implements ICustomerRepository {
-    constructor(private db: DatabaseConnection) {}
-
-    async create(customer: Customer): Promise<Customer> {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CustomerRepository = void 0;
+class CustomerRepository {
+    constructor(db) {
+        this.db = db;
+    }
+    async create(customer) {
         const query = `
             INSERT INTO customers (
                 name, email, mobile_number, password, is_active
@@ -13,7 +13,6 @@ export class CustomerRepository implements ICustomerRepository {
             VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         `;
-        
         const values = [
             customer.name,
             customer.email,
@@ -21,19 +20,16 @@ export class CustomerRepository implements ICustomerRepository {
             customer.password,
             customer.isActive
         ];
-
         const result = await this.db.query(query, values);
         return this.mapRowToCustomer(result.rows[0]);
     }
-
-    async createPending(pendingUser: PendingUser): Promise<void> {
+    async createPending(pendingUser) {
         const query = `
             INSERT INTO pending_users (
                 name, email, mobile_number, password, user_type, verification_token, token_expires_at
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         `;
-        
         const values = [
             pendingUser.name,
             pendingUser.email,
@@ -43,11 +39,9 @@ export class CustomerRepository implements ICustomerRepository {
             pendingUser.verificationToken,
             pendingUser.tokenExpiresAt
         ];
-
         await this.db.query(query, values);
     }
-
-    async verifyEmail(token: string): Promise<Customer> {
+    async verifyEmail(token) {
         const findQuery = `
             SELECT * FROM pending_users 
             WHERE verification_token = $1 
@@ -55,29 +49,23 @@ export class CustomerRepository implements ICustomerRepository {
             AND token_expires_at > CURRENT_TIMESTAMP
         `;
         const result = await this.db.query(findQuery, [token]);
-        
         if (result.rows.length === 0) {
             throw new Error('Invalid or expired verification token');
         }
-
         const pendingUser = result.rows[0];
-        const customer: Customer = {
+        const customer = {
             name: pendingUser.name,
             email: pendingUser.email,
             mobileNumber: pendingUser.mobile_number,
             password: pendingUser.password,
             isActive: true
         };
-
         const createdCustomer = await this.create(customer);
-        
         // Delete from pending_users
         await this.db.query('DELETE FROM pending_users WHERE verification_token = $1', [token]);
-        
         return createdCustomer;
     }
-
-    async findByMobileNumber(mobileNumber: string): Promise<Customer | null> {
+    async findByMobileNumber(mobileNumber) {
         const query = 'SELECT * FROM customers WHERE mobile_number = $1';
         const result = await this.db.query(query, [mobileNumber]);
         if (result.rows.length === 0) {
@@ -85,8 +73,7 @@ export class CustomerRepository implements ICustomerRepository {
         }
         return this.mapRowToCustomer(result.rows[0]);
     }
-
-    async findById(id: string): Promise<Customer | null> {
+    async findById(id) {
         const query = 'SELECT * FROM customers WHERE id = $1';
         const result = await this.db.query(query, [id]);
         if (result.rows.length === 0) {
@@ -94,8 +81,7 @@ export class CustomerRepository implements ICustomerRepository {
         }
         return this.mapRowToCustomer(result.rows[0]);
     }
-
-    async findByEmail(email: string): Promise<Customer | null> {
+    async findByEmail(email) {
         const query = 'SELECT * FROM customers WHERE email = $1';
         const result = await this.db.query(query, [email]);
         if (result.rows.length === 0) {
@@ -103,12 +89,10 @@ export class CustomerRepository implements ICustomerRepository {
         }
         return this.mapRowToCustomer(result.rows[0]);
     }
-
-    async update(id: string, customer: Partial<Customer>): Promise<Customer> {
-        const fields: string[] = [];
-        const values: any[] = [];
+    async update(id, customer) {
+        const fields = [];
+        const values = [];
         let paramCount = 1;
-
         if (customer.name) {
             fields.push(`name = $${paramCount++}`);
             values.push(customer.name);
@@ -129,7 +113,6 @@ export class CustomerRepository implements ICustomerRepository {
             fields.push(`is_active = $${paramCount++}`);
             values.push(customer.isActive);
         }
-
         values.push(id);
         const query = `
             UPDATE customers 
@@ -137,29 +120,24 @@ export class CustomerRepository implements ICustomerRepository {
             WHERE id = $${paramCount}
             RETURNING *
         `;
-
         const result = await this.db.query(query, values);
         return this.mapRowToCustomer(result.rows[0]);
     }
-
-    async delete(id: string): Promise<void> {
+    async delete(id) {
         const query = 'DELETE FROM customers WHERE id = $1';
         await this.db.query(query, [id]);
     }
-
-    async existsByMobileNumber(mobileNumber: string): Promise<boolean> {
+    async existsByMobileNumber(mobileNumber) {
         const query = 'SELECT 1 FROM customers WHERE mobile_number = $1 LIMIT 1';
         const result = await this.db.query(query, [mobileNumber]);
         return result.rows.length > 0;
     }
-
-    async existsByEmail(email: string): Promise<boolean> {
+    async existsByEmail(email) {
         const query = 'SELECT 1 FROM customers WHERE email = $1 LIMIT 1';
         const result = await this.db.query(query, [email]);
         return result.rows.length > 0;
     }
-
-    private mapRowToCustomer(row: any): Customer {
+    mapRowToCustomer(row) {
         return {
             id: row.id,
             name: row.name,
@@ -172,3 +150,4 @@ export class CustomerRepository implements ICustomerRepository {
         };
     }
 }
+exports.CustomerRepository = CustomerRepository;

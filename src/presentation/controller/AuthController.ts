@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
 import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterResturantOwnerUseCases';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
+// import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
+// import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class AuthController {
   constructor(
@@ -12,17 +15,11 @@ export class AuthController {
 
   registerCustomer = async (req: Request, res: Response): Promise<void> => {
     try {
-      const customer = await this.registerCustomerUseCase.execute(req.body);
-      
-      // Remove password from response
-      const { password, ...customerResponse } = customer;
+      await this.registerCustomerUseCase.execute(req.body);
       
       res.status(201).json({
         success: true,
-        message: 'Customer registered successfully',
-        // data: {
-        //   user: customerResponse
-        // }
+        message: 'Customer registration initiated. Please check your email for verification link.'
       });
     } catch (error) {
       res.status(400).json({
@@ -34,22 +31,54 @@ export class AuthController {
 
   registerRestaurantOwner = async (req: Request, res: Response): Promise<void> => {
     try {
-      const owner = await this.registerRestaurantOwnerUseCase.execute(req.body);
-      
-      // Remove password from response
-      const { password, ...ownerResponse } = owner;
+      await this.registerRestaurantOwnerUseCase.execute(req.body);
       
       res.status(201).json({
         success: true,
-        message: 'Restaurant owner registered successfully',
-        // data: {
-        //   user: ownerResponse
-        // }
+        message: 'Restaurant owner registration initiated. Please check your email for verification link.'
       });
     } catch (error) {
       res.status(400).json({
         success: false,
         message: error instanceof Error ? error.message : 'Registration failed'
+      });
+    }
+  };
+
+  verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { token } = req.query;
+      if (!token || typeof token !== 'string') {
+        res.status(400).json({
+          success: false,
+          message: 'Verification token is required'
+        });
+        return;
+      }
+
+      const diContainer = DIContainer.getInstance();
+      const customerRepo = diContainer.customerRepository;
+      const restaurantOwnerRepo = diContainer.restaurantOwnerRepository;
+
+      try {
+        const user = await customerRepo.verifyEmail(token);
+        res.status(200).json({
+          success: true,
+          message: 'Email verified successfully. You can now login.',
+          // data: { user }
+        });
+      } catch (customerError) {
+        const user = await restaurantOwnerRepo.verifyEmail(token);
+        res.status(200).json({
+          success: true,
+          message: 'Email verified successfully. You can now login.',
+          // data: { user }
+        });
+      }
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Verification failed'
       });
     }
   };
@@ -64,9 +93,7 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Login successful',
-        // data: {
-        //   user: result.user
-        // }
+        // data: { user: result.user }
       });
     } catch (error) {
       res.status(401).json({
@@ -105,11 +132,6 @@ export class AuthController {
         return;
       }
 
-      // You'll need to add this method to your LoginUseCase or create a new RefreshTokenUseCase
-      // const newTokens = await this.refreshTokenUseCase.execute(refreshToken);
-      
-      // For now, we'll use the auth repository directly
-      // This should be moved to a use case for better architecture
       const authRepository = require('@/infrastructure/di/DIContainer').DIContainer.getInstance().authRepository;
       const newTokens = await authRepository.refreshToken(refreshToken);
       

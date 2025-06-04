@@ -31,6 +31,12 @@ export class AuthRouter {
       this.authController.registerRestaurantOwner
     );
 
+    // Email verification
+    this.router.get(
+      '/verify',
+      this.authController.verifyEmail
+    );
+
     // Login - supports both email and mobile number
     this.router.post(
       '/login',

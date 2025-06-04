@@ -1,15 +1,14 @@
-
 import { DatabaseConnection } from '../database/DataBaseConnection';
 import { CustomerRepository } from '../repositories/CustomerRepository';
 import { RestaurantOwnerRepository } from '../repositories/RestaurantOwnerRepository';
 import { AuthRepository } from '../repositories/AuthRepository';
 import { PasswordHasher } from '../services/PasswordHasher';
+import { EmailService } from '../services/EmailService';
 import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
 import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterResturantOwnerUseCases';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
-
 type DependencyKey = keyof DIContainer;
 type DependencyFactory<T = any> = () => T;
 
@@ -61,13 +60,19 @@ export class DIContainer {
             console.log('DIContainer: Registering passwordHasher');
             return new PasswordHasher();
         });
+        
+        this.registerSingleton('emailService', () => {
+            console.log('DIContainer: Registering emailService');
+            return new EmailService();
+        });
 
         // Use Cases - Register as transients
         this.registerTransient('registerCustomerUseCase', () => {
             console.log('DIContainer: Registering registerCustomerUseCase');
             return new RegisterCustomerUseCase(
                 this.resolve('customerRepository'),
-                this.resolve('passwordHasher')
+                this.resolve('passwordHasher'),
+                this.resolve('emailService')
             );
         });
 
@@ -75,7 +80,8 @@ export class DIContainer {
             console.log('DIContainer: Registering registerRestaurantOwnerUseCase');
             return new RegisterRestaurantOwnerUseCase(
                 this.resolve('restaurantOwnerRepository'),
-                this.resolve('passwordHasher')
+                this.resolve('passwordHasher'),
+                this.resolve('emailService')
             );
         });
 
@@ -164,6 +170,10 @@ export class DIContainer {
 
     public get passwordHasher(): PasswordHasher {
         return this.resolve('passwordHasher');
+    }
+
+    public get emailService(): EmailService {
+        return this.resolve('emailService');
     }
 
     public get registerCustomerUseCase(): RegisterCustomerUseCase {

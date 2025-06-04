@@ -1,44 +1,51 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterRestaurantOwnerUseCase = void 0;
-const User_1 = require("../../../domain/entities/User");
+const uuid_1 = require("uuid");
 class RegisterRestaurantOwnerUseCase {
-    constructor(userRepository, passwordHasher) {
-        this.userRepository = userRepository;
+    constructor(restaurantOwnerRepository, passwordHasher, emailService) {
+        this.restaurantOwnerRepository = restaurantOwnerRepository;
         this.passwordHasher = passwordHasher;
+        this.emailService = emailService;
     }
     async execute(request) {
-        // Validation is now handled at the presentation layer
+        console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
         await this.checkExistingUser(request);
         const hashedPassword = await this.passwordHasher.hash(request.password);
-        const restaurantOwner = this.createRestaurantOwner(request, hashedPassword);
-        return await this.userRepository.create(restaurantOwner);
+        console.log('RegisterRestaurantOwnerUseCase: Password hashed');
+        const verificationToken = (0, uuid_1.v4)();
+        const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        const pendingUser = {
+            restaurantName: request.restaurantName,
+            organizationNumber: request.organizationNumber,
+            email: request.email,
+            mobileNumber: request.mobileNumber,
+            password: hashedPassword,
+            userType: 'restaurant_owner', // Explicitly use literal type
+            verificationToken,
+            tokenExpiresAt
+        };
+        console.log('RegisterRestaurantOwnerUseCase: Creating pending user');
+        await this.restaurantOwnerRepository.createPending(pendingUser);
+        await this.emailService.sendVerificationEmail(request.email, verificationToken);
+        console.log('RegisterRestaurantOwnerUseCase: Verification email sent');
     }
     async checkExistingUser(request) {
-        const existingUser = await this.userRepository.findByMobileNumber(request.mobileNumber);
+        console.log('RegisterRestaurantOwnerUseCase: Checking for existing user with mobile', request.mobileNumber);
+        const existingUser = await this.restaurantOwnerRepository.findByMobileNumber(request.mobileNumber);
         if (existingUser) {
             throw new Error('User already exists with this mobile number');
         }
-        // Check if email already exists
-        const emailExists = await this.userRepository.existsByEmail(request.email);
+        console.log('RegisterRestaurantOwnerUseCase: Checking for existing email', request.email);
+        const emailExists = await this.restaurantOwnerRepository.existsByEmail(request.email);
         if (emailExists) {
             throw new Error('User already exists with this email');
         }
-        const orgNumberExists = await this.userRepository.existsByOrganizationNumber(request.organizationNumber);
+        console.log('RegisterRestaurantOwnerUseCase: Checking for existing org number', request.organizationNumber);
+        const orgNumberExists = await this.restaurantOwnerRepository.existsByOrganizationNumber(request.organizationNumber);
         if (orgNumberExists) {
             throw new Error('Restaurant with this organization number already exists');
         }
-    }
-    createRestaurantOwner(request, hashedPassword) {
-        return {
-            restaurantName: request.restaurantName,
-            organizationNumber: request.organizationNumber,
-            email: request.email, // Include email in restaurant owner creation
-            mobileNumber: request.mobileNumber,
-            password: hashedPassword,
-            userType: User_1.UserType.RESTAURANT_OWNER,
-            isActive: true
-        };
     }
 }
 exports.RegisterRestaurantOwnerUseCase = RegisterRestaurantOwnerUseCase;

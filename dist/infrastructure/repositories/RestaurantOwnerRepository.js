@@ -1,11 +1,11 @@
-import { RestaurantOwner } from "@/domain/entities/User";
-import { IRestaurantOwnerRepository } from "@/domain/repositories/IRestaurantOwnerRepository";
-import { DatabaseConnection } from "../database/DataBaseConnection";
-import { PendingUser } from "@/domain/repositories/ICustomerRepository";
-export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
-    constructor(private db: DatabaseConnection) {}
-
-    async create(restaurantOwner: RestaurantOwner): Promise<RestaurantOwner> {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RestaurantOwnerRepository = void 0;
+class RestaurantOwnerRepository {
+    constructor(db) {
+        this.db = db;
+    }
+    async create(restaurantOwner) {
         const query = `
             INSERT INTO restaurant_owners (
                 restaurant_name, organization_number, email, mobile_number, password, is_active
@@ -13,7 +13,6 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `;
-        
         const values = [
             restaurantOwner.restaurantName,
             restaurantOwner.organizationNumber,
@@ -22,19 +21,16 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             restaurantOwner.password,
             restaurantOwner.isActive
         ];
-
         const result = await this.db.query(query, values);
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
-
-    async createPending(pendingUser: PendingUser): Promise<void> {
+    async createPending(pendingUser) {
         const query = `
             INSERT INTO pending_users (
                 restaurant_name, organization_number, email, mobile_number, password, user_type, verification_token, token_expires_at
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         `;
-        
         const values = [
             pendingUser.restaurantName,
             pendingUser.organizationNumber,
@@ -45,11 +41,9 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             pendingUser.verificationToken,
             pendingUser.tokenExpiresAt
         ];
-
         await this.db.query(query, values);
     }
-
-    async verifyEmail(token: string): Promise<RestaurantOwner> {
+    async verifyEmail(token) {
         const findQuery = `
             SELECT * FROM pending_users 
             WHERE verification_token = $1 
@@ -57,13 +51,11 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             AND token_expires_at > CURRENT_TIMESTAMP
         `;
         const result = await this.db.query(findQuery, [token]);
-        
         if (result.rows.length === 0) {
             throw new Error('Invalid or expired verification token');
         }
-
         const pendingUser = result.rows[0];
-        const restaurantOwner: RestaurantOwner = {
+        const restaurantOwner = {
             restaurantName: pendingUser.restaurant_name,
             organizationNumber: pendingUser.organization_number,
             email: pendingUser.email,
@@ -71,16 +63,12 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             password: pendingUser.password,
             isActive: true
         };
-
         const createdOwner = await this.create(restaurantOwner);
-        
         // Delete from pending_users
         await this.db.query('DELETE FROM pending_users WHERE verification_token = $1', [token]);
-        
         return createdOwner;
     }
-
-    async findByMobileNumber(mobileNumber: string): Promise<RestaurantOwner | null> {
+    async findByMobileNumber(mobileNumber) {
         const query = 'SELECT * FROM restaurant_owners WHERE mobile_number = $1';
         const result = await this.db.query(query, [mobileNumber]);
         if (result.rows.length === 0) {
@@ -88,8 +76,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         }
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
-
-    async findById(id: string): Promise<RestaurantOwner | null> {
+    async findById(id) {
         const query = 'SELECT * FROM restaurant_owners WHERE id = $1';
         const result = await this.db.query(query, [id]);
         if (result.rows.length === 0) {
@@ -97,8 +84,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         }
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
-
-    async findByEmail(email: string): Promise<RestaurantOwner | null> {
+    async findByEmail(email) {
         const query = 'SELECT * FROM restaurant_owners WHERE email = $1';
         const result = await this.db.query(query, [email]);
         if (result.rows.length === 0) {
@@ -106,12 +92,10 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         }
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
-
-    async update(id: string, restaurantOwner: Partial<RestaurantOwner>): Promise<RestaurantOwner> {
-        const fields: string[] = [];
-        const values: any[] = [];
+    async update(id, restaurantOwner) {
+        const fields = [];
+        const values = [];
         let paramCount = 1;
-
         if (restaurantOwner.restaurantName) {
             fields.push(`restaurant_name = $${paramCount++}`);
             values.push(restaurantOwner.restaurantName);
@@ -136,7 +120,6 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             fields.push(`is_active = $${paramCount++}`);
             values.push(restaurantOwner.isActive);
         }
-
         values.push(id);
         const query = `
             UPDATE restaurant_owners 
@@ -144,35 +127,29 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             WHERE id = $${paramCount}
             RETURNING *
         `;
-
         const result = await this.db.query(query, values);
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
-
-    async delete(id: string): Promise<void> {
+    async delete(id) {
         const query = 'DELETE FROM restaurant_owners WHERE id = $1';
         await this.db.query(query, [id]);
     }
-
-    async existsByMobileNumber(mobileNumber: string): Promise<boolean> {
+    async existsByMobileNumber(mobileNumber) {
         const query = 'SELECT 1 FROM restaurant_owners WHERE mobile_number = $1 LIMIT 1';
         const result = await this.db.query(query, [mobileNumber]);
         return result.rows.length > 0;
     }
-
-    async existsByEmail(email: string): Promise<boolean> {
+    async existsByEmail(email) {
         const query = 'SELECT 1 FROM restaurant_owners WHERE email = $1 LIMIT 1';
         const result = await this.db.query(query, [email]);
         return result.rows.length > 0;
     }
-
-    async existsByOrganizationNumber(organizationNumber: string): Promise<boolean> {
+    async existsByOrganizationNumber(organizationNumber) {
         const query = 'SELECT 1 FROM restaurant_owners WHERE organization_number = $1 LIMIT 1';
         const result = await this.db.query(query, [organizationNumber]);
         return result.rows.length > 0;
     }
-
-    private mapRowToRestaurantOwner(row: any): RestaurantOwner {
+    mapRowToRestaurantOwner(row) {
         return {
             id: row.id,
             restaurantName: row.restaurant_name,
@@ -186,3 +163,4 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         };
     }
 }
+exports.RestaurantOwnerRepository = RestaurantOwnerRepository;

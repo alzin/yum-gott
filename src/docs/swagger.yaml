@@ -1,9 +1,8 @@
-
 openapi: 3.0.3
 info:
   title: Yum-Gott Platform - User API
   description: |
-    This API provides endpoints for user-related operations in the Yum-Gott business matching platform
+    This API provides endpoints for user-related operations in the Yum-Gott business matching platform, including registration, email verification, and authentication.
   version: 1.0.0
   contact:
     name: API Support
@@ -11,7 +10,6 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-
 paths:
   /health:
     get:
@@ -34,18 +32,17 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
-                    example: "2024-12-03T10:30:00.000Z"
+                    example: "2025-06-04T20:32:00Z"
                   uptime:
                     type: number
                     description: Server uptime in seconds
                     example: 3600.5
-
   /api/auth/register/customer:
     post:
       tags:
         - Authentication
       summary: Register a new customer
-      description: Create a new customer account with email, mobile number, and password
+      description: Initiates customer registration by storing details in pending_users and sending a verification email.
       operationId: registerCustomer
       requestBody:
         required: true
@@ -63,7 +60,7 @@ paths:
                   password: "SecurePass123"
       responses:
         '201':
-          description: Customer registered successfully
+          description: Customer registration initiated successfully
           content:
             application/json:
               schema:
@@ -74,9 +71,7 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Customer registered successfully"
-                  data:
-                    $ref: '#/components/schemas/CustomerResponse'
+                    example: "Customer registration initiated. Please check your email for verification link."
         '400':
           description: Bad request - Validation errors or user already exists
           content:
@@ -100,13 +95,12 @@ paths:
                   value:
                     success: false
                     message: "User already exists with this mobile number"
-
   /api/auth/register/restaurant-owner:
     post:
       tags:
         - Authentication
       summary: Register a new restaurant owner
-      description: Create a new restaurant owner account with restaurant details
+      description: Initiates restaurant owner registration by storing details in pending_users and sending a verification email.
       operationId: registerRestaurantOwner
       requestBody:
         required: true
@@ -118,14 +112,14 @@ paths:
               validOwner:
                 summary: Valid restaurant owner registration
                 value:
-                  restaurantName: "res"
+                  restaurantName: "Tasty Bites"
                   organizationNumber: "ORG123456"
-                  email: "restaurant@gmail.com"
-                  mobileNumber: "12345678902"
-                  password: "Pass123"
+                  email: "owner@example.com"
+                  mobileNumber: "09876543210"
+                  password: "SecurePass123"
       responses:
         '201':
-          description: Restaurant owner registered successfully
+          description: Restaurant owner registration initiated successfully
           content:
             application/json:
               schema:
@@ -136,9 +130,7 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Restaurant owner registered successfully"
-                  data:
-                    $ref: '#/components/schemas/RestaurantOwnerResponse'
+                    example: "Restaurant owner registration initiated. Please check your email for verification link."
         '400':
           description: Bad request - Validation errors or organization already exists
           content:
@@ -160,7 +152,68 @@ paths:
                   value:
                     success: false
                     message: "Restaurant with this organization number already exists"
+  /api/auth/verify:
+    get:
+      tags:
+        - Authentication
+      summary: Verify email address
+      description: Verifies a user's email using a token sent in the verification email, moving the user from pending_users to the customers or restaurant_owners table.
+      operationId: verifyEmail
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Verification token sent to the user's email
+          example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Email verified successfully. You can now login."
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        oneOf:
+                          - $ref: '#/components/schemas/CustomerResponse'
+                          - $ref: '#/components/schemas/RestaurantOwnerResponse'
+              examples:
+                customerVerified:
+                  summary: Customer email verified
+                  value:
+                    success: true
+                    message: "Email verified successfully. You can now login."
 
+                restaurantOwnerVerified:
+                  summary: Restaurant owner email verified
+                  value:
+                    success: true
+                    message: "Email verified successfully. You can now login."
+                  
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidToken:
+                  summary: Invalid token
+                  value:
+                    success: false
+                    message: "Invalid or expired verification token"
   /api/auth/login:
     post:
       tags:
@@ -168,7 +221,7 @@ paths:
       summary: User login
       description: |
         Authenticate a user (customer or restaurant owner) using email/mobile number and password.
-        Returns JWT tokens for subsequent API calls.
+        Returns JWT tokens as HTTP-only cookies.
       operationId: login
       requestBody:
         required: true
@@ -182,7 +235,6 @@ paths:
                 value:
                   email: "ahmed@example.com"
                   password: "SecurePass123"
-         
       responses:
         '200':
           description: Login successful
@@ -199,6 +251,11 @@ paths:
                     example: "Login successful"
                   data:
                     $ref: '#/components/schemas/LoginResponse'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400000
         '401':
           description: Unauthorized - Invalid credentials or account deactivated
           content:
@@ -222,7 +279,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
 components:
   schemas:
     # Request Schemas
@@ -259,7 +315,6 @@ components:
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
           example: "SecurePass123"
-
     RegisterRestaurantOwnerRequest:
       type: object
       required:
@@ -274,7 +329,7 @@ components:
           minLength: 2
           maxLength: 255
           description: Name of the restaurant
-          example: "res"
+          example: "Tasty Bites"
         organizationNumber:
           type: string
           minLength: 5
@@ -287,20 +342,19 @@ components:
           format: email
           maxLength: 255
           description: Restaurant owner's email address
-          example: "restaurant@gmail.com"
+          example: "owner@example.com"
         mobileNumber:
           type: string
           pattern: '^[0-9]{10,15}$'
           description: Restaurant owner's mobile number (10-15 digits)
-          example: "12345678902"
+          example: "09876543210"
         password:
           type: string
           minLength: 6
           maxLength: 100
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
-          example: "Pass123"
-
+          example: "SecurePass123"
     LoginRequest:
       type: object
       required:
@@ -322,7 +376,6 @@ components:
           description: User's password
           example: "SecurePass123"
       description: Either email or mobileNumber must be provided
-
     # Response Schemas
     CustomerResponse:
       type: object
@@ -331,7 +384,7 @@ components:
           type: string
           format: uuid
           description: Unique customer identifier
-          example: "550e8400-e29b-41d4-a716-446655440000"
+          example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
           description: Customer's full name
@@ -358,13 +411,12 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp
-          example: "2024-12-03T10:30:00.000Z"
+          example: "2025-06-04T20:32:00Z"
         updatedAt:
           type: string
           format: date-time
           description: Account last update timestamp
-          example: "2024-12-03T10:30:00.000Z"
-
+          example: "2025-06-04T20:32:00Z"
     RestaurantOwnerResponse:
       type: object
       properties:
@@ -376,20 +428,20 @@ components:
         restaurantName:
           type: string
           description: Name of the restaurant
-          example: "res3"
+          example: "Tasty Bites"
         organizationNumber:
           type: string
           description: Organization registration number
-          example: "O3RG1234563"
+          example: "ORG123456"
         email:
           type: string
           format: email
           description: Restaurant owner's email address
-          example: "restaurant@gmail.com"
+          example: "owner@example.com"
         mobileNumber:
           type: string
           description: Restaurant owner's mobile number
-          example: "123456789023"
+          example: "09876543210"
         userType:
           type: string
           enum: ["restaurant_owner"]
@@ -403,13 +455,12 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp
-          example: "2025-06-03T13:12:19.549Z"
+          example: "2025-06-04T20:32:00Z"
         updatedAt:
           type: string
           format: date-time
           description: Account last update timestamp
-          example: "2025-06-03T13:12:19.549Z"
-
+          example: "2025-06-04T20:32:00Z"
     LoginResponse:
       type: object
       properties:
@@ -420,7 +471,6 @@ components:
           description: User information (without password)
         authToken:
           $ref: '#/components/schemas/AuthToken'
-
     AuthToken:
       type: object
       properties:
@@ -436,7 +486,6 @@ components:
           type: number
           description: Access token expiration time in seconds
           example: 86400
-
     ErrorResponse:
       type: object
       properties:
@@ -465,7 +514,6 @@ components:
                 type: string
                 description: Invalid value that was provided
                 example: "invalid-email"
-
     ValidationError:
       type: object
       properties:
@@ -480,7 +528,6 @@ components:
         value:
           description: The invalid value that was provided
           example: "invalid-email"
-
   securitySchemes:
     BearerAuth:
       type: http
@@ -489,16 +536,13 @@ components:
       description: |
         JWT authentication. Include the token in the Authorization header:
         `Authorization: Bearer <your_jwt_token>`
-
 security:
   - BearerAuth: []
-
 tags:
   - name: Health Check
     description: Server health monitoring endpoints
   - name: Authentication
-    description: User authentication and registration endpoints
-
+    description: User authentication, registration, and email verification endpoints
 externalDocs:
   description: Find out more about this API
   url: https://github.com/yourorg/restaurant-platform-api

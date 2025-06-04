@@ -2,14 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginUseCase = void 0;
 class LoginUseCase {
-    constructor(userRepository, authRepository, passwordHasher) {
-        this.userRepository = userRepository;
+    constructor(customerRepository, restaurantOwnerRepository, authRepository, passwordHasher) {
+        this.customerRepository = customerRepository;
+        this.restaurantOwnerRepository = restaurantOwnerRepository;
         this.authRepository = authRepository;
         this.passwordHasher = passwordHasher;
     }
     async execute(request) {
-        // Find user by email only
-        const user = await this.userRepository.findByEmail(request.email);
+        // Try to find user in both tables
+        const customer = await this.customerRepository.findByEmail(request.email);
+        const restaurantOwner = await this.restaurantOwnerRepository.findByEmail(request.email);
+        let user = customer || restaurantOwner;
         if (!user) {
             throw new Error("Invalid credentials");
         }
@@ -24,8 +27,8 @@ class LoginUseCase {
         // Generate Token
         const jwtPayload = {
             userId: user.id,
-            userType: user.userType,
-            email: request.email // Use email instead of mobileNumber in JWT payload
+            userType: customer ? 'customer' : 'restaurant_owner',
+            email: request.email
         };
         const authToken = await this.authRepository.generateToken(jwtPayload);
         // Remove password from response
