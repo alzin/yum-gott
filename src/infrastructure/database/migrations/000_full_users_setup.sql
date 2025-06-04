@@ -11,7 +11,6 @@ BEGIN
     END IF;
 END$$;
 
--- Drop the existing table if it exists
 DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (

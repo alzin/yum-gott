@@ -22,7 +22,7 @@ export interface Customer extends BaseUser {
 export interface restaurantOwner extends BaseUser {
     restaurantName: string;
     organizationNumber: string;
-    email: string; // Added email field for restaurant owners
+    email: string; 
     userType: UserType.RESTAURANT_OWNER
 }
 
