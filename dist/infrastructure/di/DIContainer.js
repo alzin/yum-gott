@@ -7,9 +7,11 @@ const RestaurantOwnerRepository_1 = require("../repositories/RestaurantOwnerRepo
 const AuthRepository_1 = require("../repositories/AuthRepository");
 const PasswordHasher_1 = require("../services/PasswordHasher");
 const EmailService_1 = require("../services/EmailService");
+const FileStorageService_1 = require("../services/FileStorageService");
 const RegisterCustomerUseCase_1 = require("../../application/use-cases/auth/RegisterCustomerUseCase");
 const RegisterResturantOwnerUseCases_1 = require("../../application/use-cases/auth/RegisterResturantOwnerUseCases");
 const LoginUseCase_1 = require("../../application/use-cases/auth/LoginUseCase");
+const UploadProfileImageUseCase_1 = require("../../application/use-cases/auth/UploadProfileImageUseCase");
 const AuthController_1 = require("../../presentation/controller/AuthController");
 const AuthMiddleware_1 = require("../../presentation/middleware/AuthMiddleware");
 class DIContainer {
@@ -31,7 +33,6 @@ class DIContainer {
         DIContainer.instance = undefined;
     }
     registerDependencies() {
-        // Infrastructure - Register as singletons
         this.registerSingleton('databaseConnection', () => {
             console.log('DIContainer: Registering databaseConnection');
             return DataBaseConnection_1.DatabaseConnection.getInstance();
@@ -56,7 +57,10 @@ class DIContainer {
             console.log('DIContainer: Registering emailService');
             return new EmailService_1.EmailService();
         });
-        // Use Cases - Register as transients
+        this.registerSingleton('fileStorageService', () => {
+            console.log('DIContainer: Registering fileStorageService');
+            return new FileStorageService_1.FileStorageService();
+        });
         this.registerTransient('registerCustomerUseCase', () => {
             console.log('DIContainer: Registering registerCustomerUseCase');
             return new RegisterCustomerUseCase_1.RegisterCustomerUseCase(this.resolve('customerRepository'), this.resolve('passwordHasher'), this.resolve('emailService'));
@@ -69,12 +73,14 @@ class DIContainer {
             console.log('DIContainer: Registering loginUseCase');
             return new LoginUseCase_1.LoginUseCase(this.resolve('customerRepository'), this.resolve('restaurantOwnerRepository'), this.resolve('authRepository'), this.resolve('passwordHasher'));
         });
-        // Controllers - Register as singletons
+        this.registerTransient('uploadProfileImageUseCase', () => {
+            console.log('DIContainer: Registering uploadProfileImageUseCase');
+            return new UploadProfileImageUseCase_1.UploadProfileImageUseCase(this.resolve('customerRepository'), this.resolve('restaurantOwnerRepository'), this.resolve('fileStorageService'));
+        });
         this.registerSingleton('authController', () => {
             console.log('DIContainer: Registering authController');
-            return new AuthController_1.AuthController(this.resolve('registerCustomerUseCase'), this.resolve('registerRestaurantOwnerUseCase'), this.resolve('loginUseCase'));
+            return new AuthController_1.AuthController(this.resolve('registerCustomerUseCase'), this.resolve('registerRestaurantOwnerUseCase'), this.resolve('loginUseCase'), this.resolve('uploadProfileImageUseCase'));
         });
-        // Middleware - Register as singletons
         this.registerSingleton('authMiddleware', () => {
             console.log('DIContainer: Registering authMiddleware');
             return new AuthMiddleware_1.AuthMiddleware(this.resolve('authRepository'));
@@ -132,6 +138,9 @@ class DIContainer {
     get emailService() {
         return this.resolve('emailService');
     }
+    get fileStorageService() {
+        return this.resolve('fileStorageService');
+    }
     get registerCustomerUseCase() {
         return this.resolve('registerCustomerUseCase');
     }
@@ -140,6 +149,9 @@ class DIContainer {
     }
     get loginUseCase() {
         return this.resolve('loginUseCase');
+    }
+    get uploadProfileImageUseCase() {
+        return this.resolve('uploadProfileImageUseCase');
     }
     get authController() {
         return this.resolve('authController');

@@ -1,14 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
-// import { ICustomerRepository } from '../../domain/repositories/ICustomerRepository';
-// import { IRestaurantOwnerRepository } from '../../domain/repositories/IRestaurantOwnerRepository';
 const DIContainer_1 = require("../../infrastructure/di/DIContainer");
 class AuthController {
-    constructor(registerCustomerUseCase, registerRestaurantOwnerUseCase, loginUseCase) {
+    constructor(registerCustomerUseCase, registerRestaurantOwnerUseCase, loginUseCase, uploadProfileImageUseCase) {
         this.registerCustomerUseCase = registerCustomerUseCase;
         this.registerRestaurantOwnerUseCase = registerRestaurantOwnerUseCase;
         this.loginUseCase = loginUseCase;
+        this.uploadProfileImageUseCase = uploadProfileImageUseCase;
         this.registerCustomer = async (req, res) => {
             try {
                 await this.registerCustomerUseCase.execute(req.body);
@@ -57,7 +56,6 @@ class AuthController {
                     res.status(200).json({
                         success: true,
                         message: 'Email verified successfully. You can now login.',
-                        // data: { user }
                     });
                 }
                 catch (customerError) {
@@ -65,7 +63,6 @@ class AuthController {
                     res.status(200).json({
                         success: true,
                         message: 'Email verified successfully. You can now login.',
-                        // data: { user }
                     });
                 }
             }
@@ -79,12 +76,10 @@ class AuthController {
         this.login = async (req, res) => {
             try {
                 const result = await this.loginUseCase.execute(req.body);
-                // Set HTTP-only cookies for tokens
                 this.setAuthCookies(res, result.authToken);
                 res.status(200).json({
                     success: true,
                     message: 'Login successful',
-                    // data: { user: result.user }
                 });
             }
             catch (error) {
@@ -96,7 +91,6 @@ class AuthController {
         };
         this.logout = async (req, res) => {
             try {
-                // Clear authentication cookies
                 this.clearAuthCookies(res);
                 res.status(200).json({
                     success: true,
@@ -136,23 +130,50 @@ class AuthController {
                 });
             }
         };
+        this.uploadProfileImage = async (req, res) => {
+            try {
+                const user = req.user; // From AuthMiddleware
+                if (!user) {
+                    res.status(401).json({
+                        success: false,
+                        message: 'Unauthorized: User not authenticated'
+                    });
+                    return;
+                }
+                const request = {
+                    file: req.file,
+                    userId: user.userId,
+                    userType: user.userType
+                };
+                const result = await this.uploadProfileImageUseCase.execute(request);
+                res.status(200).json({
+                    success: true,
+                    message: 'Profile image uploaded successfully',
+                    data: { profileImageUrl: result.profileImageUrl }
+                });
+            }
+            catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Image upload failed'
+                });
+            }
+        };
     }
     setAuthCookies(res, authToken) {
         const isProduction = process.env.NODE_ENV === 'production';
-        // Set access token cookie
         res.cookie('accessToken', authToken.accessToken, {
             httpOnly: true,
-            secure: isProduction, // Only use HTTPS in production
+            secure: isProduction,
             sameSite: 'strict',
-            maxAge: authToken.expiresIn * 1000, // Convert to milliseconds
+            maxAge: authToken.expiresIn * 1000,
             path: '/'
         });
-        // Set refresh token cookie with longer expiration
         res.cookie('refreshToken', authToken.refreshToken, {
             httpOnly: true,
             secure: isProduction,
             sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            maxAge: 7 * 24 * 60 * 60 * 1000,
             path: '/'
         });
     }

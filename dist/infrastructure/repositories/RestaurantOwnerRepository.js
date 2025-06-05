@@ -8,9 +8,9 @@ class RestaurantOwnerRepository {
     async create(restaurantOwner) {
         const query = `
             INSERT INTO restaurant_owners (
-                restaurant_name, organization_number, email, mobile_number, password, is_active
+                restaurant_name, organization_number, email, mobile_number, password, is_active, profile_image_url
             )
-            VALUES ($1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
         const values = [
@@ -19,7 +19,8 @@ class RestaurantOwnerRepository {
             restaurantOwner.email,
             restaurantOwner.mobileNumber,
             restaurantOwner.password,
-            restaurantOwner.isActive
+            restaurantOwner.isActive,
+            restaurantOwner.profileImageUrl
         ];
         const result = await this.db.query(query, values);
         return this.mapRowToRestaurantOwner(result.rows[0]);
@@ -61,10 +62,10 @@ class RestaurantOwnerRepository {
             email: pendingUser.email,
             mobileNumber: pendingUser.mobile_number,
             password: pendingUser.password,
-            isActive: true
+            isActive: true,
+            profileImageUrl: null
         };
         const createdOwner = await this.create(restaurantOwner);
-        // Delete from pending_users
         await this.db.query('DELETE FROM pending_users WHERE verification_token = $1', [token]);
         return createdOwner;
     }
@@ -120,6 +121,10 @@ class RestaurantOwnerRepository {
             fields.push(`is_active = $${paramCount++}`);
             values.push(restaurantOwner.isActive);
         }
+        if (restaurantOwner.profileImageUrl !== undefined) {
+            fields.push(`profile_image_url = $${paramCount++}`);
+            values.push(restaurantOwner.profileImageUrl);
+        }
         values.push(id);
         const query = `
             UPDATE restaurant_owners 
@@ -128,6 +133,19 @@ class RestaurantOwnerRepository {
             RETURNING *
         `;
         const result = await this.db.query(query, values);
+        return this.mapRowToRestaurantOwner(result.rows[0]);
+    }
+    async updateProfileImage(id, profileImageUrl) {
+        const query = `
+            UPDATE restaurant_owners 
+            SET profile_image_url = $1
+            WHERE id = $2
+            RETURNING *
+        `;
+        const result = await this.db.query(query, [profileImageUrl, id]);
+        if (result.rows.length === 0) {
+            throw new Error('Restaurant owner not found');
+        }
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
     async delete(id) {
@@ -159,7 +177,8 @@ class RestaurantOwnerRepository {
             password: row.password,
             isActive: row.is_active,
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
+            profileImageUrl: row.profile_image_url
         };
     }
 }
