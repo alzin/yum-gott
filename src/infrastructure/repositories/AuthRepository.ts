@@ -13,24 +13,37 @@ export class AuthRepository implements IAuthRepository {
     this.refreshTokenExpiration = 7 * 24 * 60 * 60; // 7 days in seconds
   }
 
-  async generateToken(payload: JWTpayload): Promise<AuthToken> {
-    const accessTokenOptions: SignOptions = {
-      expiresIn: this.jwtExpiration,
-    };
+async generateToken(payload: JWTpayload): Promise<AuthToken> {
+  const accessTokenOptions: SignOptions = {
+      expiresIn: `${this.jwtExpiration}s`, 
+    notBefore: 0,
+  };
 
-    const refreshTokenOptions: SignOptions = {
-      expiresIn: this.refreshTokenExpiration,
-    };
+  const refreshTokenOptions: SignOptions = {
+        expiresIn: `${this.refreshTokenExpiration}s`, 
 
-    const accessToken = jwt.sign(payload, this.jwtSecret, accessTokenOptions);
-    const refreshToken = jwt.sign(payload, this.jwtSecret, refreshTokenOptions);
+    notBefore: 0,
+  };
 
-    return {
-      accessToken,
-      refreshToken,
-      expiresIn: this.jwtExpiration,
-    };
-  }
+  const accessToken = jwt.sign(payload, this.jwtSecret, accessTokenOptions);
+  const refreshToken = jwt.sign(payload, this.jwtSecret, refreshTokenOptions);
+
+  const decoded = jwt.decode(accessToken) as { exp: number, iat: number };
+
+  console.log('AuthRepository: Token generated', {
+    userId: payload.userId,
+    iat: decoded.iat,
+    exp: decoded.exp,
+    date: new Date(decoded.iat * 1000).toISOString()
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+    expiresIn: this.jwtExpiration,
+  };
+}
+
 
   async verifyToken(token: string): Promise<JWTpayload> {
     try {

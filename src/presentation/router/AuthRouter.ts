@@ -7,6 +7,7 @@ import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 import { SanitizationMiddleware } from '../middleware/SanitizationMiddleware';
 import { AuthMiddleware } from '../middleware/AuthMiddleware';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import dayjs from 'dayjs';
 
 export class AuthRouter {
   private router: Router;
@@ -85,7 +86,21 @@ export class AuthRouter {
       SanitizationMiddleware.sanitizeProfileImageUpload(),
       this.authController.uploadProfileImage
     );
+
+    this.router.get('/server-time', (req, res) => {
+  const currentTime = dayjs().unix();
+  res.status(200).json({
+    success: true,
+    message: 'Server time retrieved successfully',
+    data: {
+      timestamp: currentTime,
+      date: dayjs().toISOString(),
+    },
+  });
+});
   }
+
+  
 
   public getRouter(): Router {
     return this.router;

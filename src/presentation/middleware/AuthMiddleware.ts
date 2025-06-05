@@ -39,6 +39,7 @@ export class AuthMiddleware {
         });
         return;
       }
+      
 
       next();
     } catch (error) {
