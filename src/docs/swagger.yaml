@@ -195,13 +195,11 @@ paths:
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
-
                 restaurantOwnerVerified:
                   summary: Restaurant owner email verified
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
-                  
         '400':
           description: Invalid or expired token
           content:
@@ -279,9 +277,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/profile/image:
+    post:
+      tags:
+        - Authentication
+      summary: Upload profile image
+      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3.
+      operationId: uploadProfileImage
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profileImage:
+                  type: string
+                  format: binary
+                  description: Profile image file (JPEG, PNG, or GIF, max 5MB)
+                userType:
+                  type: string
+                  enum: ['customer', 'restaurant_owner']
+                  description: Type of user uploading the image
+              required:
+                - profileImage
+                - userType
+      responses:
+        '200':
+          description: Profile image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profile image uploaded successfully"
+                  data:
+                    type: object
+                    properties:
+                      profileImageUrl:
+                        type: string
+                        description: URL of the uploaded image
+                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000-1698771234567.jpg"
+        '400':
+          description: Bad request - Validation errors or upload failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                noFile:
+                  summary: No file uploaded
+                  value:
+                    success: false
+                    message: "No file uploaded"
+                invalidFileType:
+                  summary: Invalid file type
+                  value:
+                    success: false
+                    message: "Only JPEG, PNG, and GIF images are allowed"
+                fileTooLarge:
+                  summary: File too large
+                  value:
+                    success: false
+                    message: "File size must not exceed 5MB"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  summary: Unauthorized
+                  value:
+                    success: false
+                    message: "Unauthorized: User not authenticated"
 components:
   schemas:
-    # Request Schemas
     RegisterCustomerRequest:
       type: object
       required:
@@ -376,7 +455,6 @@ components:
           description: User's password
           example: "SecurePass123"
       description: Either email or mobileNumber must be provided
-    # Response Schemas
     CustomerResponse:
       type: object
       properties:
@@ -417,6 +495,10 @@ components:
           format: date-time
           description: Account last update timestamp
           example: "2025-06-04T20:32:00Z"
+        profileImageUrl:
+          type: string
+          description: URL of the customer's profile image
+          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000-1698771234567.jpg"
     RestaurantOwnerResponse:
       type: object
       properties:
@@ -461,6 +543,10 @@ components:
           format: date-time
           description: Account last update timestamp
           example: "2025-06-04T20:32:00Z"
+        profileImageUrl:
+          type: string
+          description: URL of the restaurant owner's profile image
+          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/7db9be8e-72d8-49dd-95e4-bb5419667984-1698771234567.jpg"
     LoginResponse:
       type: object
       properties:

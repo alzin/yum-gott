@@ -6,6 +6,7 @@ export interface BaseUser {
     isActive: boolean;
     createdAt?: Date;
     updatedAt?: Date;
+    profileImageUrl?: string | null;
 }
 
 export interface Customer extends BaseUser {

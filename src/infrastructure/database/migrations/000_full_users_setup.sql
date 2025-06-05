@@ -35,7 +35,8 @@ CREATE TABLE base_users (
     password VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    profile_image_url VARCHAR(255) -- Added for profile image
 );
 
 -- Create customers table that inherits from base_users
@@ -47,7 +48,8 @@ CREATE TABLE customers (
     name VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    profile_image_url VARCHAR(255) -- Added for profile image
 ) INHERITS (base_users);
 
 -- Create restaurant_owners table that inherits from base_users
@@ -60,7 +62,8 @@ CREATE TABLE restaurant_owners (
     organization_number VARCHAR(50) UNIQUE NOT NULL,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    profile_image_url VARCHAR(255) -- Added for profile image
 ) INHERITS (base_users);
 
 -- Create indexes for customers

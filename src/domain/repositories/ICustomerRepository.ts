@@ -23,4 +23,5 @@ export interface ICustomerRepository {
     delete(id: string): Promise<void>;
     existsByMobileNumber(mobileNumber: string): Promise<boolean>;
     existsByEmail(email: string): Promise<boolean>;
+    updateProfileImage(id :string , profileImage : string):Promise<Customer>
 }

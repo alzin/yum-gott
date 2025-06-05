@@ -1,19 +1,25 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
 import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 import { SanitizationMiddleware } from '../middleware/SanitizationMiddleware';
+import { AuthMiddleware } from '../middleware/AuthMiddleware';
+import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class AuthRouter {
   private router: Router;
+  private upload: multer.Multer;
 
   constructor(private authController: AuthController) {
     this.router = Router();
+    this.upload = multer({ storage: multer.memoryStorage() });
     this.setupRoutes();
   }
 
   private setupRoutes(): void {
-    // Customer registration
+    const authMiddleware = DIContainer.getInstance().authMiddleware;
+
     this.router.post(
       '/register/customer',
       SanitizationMiddleware.sanitizeCustomerRegistration(),
@@ -22,7 +28,6 @@ export class AuthRouter {
       this.authController.registerCustomer
     );
 
-    // Restaurant owner registration
     this.router.post(
       '/register/restaurant-owner',
       SanitizationMiddleware.sanitizeRestaurantOwnerRegistration(),
@@ -31,19 +36,25 @@ export class AuthRouter {
       this.authController.registerRestaurantOwner
     );
 
-    // Email verification
     this.router.get(
       '/verify',
       this.authController.verifyEmail
     );
 
-    // Login - supports both email and mobile number
     this.router.post(
       '/login',
       SanitizationMiddleware.sanitizeLoginRequest(),
       AuthValidators.login(),
       ValidationMiddleware.handleValidationErrors(),
       this.authController.login
+    );
+
+    this.router.post(
+      '/profile/image',
+      authMiddleware.authenticate,
+      this.upload.single('profileImage'),
+      SanitizationMiddleware.sanitizeProfileImageUpload(),
+      this.authController.uploadProfileImage
     );
   }
 

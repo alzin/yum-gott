@@ -2,15 +2,15 @@ import { Request, Response } from 'express';
 import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
 import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterResturantOwnerUseCases';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
-// import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
-// import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { UploadProfileImageUseCase } from '@/application/use-cases/auth/UploadProfileImageUseCase';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class AuthController {
   constructor(
     private registerCustomerUseCase: RegisterCustomerUseCase,
     private registerRestaurantOwnerUseCase: RegisterRestaurantOwnerUseCase,
-    private loginUseCase: LoginUseCase
+    private loginUseCase: LoginUseCase,
+    private uploadProfileImageUseCase: UploadProfileImageUseCase
   ) {}
 
   registerCustomer = async (req: Request, res: Response): Promise<void> => {
@@ -65,14 +65,12 @@ export class AuthController {
         res.status(200).json({
           success: true,
           message: 'Email verified successfully. You can now login.',
-          // data: { user }
         });
       } catch (customerError) {
         const user = await restaurantOwnerRepo.verifyEmail(token);
         res.status(200).json({
           success: true,
           message: 'Email verified successfully. You can now login.',
-          // data: { user }
         });
       }
     } catch (error) {
@@ -87,13 +85,11 @@ export class AuthController {
     try {
       const result = await this.loginUseCase.execute(req.body);
       
-      // Set HTTP-only cookies for tokens
       this.setAuthCookies(res, result.authToken);
       
       res.status(200).json({
         success: true,
         message: 'Login successful',
-        // data: { user: result.user }
       });
     } catch (error) {
       res.status(401).json({
@@ -105,7 +101,6 @@ export class AuthController {
 
   logout = async (req: Request, res: Response): Promise<void> => {
     try {
-      // Clear authentication cookies
       this.clearAuthCookies(res);
       
       res.status(200).json({
@@ -150,24 +145,54 @@ export class AuthController {
     }
   };
 
+  uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user; // From AuthMiddleware
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          message: 'Unauthorized: User not authenticated'
+        });
+        return;
+      }
+
+      const request = {
+        file: req.file,
+        userId: user.userId,
+        userType: user.userType
+      };
+
+      const result = await this.uploadProfileImageUseCase.execute(request);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Profile image uploaded successfully',
+        data: { profileImageUrl: result.profileImageUrl }
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Image upload failed'
+      });
+    }
+  };
+
   private setAuthCookies(res: Response, authToken: any): void {
     const isProduction = process.env.NODE_ENV === 'production';
     
-    // Set access token cookie
     res.cookie('accessToken', authToken.accessToken, {
       httpOnly: true,
-      secure: isProduction, // Only use HTTPS in production
+      secure: isProduction,
       sameSite: 'strict',
-      maxAge: authToken.expiresIn * 1000, // Convert to milliseconds
+      maxAge: authToken.expiresIn * 1000,
       path: '/'
     });
 
-    // Set refresh token cookie with longer expiration
     res.cookie('refreshToken', authToken.refreshToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/'
     });
   }

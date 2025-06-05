@@ -4,9 +4,11 @@ import { RestaurantOwnerRepository } from '../repositories/RestaurantOwnerReposi
 import { AuthRepository } from '../repositories/AuthRepository';
 import { PasswordHasher } from '../services/PasswordHasher';
 import { EmailService } from '../services/EmailService';
+import { FileStorageService } from '../services/FileStorageService';
 import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
 import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterResturantOwnerUseCases';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
+import { UploadProfileImageUseCase } from '@/application/use-cases/auth/UploadProfileImageUseCase';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 type DependencyKey = keyof DIContainer;
@@ -36,7 +38,6 @@ export class DIContainer {
     }
 
     private registerDependencies(): void {
-        // Infrastructure - Register as singletons
         this.registerSingleton('databaseConnection', () => {
             console.log('DIContainer: Registering databaseConnection');
             return DatabaseConnection.getInstance();
@@ -66,7 +67,11 @@ export class DIContainer {
             return new EmailService();
         });
 
-        // Use Cases - Register as transients
+        this.registerSingleton('fileStorageService', () => {
+            console.log('DIContainer: Registering fileStorageService');
+            return new FileStorageService();
+        });
+
         this.registerTransient('registerCustomerUseCase', () => {
             console.log('DIContainer: Registering registerCustomerUseCase');
             return new RegisterCustomerUseCase(
@@ -95,17 +100,25 @@ export class DIContainer {
             );
         });
 
-        // Controllers - Register as singletons
+        this.registerTransient('uploadProfileImageUseCase', () => {
+            console.log('DIContainer: Registering uploadProfileImageUseCase');
+            return new UploadProfileImageUseCase(
+                this.resolve('customerRepository'),
+                this.resolve('restaurantOwnerRepository'),
+                this.resolve('fileStorageService')
+            );
+        });
+
         this.registerSingleton('authController', () => {
             console.log('DIContainer: Registering authController');
             return new AuthController(
                 this.resolve('registerCustomerUseCase'),
                 this.resolve('registerRestaurantOwnerUseCase'),
-                this.resolve('loginUseCase')
+                this.resolve('loginUseCase'),
+                this.resolve('uploadProfileImageUseCase')
             );
         });
 
-        // Middleware - Register as singletons
         this.registerSingleton('authMiddleware', () => {
             console.log('DIContainer: Registering authMiddleware');
             return new AuthMiddleware(this.resolve('authRepository'));
@@ -176,6 +189,10 @@ export class DIContainer {
         return this.resolve('emailService');
     }
 
+    public get fileStorageService(): FileStorageService {
+        return this.resolve('fileStorageService');
+    }
+
     public get registerCustomerUseCase(): RegisterCustomerUseCase {
         return this.resolve('registerCustomerUseCase');
     }
@@ -186,6 +203,10 @@ export class DIContainer {
 
     public get loginUseCase(): LoginUseCase {
         return this.resolve('loginUseCase');
+    }
+
+    public get uploadProfileImageUseCase(): UploadProfileImageUseCase {
+        return this.resolve('uploadProfileImageUseCase');
     }
 
     public get authController(): AuthController {

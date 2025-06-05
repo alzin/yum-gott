@@ -8,9 +8,9 @@ export class CustomerRepository implements ICustomerRepository {
     async create(customer: Customer): Promise<Customer> {
         const query = `
             INSERT INTO customers (
-                name, email, mobile_number, password, is_active
+                name, email, mobile_number, password, is_active, profile_image_url
             )
-            VALUES ($1, $2, $3, $4, $5)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `;
         
@@ -19,7 +19,8 @@ export class CustomerRepository implements ICustomerRepository {
             customer.email,
             customer.mobileNumber,
             customer.password,
-            customer.isActive
+            customer.isActive,
+            customer.profileImageUrl
         ];
 
         const result = await this.db.query(query, values);
@@ -66,12 +67,12 @@ export class CustomerRepository implements ICustomerRepository {
             email: pendingUser.email,
             mobileNumber: pendingUser.mobile_number,
             password: pendingUser.password,
-            isActive: true
+            isActive: true,
+            profileImageUrl: null
         };
 
         const createdCustomer = await this.create(customer);
         
-        // Delete from pending_users
         await this.db.query('DELETE FROM pending_users WHERE verification_token = $1', [token]);
         
         return createdCustomer;
@@ -129,6 +130,10 @@ export class CustomerRepository implements ICustomerRepository {
             fields.push(`is_active = $${paramCount++}`);
             values.push(customer.isActive);
         }
+        if (customer.profileImageUrl !== undefined) {
+            fields.push(`profile_image_url = $${paramCount++}`);
+            values.push(customer.profileImageUrl);
+        }
 
         values.push(id);
         const query = `
@@ -139,6 +144,20 @@ export class CustomerRepository implements ICustomerRepository {
         `;
 
         const result = await this.db.query(query, values);
+        return this.mapRowToCustomer(result.rows[0]);
+    }
+
+    async updateProfileImage(id: string, profileImageUrl: string): Promise<Customer> {
+        const query = `
+            UPDATE customers 
+            SET profile_image_url = $1
+            WHERE id = $2
+            RETURNING *
+        `;
+        const result = await this.db.query(query, [profileImageUrl, id]);
+        if (result.rows.length === 0) {
+            throw new Error('Customer not found');
+        }
         return this.mapRowToCustomer(result.rows[0]);
     }
 
@@ -168,7 +187,8 @@ export class CustomerRepository implements ICustomerRepository {
             password: row.password,
             isActive: row.is_active,
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
+            profileImageUrl: row.profile_image_url
         };
     }
 }
