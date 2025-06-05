@@ -1,3 +1,4 @@
+// src/presentation/router/AuthRouter.ts
 import { Router } from 'express';
 import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
@@ -13,7 +14,20 @@ export class AuthRouter {
 
   constructor(private authController: AuthController) {
     this.router = Router();
-    this.upload = multer({ storage: multer.memoryStorage() });
+    // Configure multer with file type and size validation
+    this.upload = multer({
+      storage: multer.memoryStorage(),
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.mimetype)) {
+          return cb(new Error('Only JPEG, PNG, and GIF images are allowed'));
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+      }
+    });
     this.setupRoutes();
   }
 
@@ -52,7 +66,22 @@ export class AuthRouter {
     this.router.post(
       '/profile/image',
       authMiddleware.authenticate,
-      this.upload.single('profileImage'),
+      (req: any, res, next) => {
+        this.upload.single('profileImage')(req, res, (err) => {
+          if (err instanceof multer.MulterError) {
+            return res.status(400).json({
+              success: false,
+              message: err.message === 'File too large' ? 'File size must not exceed 5MB' : 'Image upload error'
+            });
+          } else if (err) {
+            return res.status(400).json({
+              success: false,
+              message: err.message
+            });
+          }
+          next();
+        });
+      },
       SanitizationMiddleware.sanitizeProfileImageUpload(),
       this.authController.uploadProfileImage
     );
