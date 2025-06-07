@@ -34,7 +34,7 @@ export class FileStorageService implements IFileStorageService {
             Key: fileName,
             Body: file.buffer,
             ContentType: file.mimetype,
-            ACL: ObjectCannedACL.public_read
+            // ACL: ObjectCannedACL.public_read
         };
 
         try {

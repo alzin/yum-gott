@@ -8,10 +8,25 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export class AuthMiddleware {
-  constructor(private authRepository: IAuthRepository) {}
+  constructor(private authRepository: IAuthRepository) { }
 
   authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+      console.log('AuthMiddleware: Checking authentication...');
+      console.log('Raw cookies:', req.headers.cookie);
+
+      // Parse cookies manually if not already parsed
+      if (!req.cookies && req.headers.cookie) {
+        req.cookies = req.headers.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
+          const [key, value] = cookie.trim().split('=');
+          acc[key] = value;
+          return acc;
+        }, {});
+      }
+
+      console.log('Parsed cookies:', req.cookies);
+      console.log('Headers:', req.headers);
+
       let token = req.cookies?.accessToken;
       if (!token) {
         const authHeader = req.headers.authorization;
@@ -20,15 +35,22 @@ export class AuthMiddleware {
         }
       }
 
+      console.log('Token found:', !!token);
+      if (token) {
+        console.log('Token value:', token);
+      }
+
       if (!token) {
-        res.status(401).json({ 
+        console.log('AuthMiddleware: No token found');
+        res.status(401).json({
           success: false,
-          message: 'Access token required' 
+          message: 'Access token required'
         });
         return;
       }
 
       const payload = await this.authRepository.verifyToken(token);
+      console.log('Token payload:', payload);
       req.user = payload;
 
       // Additional check for userType consistency in requests with userType field
@@ -39,18 +61,19 @@ export class AuthMiddleware {
         });
         return;
       }
-      
 
       next();
     } catch (error) {
+      console.error('AuthMiddleware: Authentication error:', error);
       const refreshToken = req.cookies?.refreshToken;
       if (refreshToken) {
         try {
+          console.log('Attempting to refresh token...');
           const newTokens = await this.authRepository.refreshToken(refreshToken);
           this.setAuthCookies(res, newTokens);
           const payload = await this.authRepository.verifyToken(newTokens.accessToken);
           req.user = payload;
-          
+
           // Check userType consistency after refresh
           if (req.body.userType && req.body.userType !== payload.userType) {
             res.status(403).json({
@@ -59,22 +82,22 @@ export class AuthMiddleware {
             });
             return;
           }
-          
+
           next();
           return;
         } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
           this.clearAuthCookies(res);
         }
       }
-      
-      res.status(401).json({ 
+
+      res.status(401).json({
         success: false,
-        message: 'Invalid or expired token' 
+        message: 'Invalid or expired token'
       });
     }
   };
 
-  // ... rest of the file remains the same
   private setAuthCookies(res: Response, authToken: any): void {
     const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('accessToken', authToken.accessToken, {
@@ -92,15 +115,16 @@ export class AuthMiddleware {
       path: '/'
     });
   }
-
-  private clearAuthCookies(res: Response): void {
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
-      path: '/'
-    };
-    res.clearCookie('accessToken', cookieOptions);
-    res.clearCookie('refreshToken', cookieOptions);
-  }
+// في AuthMiddleware.ts
+private clearAuthCookies(res: Response): void {
+  console.log('AuthMiddleware: Clearing cookies for request', res.req?.originalUrl);
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    path: '/'
+  };
+  res.clearCookie('accessToken', cookieOptions);
+  res.clearCookie('refreshToken', cookieOptions);
+}
 }

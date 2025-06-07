@@ -14,7 +14,7 @@ export class App {
   private diContainer: DIContainer;
 
   constructor() {
-const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
+    const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
     this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     this.diContainer = DIContainer.getInstance();
@@ -29,10 +29,18 @@ const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
 
     // CORS configuration
     this.app.use(cors({
-      origin: process.env.CORS_ORIGIN || '*',
+      origin: function (origin, callback) {
+        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'https://yum-gott.onrender.com'];
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization']
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+      exposedHeaders: ['Set-Cookie']
     }));
 
     // Logging
@@ -79,7 +87,7 @@ const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     });
   }
 
-  
+
 
   public getApp(): Application {
     return this.app;

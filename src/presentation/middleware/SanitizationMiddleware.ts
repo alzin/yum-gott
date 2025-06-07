@@ -1,13 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
+import xss from 'xss'; // تأكد من تثبيت مكتبة xss إذا كنت تستخدمها
 
 export class SanitizationMiddleware {
   static allowedFields(allowedFields: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {
       const sanitizedBody: Record<string, any> = {};
 
-      for (const field of allowedFields) {
-        if (req.body.hasOwnProperty(field)) {
-          sanitizedBody[field] = req.body[field];
+      // تحقق من أن req.body هو كائن صالح
+      if (typeof req.body === 'object' && req.body !== null) {
+        for (const field of allowedFields) {
+          if (field in req.body) {
+            sanitizedBody[field] = xss(req.body[field]); // تنظيف القيمة باستخدام xss
+          }
         }
       }
 
@@ -18,8 +22,11 @@ export class SanitizationMiddleware {
 
   static excludeFields(excludedFields: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {
-      for (const field of excludedFields) {
-        delete req.body[field];
+      // تحقق من أن req.body هو كائن صالح
+      if (typeof req.body === 'object' && req.body !== null) {
+        for (const field of excludedFields) {
+          delete req.body[field];
+        }
       }
       next();
     };
