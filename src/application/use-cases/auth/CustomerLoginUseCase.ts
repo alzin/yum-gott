@@ -1,7 +1,6 @@
-import { ICustomerRepository } from "@/domain/repositories/ICustomerRepository";
-import { IAuthRepository } from "@/domain/repositories/IAuthRepository";
-import { IPasswordHasher } from "../interface/IPasswordHasher";
-import { LoginRequest , LoginResponse} from "./auth/LoginUseCase";
+import { ICustomerRepository , IAuthRepository } from "@/domain/repositories/index";
+import { IPasswordHasher } from "@/application/interface/IPasswordHasher";
+import { LoginRequest , LoginResponse} from "@/application/use-cases/auth";
 import { JWTpayload } from "@/domain/entities/AuthToken";
 export class CustomerLoginUseCase {
   constructor(

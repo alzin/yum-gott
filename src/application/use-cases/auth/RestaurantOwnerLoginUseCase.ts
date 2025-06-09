@@ -1,5 +1,4 @@
-import { IRestaurantOwnerRepository } from "@/domain/repositories/IRestaurantOwnerRepository";
-import { IAuthRepository } from "@/domain/repositories/IAuthRepository";
+import { IRestaurantOwnerRepository , IAuthRepository } from "@/domain/repositories/index";
 import { IPasswordHasher } from "@/application/interface/IPasswordHasher";
 import { LoginResponse, LoginRequest } from "@/application/interface/ILoginUseCase";
 import { JWTpayload } from "@/domain/entities/AuthToken";

@@ -1,12 +1,9 @@
-import { Router, Request, Response, NextFunction } from 'express'; // تأكد من استيراد الأنواع
+import { Router, Request, Response, NextFunction } from 'express'; 
 import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
 import { AuthValidators } from '../validators/AuthValidators';
-import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
-import { SanitizationMiddleware } from '../middleware/SanitizationMiddleware';
-// import { AuthMiddleware } from '../middleware/AuthMiddleware';
+import { ValidationMiddleware , SanitizationMiddleware } from '../middleware/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
-// import dayjs from 'dayjs';
 
 export class AuthRouter {
   private router: Router;

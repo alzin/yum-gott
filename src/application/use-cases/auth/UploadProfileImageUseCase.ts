@@ -1,7 +1,5 @@
-// src/application/use-cases/auth/UploadProfileImageUseCase.ts
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
-import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { ICustomerRepository , IRestaurantOwnerRepository} from '@/domain/repositories/index';
 
 export interface UploadProfileImageRequest {
     file: Express.Multer.File | undefined;

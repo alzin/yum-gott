@@ -1,11 +1,6 @@
 import { Request, Response } from 'express';
-import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
-import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterRestaurantOwnerUseCase';
-// import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
-import { UploadProfileImageUseCase } from '@/application/use-cases/auth/UploadProfileImageUseCase';
+import { RegisterCustomerUseCase , RegisterRestaurantOwnerUseCase , RestaurantOwnerLoginUseCase , UploadProfileImageUseCase , CustomerLoginUseCase} from '@/application/use-cases/auth/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
-import { CustomerLoginUseCase } from '@/application/use-cases/CustomerLoginUseCase';
-import { RestaurantOwnerLoginUseCase } from '@/application/use-cases/auth/RestaurantOwnerLoginUseCase';
 
 export class AuthController {
   constructor(

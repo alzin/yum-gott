@@ -16,7 +16,7 @@ export class RegisterCustomerUseCase {
         private customerRepository: ICustomerRepository,
         private passwordHasher: IPasswordHasher,
         private emailService: EmailService
-    ) {}
+    ) { }
 
     async execute(request: RegisterCustomerRequest): Promise<void> {
         await this.checkExistingUser(request);
@@ -47,7 +47,7 @@ export class RegisterCustomerUseCase {
         }
     }
 
-    private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> { 
+    private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> {
         await this.checkExistingEmail(request.email);
     }
 }

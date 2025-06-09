@@ -1,19 +1,11 @@
 import { DatabaseConnection } from '../database/DataBaseConnection';
-import { CustomerRepository } from '../repositories/CustomerRepository';
-import { RestaurantOwnerRepository } from '../repositories/RestaurantOwnerRepository';
-import { AuthRepository } from '../repositories/AuthRepository';
-import { PasswordHasher } from '../services/PasswordHasher';
-import { EmailService } from '../services/EmailService';
-import { FileStorageService } from '../services/FileStorageService';
-import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
-import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterRestaurantOwnerUseCase';
-import { UploadProfileImageUseCase } from '@/application/use-cases/auth/UploadProfileImageUseCase';
+import { CustomerRepository , RestaurantOwnerRepository , AuthRepository } from '../repositories/index';
+import { PasswordHasher , EmailService , FileStorageService} from '../services/index';
+import { RegisterCustomerUseCase  , RegisterRestaurantOwnerUseCase , UploadProfileImageUseCase , CustomerLoginUseCase , RestaurantOwnerLoginUseCase} from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
-import { CustomerLoginUseCase } from '@/application/use-cases/CustomerLoginUseCase';
-import { RestaurantOwnerLoginUseCase } from '@/application/use-cases/auth/RestaurantOwnerLoginUseCase';
 
-type DependencyKey = keyof DIContainer;
+// type DependencyKey = keyof DIContainer;
 type DependencyFactory<T = any> = () => T;
 
 export class DIContainer {
