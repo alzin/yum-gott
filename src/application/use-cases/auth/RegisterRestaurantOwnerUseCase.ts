@@ -50,10 +50,7 @@ export class RegisterRestaurantOwnerUseCase {
 
     private async checkExistingUser(request: RegisterRestaurantOwnerRequest): Promise<void> {
         console.log('RegisterRestaurantOwnerUseCase: Checking for existing user with mobile', request.mobileNumber);
-        const existingUser = await this.restaurantOwnerRepository.findByMobileNumber(request.mobileNumber);
-        if (existingUser) {
-            throw new Error('User already exists with this mobile number');
-        }
+     
         
         console.log('RegisterRestaurantOwnerUseCase: Checking for existing email', request.email);
         const emailExists = await this.restaurantOwnerRepository.existsByEmail(request.email);

@@ -48,10 +48,7 @@ export class RegisterCustomerUseCase {
     }
 
     private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> {
-        const existingUser = await this.customerRepository.findByMobileNumber(request.mobileNumber);
-        if (existingUser) {
-            throw new Error('User already exists with this mobile number');
-        }
+       
         await this.checkExistingEmail(request.email);
     }
 }

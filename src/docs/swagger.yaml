@@ -2,20 +2,9 @@
 openapi: 3.0.3
 info:
   title: Yum-Gott Platform - User API
-  description: |
-    This API provides endpoints for user-related operations in the Yum-Gott business matching platform, including registration, email verification, authentication, and token management.
-  version: 1.0.0
-  contact:
-    name: API Support
-    email: support@restaurantplatform.com
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-servers:
-  - url: https://yum-gott.onrender.com
-    description: Production server
-  - url: http://localhost:3000
-    description: Local development server
+ 
+
+ 
 paths:
   /health:
     get:
@@ -202,32 +191,13 @@ paths:
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
-                    data:
-                      user:
-                        id: "123e4567-e89b-12d3-a456-426614174000"
-                        name: "Ahmed Mohamed"
-                        email: "ahmed@example.com"
-                        mobileNumber: "01234567890"
-                        userType: "customer"
-                        isActive: true
-                        createdAt: "2025-06-09T13:06:00Z"
-                        updatedAt: "2025-06-09T13:06:00Z"
+                   
                 restaurantOwnerVerified:
                   summary: Restaurant owner email verified
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
-                    data:
-                      user:
-                        id: "7db9be8e-72d8-49dd-95e4-bb5419667984"
-                        restaurantName: "Tasty Bites"
-                        organizationNumber: "ORG123456"
-                        email: "owner@example.com"
-                        mobileNumber: "09876543210"
-                        userType: "restaurant_owner"
-                        isActive: true
-                        createdAt: "2025-06-09T13:06:00Z"
-                        updatedAt: "2025-06-09T13:06:00Z"
+                 
         '400':
           description: Invalid or expired token
           content:
@@ -291,20 +261,7 @@ paths:
                   value:
                     success: true
                     message: "Customer login successful"
-                    data:
-                      user:
-                        id: "123e4567-e89b-12d3-a456-426614174000"
-                        name: "Ahmed Mohamed"
-                        email: "ahmed@example.com"
-                        mobileNumber: "01234567890"
-                        userType: "customer"
-                        isActive: true
-                        createdAt: "2025-06-09T13:06:00Z"
-                        updatedAt: "2025-06-09T13:06:00Z"
-                      authToken:
-                        accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                        refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                        expiresIn: 86400
+             
           headers:
             Set-Cookie:
               schema:
@@ -406,21 +363,7 @@ paths:
                   value:
                     success: true
                     message: "Restaurant owner login successful"
-                    data:
-                      user:
-                        id: "7db9be8e-72d8-49dd-95e4-bb5419667984"
-                        restaurantName: "Tasty Bites"
-                        organizationNumber: "ORG123456"
-                        email: "owner@example.com"
-                        mobileNumber: "09876543210"
-                        userType: "restaurant_owner"
-                        isActive: true
-                        createdAt: "2025-06-09T13:06:00Z"
-                        updatedAt: "2025-06-09T13:06:00Z"
-                      authToken:
-                        accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                        refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                        expiresIn: 86400
+               
           headers:
             Set-Cookie:
               schema:
