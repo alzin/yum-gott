@@ -9,7 +9,7 @@ export class SanitizationMiddleware {
       if (typeof req.body === 'object' && req.body !== null) {
         for (const field of allowedFields) {
           if (field in req.body) {
-            sanitizedBody[field] = xss(req.body[field]); // تنظيف القيمة باستخدام xss
+            sanitizedBody[field] = xss(req.body[field]);
           }
         }
       }
@@ -21,7 +21,6 @@ export class SanitizationMiddleware {
 
   static excludeFields(excludedFields: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {
-      // تحقق من أن req.body هو كائن صالح
       if (typeof req.body === 'object' && req.body !== null) {
         for (const field of excludedFields) {
           delete req.body[field];
