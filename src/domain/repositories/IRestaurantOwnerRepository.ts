@@ -1,9 +1,7 @@
 import { RestaurantOwner } from '../entities/User';
-import { PendingUser } from './ICustomerRepository';
 
 export interface IRestaurantOwnerRepository {
     create(restaurantOwner: RestaurantOwner): Promise<RestaurantOwner>;
-    createPending(pendingUser: PendingUser): Promise<void>;
     verifyEmail(token: string): Promise<RestaurantOwner>;
     findByMobileNumber(mobileNumber: string): Promise<RestaurantOwner | null>;
     findById(id: string): Promise<RestaurantOwner | null>;
@@ -13,6 +11,5 @@ export interface IRestaurantOwnerRepository {
     existsByMobileNumber(mobileNumber: string): Promise<boolean>;
     existsByEmail(email: string): Promise<boolean>;
     existsByOrganizationNumber(organizationNumber: string): Promise<boolean>;
-    updateProfileImage(id :string , profileImage : string):Promise<RestaurantOwner>
-    
+    updateProfileImage(id: string, profileImage: string): Promise<RestaurantOwner>;
 }

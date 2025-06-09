@@ -1,7 +1,6 @@
 import { RestaurantOwner } from "@/domain/entities/User";
 import { IRestaurantOwnerRepository } from "@/domain/repositories/IRestaurantOwnerRepository";
 import { DatabaseConnection } from "../database/DataBaseConnection";
-import { PendingUser } from "@/domain/repositories/ICustomerRepository";
 
 export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
     constructor(private db: DatabaseConnection) {}
@@ -9,9 +8,10 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
     async create(restaurantOwner: RestaurantOwner): Promise<RestaurantOwner> {
         const query = `
             INSERT INTO restaurant_owners (
-                restaurant_name, organization_number, email, mobile_number, password, is_active, profile_image_url
+                restaurant_name, organization_number, email, mobile_number, password, 
+                is_active, is_email_verified, verification_token, token_expires_at, profile_image_url
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
         `;
         
@@ -22,6 +22,9 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             restaurantOwner.mobileNumber,
             restaurantOwner.password,
             restaurantOwner.isActive,
+            restaurantOwner.isEmailVerified,
+            restaurantOwner.verificationToken,
+            restaurantOwner.tokenExpiresAt,
             restaurantOwner.profileImageUrl
         ];
 
@@ -29,57 +32,21 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
 
-    async createPending(pendingUser: PendingUser): Promise<void> {
-        const query = `
-            INSERT INTO pending_users (
-                restaurant_name, organization_number, email, mobile_number, password, user_type, verification_token, token_expires_at
-            )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `;
-        
-        const values = [
-            pendingUser.restaurantName,
-            pendingUser.organizationNumber,
-            pendingUser.email,
-            pendingUser.mobileNumber,
-            pendingUser.password,
-            pendingUser.userType,
-            pendingUser.verificationToken,
-            pendingUser.tokenExpiresAt
-        ];
-
-        await this.db.query(query, values);
-    }
-
     async verifyEmail(token: string): Promise<RestaurantOwner> {
-        const findQuery = `
-            SELECT * FROM pending_users 
+        const query = `
+            UPDATE restaurant_owners 
+            SET is_email_verified = true, verification_token = NULL, token_expires_at = NULL
             WHERE verification_token = $1 
-            AND user_type = 'restaurant_owner'
             AND token_expires_at > CURRENT_TIMESTAMP
+            RETURNING *
         `;
-        const result = await this.db.query(findQuery, [token]);
+        const result = await this.db.query(query, [token]);
         
         if (result.rows.length === 0) {
             throw new Error('Invalid or expired verification token');
         }
-
-        const pendingUser = result.rows[0];
-        const restaurantOwner: RestaurantOwner = {
-            restaurantName: pendingUser.restaurant_name,
-            organizationNumber: pendingUser.organization_number,
-            email: pendingUser.email,
-            mobileNumber: pendingUser.mobile_number,
-            password: pendingUser.password,
-            isActive: true,
-            profileImageUrl: null
-        };
-
-        const createdOwner = await this.create(restaurantOwner);
         
-        await this.db.query('DELETE FROM pending_users WHERE verification_token = $1', [token]);
-        
-        return createdOwner;
+        return this.mapRowToRestaurantOwner(result.rows[0]);
     }
 
     async findByMobileNumber(mobileNumber: string): Promise<RestaurantOwner | null> {
@@ -137,6 +104,18 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         if (restaurantOwner.isActive !== undefined) {
             fields.push(`is_active = $${paramCount++}`);
             values.push(restaurantOwner.isActive);
+        }
+        if (restaurantOwner.isEmailVerified !== undefined) {
+            fields.push(`is_email_verified = $${paramCount++}`);
+            values.push(restaurantOwner.isEmailVerified);
+        }
+        if (restaurantOwner.verificationToken !== undefined) {
+            fields.push(`verification_token = $${paramCount++}`);
+            values.push(restaurantOwner.verificationToken);
+        }
+        if (restaurantOwner.tokenExpiresAt !== undefined) {
+            fields.push(`token_expires_at = $${paramCount++}`);
+            values.push(restaurantOwner.tokenExpiresAt);
         }
         if (restaurantOwner.profileImageUrl !== undefined) {
             fields.push(`profile_image_url = $${paramCount++}`);
@@ -201,6 +180,9 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             mobileNumber: row.mobile_number,
             password: row.password,
             isActive: row.is_active,
+            isEmailVerified: row.is_email_verified,
+            verificationToken: row.verification_token,
+            tokenExpiresAt: row.token_expires_at,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
             profileImageUrl: row.profile_image_url

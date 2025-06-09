@@ -1,5 +1,5 @@
 import { Customer } from "@/domain/entities/User";
-import { ICustomerRepository, PendingUser } from "@/domain/repositories/ICustomerRepository";
+import { ICustomerRepository } from "@/domain/repositories/ICustomerRepository";
 import { DatabaseConnection } from "../database/DataBaseConnection";
 
 export class CustomerRepository implements ICustomerRepository {
@@ -8,9 +8,10 @@ export class CustomerRepository implements ICustomerRepository {
     async create(customer: Customer): Promise<Customer> {
         const query = `
             INSERT INTO customers (
-                name, email, mobile_number, password, is_active, profile_image_url
+                name, email, mobile_number, password, is_active, is_email_verified, 
+                verification_token, token_expires_at, profile_image_url
             )
-            VALUES ($1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
         `;
         
@@ -20,6 +21,9 @@ export class CustomerRepository implements ICustomerRepository {
             customer.mobileNumber,
             customer.password,
             customer.isActive,
+            customer.isEmailVerified,
+            customer.verificationToken,
+            customer.tokenExpiresAt,
             customer.profileImageUrl
         ];
 
@@ -27,55 +31,21 @@ export class CustomerRepository implements ICustomerRepository {
         return this.mapRowToCustomer(result.rows[0]);
     }
 
-    async createPending(pendingUser: PendingUser): Promise<void> {
-        const query = `
-            INSERT INTO pending_users (
-                name, email, mobile_number, password, user_type, verification_token, token_expires_at
-            )
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-        `;
-        
-        const values = [
-            pendingUser.name,
-            pendingUser.email,
-            pendingUser.mobileNumber,
-            pendingUser.password,
-            pendingUser.userType,
-            pendingUser.verificationToken,
-            pendingUser.tokenExpiresAt
-        ];
-
-        await this.db.query(query, values);
-    }
-
     async verifyEmail(token: string): Promise<Customer> {
-        const findQuery = `
-            SELECT * FROM pending_users 
+        const query = `
+            UPDATE customers 
+            SET is_email_verified = true, verification_token = NULL, token_expires_at = NULL
             WHERE verification_token = $1 
-            AND user_type = 'customer'
             AND token_expires_at > CURRENT_TIMESTAMP
+            RETURNING *
         `;
-        const result = await this.db.query(findQuery, [token]);
+        const result = await this.db.query(query, [token]);
         
         if (result.rows.length === 0) {
             throw new Error('Invalid or expired verification token');
         }
-
-        const pendingUser = result.rows[0];
-        const customer: Customer = {
-            name: pendingUser.name,
-            email: pendingUser.email,
-            mobileNumber: pendingUser.mobile_number,
-            password: pendingUser.password,
-            isActive: true,
-            profileImageUrl: null
-        };
-
-        const createdCustomer = await this.create(customer);
         
-        await this.db.query('DELETE FROM pending_users WHERE verification_token = $1', [token]);
-        
-        return createdCustomer;
+        return this.mapRowToCustomer(result.rows[0]);
     }
 
     async findByMobileNumber(mobileNumber: string): Promise<Customer | null> {
@@ -129,6 +99,18 @@ export class CustomerRepository implements ICustomerRepository {
         if (customer.isActive !== undefined) {
             fields.push(`is_active = $${paramCount++}`);
             values.push(customer.isActive);
+        }
+        if (customer.isEmailVerified !== undefined) {
+            fields.push(`is_email_verified = $${paramCount++}`);
+            values.push(customer.isEmailVerified);
+        }
+        if (customer.verificationToken !== undefined) {
+            fields.push(`verification_token = $${paramCount++}`);
+            values.push(customer.verificationToken);
+        }
+        if (customer.tokenExpiresAt !== undefined) {
+            fields.push(`token_expires_at = $${paramCount++}`);
+            values.push(customer.tokenExpiresAt);
         }
         if (customer.profileImageUrl !== undefined) {
             fields.push(`profile_image_url = $${paramCount++}`);
@@ -186,6 +168,9 @@ export class CustomerRepository implements ICustomerRepository {
             mobileNumber: row.mobile_number,
             password: row.password,
             isActive: row.is_active,
+            isEmailVerified: row.is_email_verified,
+            verificationToken: row.verification_token,
+            tokenExpiresAt: row.token_expires_at,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
             profileImageUrl: row.profile_image_url

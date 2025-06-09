@@ -6,7 +6,7 @@ import { PasswordHasher } from '../services/PasswordHasher';
 import { EmailService } from '../services/EmailService';
 import { FileStorageService } from '../services/FileStorageService';
 import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
-import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterResturantOwnerUseCases';
+import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterRestaurantOwnerUseCase';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
 import { UploadProfileImageUseCase } from '@/application/use-cases/auth/UploadProfileImageUseCase';
 import { AuthController } from '@/presentation/controller/AuthController';
@@ -42,17 +42,17 @@ export class DIContainer {
             console.log('DIContainer: Registering databaseConnection');
             return DatabaseConnection.getInstance();
         });
-        
+
         this.registerSingleton('customerRepository', () => {
             console.log('DIContainer: Registering customerRepository');
             return new CustomerRepository(this.resolve('databaseConnection'));
         });
-        
+
         this.registerSingleton('restaurantOwnerRepository', () => {
             console.log('DIContainer: Registering restaurantOwnerRepository');
             return new RestaurantOwnerRepository(this.resolve('databaseConnection'));
         });
-        
+
         this.registerSingleton('authRepository', () => {
             console.log('DIContainer: Registering authRepository');
             return new AuthRepository();
@@ -61,7 +61,7 @@ export class DIContainer {
             console.log('DIContainer: Registering passwordHasher');
             return new PasswordHasher();
         });
-        
+
         this.registerSingleton('emailService', () => {
             console.log('DIContainer: Registering emailService');
             return new EmailService();
@@ -81,6 +81,9 @@ export class DIContainer {
             );
         });
 
+
+
+        // In src/infrastructure/di/DIContainer.ts
         this.registerTransient('registerRestaurantOwnerUseCase', () => {
             console.log('DIContainer: Registering registerRestaurantOwnerUseCase');
             return new RegisterRestaurantOwnerUseCase(

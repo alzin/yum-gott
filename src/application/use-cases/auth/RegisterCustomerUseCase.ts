@@ -1,5 +1,5 @@
-// import { Customer } from '@/domain/entities/User';
-import { ICustomerRepository, PendingUser } from '@/domain/repositories/ICustomerRepository';
+import { Customer } from '@/domain/entities/User';
+import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 import { EmailService } from '@/infrastructure/services/EmailService';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,17 +24,19 @@ export class RegisterCustomerUseCase {
         const verificationToken = uuidv4();
         const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-        const pendingUser: PendingUser = {
+        const customer: Customer = {
             name: request.name,
             email: request.email,
             mobileNumber: request.mobileNumber,
             password: hashedPassword,
-            userType: 'customer', // Explicitly use literal type
+            isActive: true,
+            isEmailVerified: false,
             verificationToken: verificationToken,
-            tokenExpiresAt: tokenExpiresAt
+            tokenExpiresAt: tokenExpiresAt,
+            profileImageUrl: null
         };
 
-        await this.customerRepository.createPending(pendingUser);
+        await this.customerRepository.create(customer);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
     }
 

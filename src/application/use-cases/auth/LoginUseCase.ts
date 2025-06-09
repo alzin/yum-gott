@@ -38,6 +38,10 @@ export class LoginUseCase {
             throw new Error("Account is deactivated");
         }
 
+        if (!user.isEmailVerified) {
+            throw new Error("Email not verified. Please verify your email before logging in.");
+        }
+
         // Check password
         const isPasswordValid = await this.passwordHasher.compare(request.password, user.password);
         if (!isPasswordValid) {
