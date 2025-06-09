@@ -1,22 +1,24 @@
 import { Request, Response } from 'express';
 import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
 import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterRestaurantOwnerUseCase';
-import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
+// import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
 import { UploadProfileImageUseCase } from '@/application/use-cases/auth/UploadProfileImageUseCase';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import { CustomerLoginUseCase } from '@/application/use-cases/CustomerLoginUseCase';
+import { RestaurantOwnerLoginUseCase } from '@/application/use-cases/auth/RestaurantOwnerLoginUseCase';
 
 export class AuthController {
   constructor(
     private registerCustomerUseCase: RegisterCustomerUseCase,
     private registerRestaurantOwnerUseCase: RegisterRestaurantOwnerUseCase,
-    private loginUseCase: LoginUseCase,
+    private customerLoginUseCase: CustomerLoginUseCase,
+    private restaurantOwnerLoginUseCase: RestaurantOwnerLoginUseCase,
     private uploadProfileImageUseCase: UploadProfileImageUseCase
-  ) { }
+  ) {}
 
   registerCustomer = async (req: Request, res: Response): Promise<void> => {
     try {
       await this.registerCustomerUseCase.execute(req.body);
-
       res.status(201).json({
         success: true,
         message: 'Customer registration initiated. Please check your email for verification link.'
@@ -32,7 +34,6 @@ export class AuthController {
   registerRestaurantOwner = async (req: Request, res: Response): Promise<void> => {
     try {
       await this.registerRestaurantOwnerUseCase.execute(req.body);
-
       res.status(201).json({
         success: true,
         message: 'Restaurant owner registration initiated. Please check your email for verification link.'
@@ -64,13 +65,13 @@ export class AuthController {
         const user = await customerRepo.verifyEmail(token);
         res.status(200).json({
           success: true,
-          message: 'Email verified successfully. You can now login.',
+          message: 'Email verified successfully. You can now login.'
         });
       } catch (customerError) {
         const user = await restaurantOwnerRepo.verifyEmail(token);
         res.status(200).json({
           success: true,
-          message: 'Email verified successfully. You can now login.',
+          message: 'Email verified successfully. You can now login.'
         });
       }
     } catch (error) {
@@ -81,16 +82,31 @@ export class AuthController {
     }
   };
 
-  login = async (req: Request, res: Response): Promise<void> => {
+  customerLogin = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.loginUseCase.execute(req.body);
-
+      const result = await this.customerLoginUseCase.execute(req.body);
       this.setAuthCookies(res, result.authToken);
-
       res.status(200).json({
         success: true,
-        message: 'Login successful',
-        // data:result
+        message: 'Customer login successful',
+        data: result
+      });
+    } catch (error) {
+      res.status(401).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Login failed'
+      });
+    }
+  };
+
+  restaurantOwnerLogin = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const result = await this.restaurantOwnerLoginUseCase.execute(req.body);
+      this.setAuthCookies(res, result.authToken);
+      res.status(200).json({
+        success: true,
+        message: 'Restaurant owner login successful',
+        data: result
       });
     } catch (error) {
       res.status(401).json({
@@ -103,7 +119,6 @@ export class AuthController {
   logout = async (req: Request, res: Response): Promise<void> => {
     try {
       this.clearAuthCookies(res);
-
       res.status(200).json({
         success: true,
         message: 'Logout successful'
@@ -119,7 +134,6 @@ export class AuthController {
   refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const refreshToken = req.cookies.refreshToken;
-
       if (!refreshToken) {
         res.status(401).json({
           success: false,
@@ -128,11 +142,9 @@ export class AuthController {
         return;
       }
 
-      const authRepository = require('@/infrastructure/di/DIContainer').DIContainer.getInstance().authRepository;
+      const authRepository = DIContainer.getInstance().authRepository;
       const newTokens = await authRepository.refreshToken(refreshToken);
-
       this.setAuthCookies(res, newTokens);
-
       res.status(200).json({
         success: true,
         message: 'Token refreshed successfully'
@@ -152,7 +164,7 @@ export class AuthController {
       console.log('Request user:', (req as any).user);
       console.log('Request file:', req.file);
 
-      const user = (req as any).user; // From AuthMiddleware
+      const user = (req as any).user;
       if (!user) {
         console.log('AuthController: No user found in request');
         res.status(401).json({
@@ -169,9 +181,7 @@ export class AuthController {
       };
 
       console.log('Processing upload request:', request);
-
       const result = await this.uploadProfileImageUseCase.execute(request);
-
       console.log('Upload successful:', result);
 
       res.status(200).json({
@@ -190,7 +200,6 @@ export class AuthController {
 
   private setAuthCookies(res: Response, authToken: any): void {
     const isProduction = process.env.NODE_ENV === 'production';
-
     res.cookie('accessToken', authToken.accessToken, {
       httpOnly: true,
       secure: isProduction,
@@ -198,7 +207,6 @@ export class AuthController {
       maxAge: authToken.expiresIn * 1000,
       path: '/'
     });
-
     res.cookie('refreshToken', authToken.refreshToken, {
       httpOnly: true,
       secure: isProduction,
@@ -208,15 +216,15 @@ export class AuthController {
     });
   }
 
-private clearAuthCookies(res: Response): void {
-  console.log('AuthController: Clearing cookies for request', res.req?.originalUrl);
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
-    path: '/'
-  };
-  res.clearCookie('accessToken', cookieOptions);
-  res.clearCookie('refreshToken', cookieOptions);
-}
+  private clearAuthCookies(res: Response): void {
+    console.log('AuthController: Clearing cookies for request', res.req?.originalUrl);
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' as const,
+      path: '/'
+    };
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
+  }
 }

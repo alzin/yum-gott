@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import xss from 'xss'; // تأكد من تثبيت مكتبة xss إذا كنت تستخدمها
+import xss from 'xss'; 
 
 export class SanitizationMiddleware {
   static allowedFields(allowedFields: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {
       const sanitizedBody: Record<string, any> = {};
 
-      // تحقق من أن req.body هو كائن صالح
       if (typeof req.body === 'object' && req.body !== null) {
         for (const field of allowedFields) {
           if (field in req.body) {

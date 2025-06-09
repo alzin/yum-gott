@@ -1,8 +1,9 @@
+
 openapi: 3.0.3
 info:
   title: Yum-Gott Platform - User API
   description: |
-    This API provides endpoints for user-related operations in the Yum-Gott business matching platform, including registration, email verification, and authentication.
+    This API provides endpoints for user-related operations in the Yum-Gott business matching platform, including registration, email verification, authentication, and token management.
   version: 1.0.0
   contact:
     name: API Support
@@ -10,6 +11,11 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://yum-gott.onrender.com
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server
 paths:
   /health:
     get:
@@ -17,7 +23,7 @@ paths:
         - Health Check
       summary: Health check endpoint
       description: Check if the API server is running and healthy
-      operationId: healthCheck
+      operationId: checkHealth
       responses:
         '200':
           description: Server is healthy
@@ -32,7 +38,7 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
-                    example: "2025-06-04T20:32:00Z"
+                    example: "2025-06-09T13:06:00Z"
                   uptime:
                     type: number
                     description: Server uptime in seconds
@@ -90,6 +96,7 @@ paths:
                         value: "invalid-email"
                       - field: "password"
                         message: "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+                        value: "pass"
                 userExists:
                   summary: User already exists
                   value:
@@ -195,11 +202,32 @@ paths:
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
+                    data:
+                      user:
+                        id: "123e4567-e89b-12d3-a456-426614174000"
+                        name: "Ahmed Mohamed"
+                        email: "ahmed@example.com"
+                        mobileNumber: "01234567890"
+                        userType: "customer"
+                        isActive: true
+                        createdAt: "2025-06-09T13:06:00Z"
+                        updatedAt: "2025-06-09T13:06:00Z"
                 restaurantOwnerVerified:
                   summary: Restaurant owner email verified
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
+                    data:
+                      user:
+                        id: "7db9be8e-72d8-49dd-95e4-bb5419667984"
+                        restaurantName: "Tasty Bites"
+                        organizationNumber: "ORG123456"
+                        email: "owner@example.com"
+                        mobileNumber: "09876543210"
+                        userType: "restaurant_owner"
+                        isActive: true
+                        createdAt: "2025-06-09T13:06:00Z"
+                        updatedAt: "2025-06-09T13:06:00Z"
         '400':
           description: Invalid or expired token
           content:
@@ -212,15 +240,18 @@ paths:
                   value:
                     success: false
                     message: "Invalid or expired verification token"
-  /api/auth/login:
+                missingToken:
+                  summary: Missing token
+                  value:
+                    success: false
+                    message: "Verification token is required"
+  /api/auth/login/customer:
     post:
       tags:
         - Authentication
-      summary: User login
-      description: |
-        Authenticate a user (customer or restaurant owner) using email/mobile number and password.
-        Returns JWT tokens as HTTP-only cookies.
-      operationId: login
+      summary: Customer login
+      description: Authenticate a customer using email or mobile number and password. Returns JWT tokens as HTTP-only cookies.
+      operationId: loginCustomer
       requestBody:
         required: true
         content:
@@ -233,9 +264,14 @@ paths:
                 value:
                   email: "ahmed@example.com"
                   password: "SecurePass123"
+              loginWithMobile:
+                summary: Login with mobile number
+                value:
+                  mobileNumber: "01234567890"
+                  password: "SecurePass123"
       responses:
         '200':
-          description: Login successful
+          description: Customer login successful
           content:
             application/json:
               schema:
@@ -246,14 +282,55 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Login successful"
+                    example: "Customer login successful"
                   data:
                     $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    success: true
+                    message: "Customer login successful"
+                    data:
+                      user:
+                        id: "123e4567-e89b-12d3-a456-426614174000"
+                        name: "Ahmed Mohamed"
+                        email: "ahmed@example.com"
+                        mobileNumber: "01234567890"
+                        userType: "customer"
+                        isActive: true
+                        createdAt: "2025-06-09T13:06:00Z"
+                        updatedAt: "2025-06-09T13:06:00Z"
+                      authToken:
+                        accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        expiresIn: 86400
           headers:
             Set-Cookie:
               schema:
                 type: string
-                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400000
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingCredentials:
+                  summary: Missing email or mobile number
+                  value:
+                    success: false
+                    message: "Email or mobile number is required"
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "email"
+                        message: "Invalid email format"
+                        value: "invalid-email"
         '401':
           description: Unauthorized - Invalid credentials or account deactivated
           content:
@@ -271,12 +348,136 @@ paths:
                   value:
                     success: false
                     message: "Account is deactivated"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimit:
+                  summary: Rate limit exceeded
+                  value:
+                    success: false
+                    message: "Too many login attempts. Please try again later."
+  /api/auth/login/restaurant-owner:
+    post:
+      tags:
+        - Authentication
+      summary: Restaurant owner login
+      description: Authenticate a restaurant owner using email or mobile number and password. Returns JWT tokens as HTTP-only cookies.
+      operationId: loginRestaurantOwner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              loginWithEmail:
+                summary: Login with email
+                value:
+                  email: "owner@example.com"
+                  password: "SecurePass123"
+              loginWithMobile:
+                summary: Login with mobile number
+                value:
+                  mobileNumber: "09876543210"
+                  password: "SecurePass123"
+      responses:
+        '200':
+          description: Restaurant owner login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant owner login successful"
+                  data:
+                    $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    success: true
+                    message: "Restaurant owner login successful"
+                    data:
+                      user:
+                        id: "7db9be8e-72d8-49dd-95e4-bb5419667984"
+                        restaurantName: "Tasty Bites"
+                        organizationNumber: "ORG123456"
+                        email: "owner@example.com"
+                        mobileNumber: "09876543210"
+                        userType: "restaurant_owner"
+                        isActive: true
+                        createdAt: "2025-06-09T13:06:00Z"
+                        updatedAt: "2025-06-09T13:06:00Z"
+                      authToken:
+                        accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        expiresIn: 86400
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
         '400':
           description: Bad request - Validation errors
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingCredentials:
+                  summary: Missing email or mobile number
+                  value:
+                    success: false
+                    message: "Email or mobile number is required"
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "email"
+                        message: "Invalid email format"
+                        value: "invalid-email"
+        '401':
+          description: Unauthorized - Invalid credentials or account deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Invalid credentials
+                  value:
+                    success: false
+                    message: "Invalid credentials"
+                accountDeactivated:
+                  summary: Account deactivated
+                  value:
+                    success: false
+                    message: "Account is deactivated"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimit:
+                  summary: Rate limit exceeded
+                  value:
+                    success: false
+                    message: "Too many login attempts. Please try again later."
+
+
   /api/auth/profile/image:
     post:
       tags:
@@ -336,7 +537,7 @@ paths:
                   summary: No file uploaded
                   value:
                     success: false
-                    message: "No file uploaded"
+                    message: "Profile image is required"
                 invalidFileType:
                   summary: Invalid file type
                   value:
@@ -347,6 +548,11 @@ paths:
                   value:
                     success: false
                     message: "File size must not exceed 5MB"
+                invalidUserType:
+                  summary: Invalid user type
+                  value:
+                    success: false
+                    message: "User type must be 'customer' or 'restaurant_owner'"
         '401':
           description: Unauthorized - Invalid or missing token
           content:
@@ -438,11 +644,14 @@ components:
       type: object
       required:
         - password
+      oneOf:
+        - required: [email]
+        - required: [mobileNumber]
       properties:
         email:
           type: string
           format: email
-          description: User's email address (for customers)
+          description: User's email address
           example: "ahmed@example.com"
         mobileNumber:
           type: string
@@ -451,10 +660,10 @@ components:
           example: "01234567890"
         password:
           type: string
-          minLength: 1
+          minLength: 6
           description: User's password
           example: "SecurePass123"
-      description: Either email or mobileNumber must be provided
+      description: Either email or mobileNumber must be provided along with password
     CustomerResponse:
       type: object
       properties:
@@ -489,12 +698,12 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp
-          example: "2025-06-04T20:32:00Z"
+          example: "2025-06-09T13:06:00Z"
         updatedAt:
           type: string
           format: date-time
           description: Account last update timestamp
-          example: "2025-06-04T20:32:00Z"
+          example: "2025-06-09T13:06:00Z"
         profileImageUrl:
           type: string
           description: URL of the customer's profile image
@@ -537,12 +746,12 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp
-          example: "2025-06-04T20:32:00Z"
+          example: "2025-06-09T13:06:00Z"
         updatedAt:
           type: string
           format: date-time
           description: Account last update timestamp
-          example: "2025-06-04T20:32:00Z"
+          example: "2025-06-09T13:06:00Z"
         profileImageUrl:
           type: string
           description: URL of the restaurant owner's profile image
@@ -617,7 +826,7 @@ components:
   securitySchemes:
     BearerAuth:
       type: http
-      scheme: bearer
+      scheme: Bearer
       bearerFormat: JWT
       description: |
         JWT authentication. Include the token in the Authorization header:
@@ -628,7 +837,7 @@ tags:
   - name: Health Check
     description: Server health monitoring endpoints
   - name: Authentication
-    description: User authentication, registration, and email verification endpoints
+    description: User authentication, registration, email verification, and token management endpoints
 externalDocs:
   description: Find out more about this API
   url: https://github.com/yourorg/restaurant-platform-api
