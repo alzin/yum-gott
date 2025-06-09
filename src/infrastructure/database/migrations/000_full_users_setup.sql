@@ -41,13 +41,13 @@ CREATE TABLE restaurant_owners (
 
 -- Create indexes for customers
 CREATE UNIQUE INDEX idx_customers_email ON customers(email);
-CREATE UNIQUE INDEX idx_customers_mobile_number ON customers(mobile_number);
+CREATE  INDEX idx_customers_mobile_number ON customers(mobile_number);
 CREATE INDEX idx_customers_verification_token ON customers(verification_token);
 
 -- Create indexes for restaurant_owners
 CREATE UNIQUE INDEX idx_restaurant_owners_email ON restaurant_owners(email);
 CREATE UNIQUE INDEX idx_restaurant_owners_organization_number ON restaurant_owners(organization_number);
-CREATE UNIQUE INDEX idx_restaurant_owners_mobile_number ON restaurant_owners(mobile_number);
+CREATE  INDEX idx_restaurant_owners_mobile_number ON restaurant_owners(mobile_number);
 CREATE INDEX idx_restaurant_owners_verification_token ON restaurant_owners(verification_token);
 
 -- Function to update updated_at timestamp

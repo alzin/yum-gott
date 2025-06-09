@@ -47,8 +47,7 @@ export class RegisterCustomerUseCase {
         }
     }
 
-    private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> {
-       
+    private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> { 
         await this.checkExistingEmail(request.email);
     }
 }
