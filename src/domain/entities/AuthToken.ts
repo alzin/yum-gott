@@ -6,6 +6,6 @@ export interface AuthToken {
 
 export interface JWTpayload {
   userId: string;
-  userType: string;
-  email: string; 
+  userType: 'customer' | 'restaurant_owner';
+  email: string;
 }
