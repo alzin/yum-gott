@@ -21,6 +21,7 @@ export class RegisterRestaurantOwnerUseCase {
 
     async execute(request: RegisterRestaurantOwnerRequest): Promise<void> {
         console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
+       
         await this.checkExistingUser(request);
         
         const hashedPassword = await this.passwordHasher.hash(request.password);

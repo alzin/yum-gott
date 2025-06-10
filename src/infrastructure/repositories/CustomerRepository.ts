@@ -160,6 +160,17 @@ export class CustomerRepository implements ICustomerRepository {
         return result.rows.length > 0;
     }
 
+    async deleteUnverifiedOlderThan(date: Date): Promise<number> {
+        const query = `
+            DELETE FROM customers 
+            WHERE is_email_verified = false 
+            AND created_at < $1
+            RETURNING id
+        `;
+        const result = await this.db.query(query, [date]);
+        return result.rowCount || 0;
+    }
+
     private mapRowToCustomer(row: any): Customer {
         return {
             id: row.id,

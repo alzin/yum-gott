@@ -11,4 +11,5 @@ export interface ICustomerRepository {
     existsByMobileNumber(mobileNumber: string): Promise<boolean>;
     existsByEmail(email: string): Promise<boolean>;
     updateProfileImage(id: string, profileImage: string): Promise<Customer>;
+    deleteUnverifiedOlderThan(date: Date): Promise<number>;
 }

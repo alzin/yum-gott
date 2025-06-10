@@ -171,6 +171,17 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return result.rows.length > 0;
     }
 
+    async deleteUnverifiedOlderThan(date: Date): Promise<number> {
+        const query = `
+            DELETE FROM restaurant_owners 
+            WHERE is_email_verified = false 
+            AND created_at < $1
+            RETURNING id
+        `;
+        const result = await this.db.query(query, [date]);
+        return result.rowCount || 0;
+    }
+
     private mapRowToRestaurantOwner(row: any): RestaurantOwner {
         return {
             id: row.id,

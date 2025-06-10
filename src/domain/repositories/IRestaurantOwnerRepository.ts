@@ -12,4 +12,5 @@ export interface IRestaurantOwnerRepository {
     existsByEmail(email: string): Promise<boolean>;
     existsByOrganizationNumber(organizationNumber: string): Promise<boolean>;
     updateProfileImage(id: string, profileImage: string): Promise<RestaurantOwner>;
+    deleteUnverifiedOlderThan(date: Date): Promise<number>;
 }

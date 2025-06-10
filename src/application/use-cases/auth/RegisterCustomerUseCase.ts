@@ -19,6 +19,7 @@ export class RegisterCustomerUseCase {
     ) { }
 
     async execute(request: RegisterCustomerRequest): Promise<void> {
+        
         await this.checkExistingUser(request);
         const hashedPassword = await this.passwordHasher.hash(request.password);
         const verificationToken = uuidv4();

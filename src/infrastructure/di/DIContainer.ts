@@ -1,9 +1,12 @@
 import { DatabaseConnection } from '../database/DataBaseConnection';
-import { CustomerRepository , RestaurantOwnerRepository , AuthRepository } from '../repositories/index';
-import { PasswordHasher , EmailService , FileStorageService} from '../services/index';
-import { RegisterCustomerUseCase  , RegisterRestaurantOwnerUseCase , UploadProfileImageUseCase , CustomerLoginUseCase , RestaurantOwnerLoginUseCase} from '@/application/use-cases/auth/index';
+import { CustomerRepository, RestaurantOwnerRepository, AuthRepository } from '../repositories/index';
+import { PasswordHasher, EmailService, FileStorageService } from '../services/index';
+import { RegisterCustomerUseCase, RegisterRestaurantOwnerUseCase, UploadProfileImageUseCase, CustomerLoginUseCase, RestaurantOwnerLoginUseCase, CleanupUnverifiedAccountsUseCase } from '@/application/use-cases/auth/index';
+import { SchedulerService } from '@/infrastructure/services/SchedulerService';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
+import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
+import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
 
 // type DependencyKey = keyof DIContainer;
 type DependencyFactory<T = any> = () => T;
@@ -13,6 +16,8 @@ export class DIContainer {
   private dependencies: Map<string, any> = new Map();
   private factories: Map<string, DependencyFactory> = new Map();
   private singletons: Set<string> = new Set();
+  
+  // Service instances will be accessed through getter methods
 
   private constructor() {
     console.log('DIContainer: Initializing dependency injection');
@@ -32,6 +37,7 @@ export class DIContainer {
   }
 
   private registerDependencies(): void {
+    // Register repositories and services first
     this.registerSingleton('databaseConnection', () => {
       console.log('DIContainer: Registering databaseConnection');
       return DatabaseConnection.getInstance();
@@ -127,6 +133,28 @@ export class DIContainer {
       console.log('DIContainer: Registering authMiddleware');
       return new AuthMiddleware(this.resolve('authRepository'));
     });
+
+      // Register cleanup use case
+    this.registerSingleton('cleanupUnverifiedAccountsUseCase', () => {
+      console.log('DIContainer: Registering CleanupUnverifiedAccountsUseCase');
+      return new CleanupUnverifiedAccountsUseCase(
+        this.resolve('customerRepository'),
+        this.resolve('restaurantOwnerRepository')
+      );
+    });
+
+    // Register scheduler service
+    this.registerSingleton('schedulerService', () => {
+      console.log('DIContainer: Registering SchedulerService');
+      const scheduler = new SchedulerService(
+        this.resolve('cleanupUnverifiedAccountsUseCase')
+      );
+      // Start the scheduler
+      scheduler.startScheduledJobs();
+      return scheduler;
+    });
+    
+
   }
 
   private registerSingleton<T>(key: string, factory: DependencyFactory<T>): void {
