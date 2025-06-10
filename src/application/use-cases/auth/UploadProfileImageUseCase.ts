@@ -66,18 +66,6 @@ export class UploadProfileImageUseCase {
             console.error('UploadProfileImageUseCase: Failed to update database, rolled back S3 upload', error);
             throw new Error('Failed to update profile image in database');
         }
-
-        // Delete old profile image from S3 if it exists
-        if (oldProfileImageUrl) {
-            try {
-                await this.fileStorageService.deleteFile(oldProfileImageUrl);
-                console.log('UploadProfileImageUseCase: Deleted old profile image from S3', oldProfileImageUrl);
-            } catch (error) {
-                console.warn('UploadProfileImageUseCase: Failed to delete old profile image from S3', error);
-                // Don't throw error here; continue as the new image is already saved
-            }
-        }
-
         return { profileImageUrl };
     }
 }

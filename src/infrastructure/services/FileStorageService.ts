@@ -1,75 +1,111 @@
-// src/infrastructure/services/FileStorageService.ts
-import { S3Client, PutObjectCommand, DeleteObjectCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
+import sharp from 'sharp';
 
 export class FileStorageService implements IFileStorageService {
-    private s3: S3Client;
-    private bucketName: string;
+  private s3Client: S3Client;
+  private bucketName: string;
 
-    constructor() {
-        this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'yum-gott-profile-images';
-        
-        // Validate environment variables
-        if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
-            console.error('FileStorageService: Missing AWS configuration');
-            throw new Error('AWS credentials or region not configured properly');
-        }
+  constructor() {
+    console.log('FileStorageService: Initializing with env', {
+      region: process.env.AWS_REGION,
+      bucket: process.env.AWS_S3_BUCKET_NAME,
+      accessKey: process.env.AWS_ACCESS_KEY_ID ? 'Set' : 'Missing',
+      secretKey: process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Missing',
+    });
+    this.s3Client = new S3Client({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
+    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'yum-gott-profile-images';
+  }
 
-        this.s3 = new S3Client({
-            region: process.env.AWS_REGION || 'us-east-1',
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-            }
+  async uploadFile(
+    file: Express.Multer.File,
+    userId: string,
+    userType: 'customer' | 'restaurant_owner'
+  ): Promise<string> {
+    // Standardize to JPG format
+    const extension = 'jpg';
+    let fileBuffer = file.buffer;
+
+    // Convert image to JPG if it's not already
+    if (file.mimetype !== 'image/jpeg') {
+      try {
+        fileBuffer = await sharp(file.buffer)
+          .jpeg({ quality: 80 })
+          .toBuffer();
+        console.log('FileStorageService: Converted image to JPG', {
+          originalMimetype: file.mimetype,
+          userId,
         });
-        console.log('FileStorageService: Initialized with bucket', this.bucketName);
+      } catch (error: any) {
+        console.error('FileStorageService: Image conversion failed', {
+          errorName: error.name,
+          errorMessage: error.message,
+        });
+        throw new Error('Failed to convert image to JPG');
+      }
     }
 
-    async uploadFile(file: Express.Multer.File, userId: string, userType: 'customer' | 'restaurant_owner'): Promise<string> {
-        const fileExtension = file.originalname.split('.').pop();
-        const fileName = `${userType}/${userId}-${Date.now()}.${fileExtension}`;
-        
-        const params = {
-            Bucket: this.bucketName,
-            Key: fileName,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-            // ACL: ObjectCannedACL.public_read
-        };
+    // Use fixed S3 key: <userType>/<userId>.jpg
+    const key = `${userType}/${userId}`;
 
-        try {
-            await this.s3.send(new PutObjectCommand(params));
-            const fileUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${fileName}`;
-            console.log('FileStorageService: File uploaded successfully', { fileName, fileUrl });
-            return fileUrl;
-        } catch (error) {
-            console.error('FileStorageService: Error uploading to S3', {
-                error: error instanceof Error ? error.message : error,
-                fileName,
-                userId,
-                userType
-            });
-            throw new Error('Failed to upload image to S3');
-        }
+    console.log('FileStorageService: Uploading file', {
+      key,
+      bucket: this.bucketName,
+      mimetype: file.mimetype,
+      size: fileBuffer.length,
+    });
+
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: fileBuffer,
+      ContentType: 'image/jpeg',
+    });
+
+    try {
+      await this.s3Client.send(command);
+      const fileUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
+      console.log('FileStorageService: Successfully uploaded', { fileUrl });
+      return fileUrl;
+    } catch (error: any) {
+      console.error('FileStorageService: Failed to upload', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        key,
+        bucket: this.bucketName,
+      });
+      throw new Error(`Failed to upload image to S3: ${error.message}`);
     }
+  }
 
-    async deleteFile(fileUrl: string): Promise<void> {
-        const key = fileUrl.split('.com/')[1];
-        const params = {
-            Bucket: this.bucketName,
-            Key: key
-        };
+  async deleteFile(fileUrl: string): Promise<void> {
+    // Extract key from URL
+    const key = fileUrl.split(`https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/`)[1];
+    console.log('FileStorageService: Deleting file', { key, fileUrl });
 
-        try {
-            await this.s3.send(new DeleteObjectCommand(params));
-            console.log('FileStorageService: File deleted successfully', { fileUrl, key });
-        } catch (error) {
-            console.error('FileStorageService: Error deleting from S3', {
-                error: error instanceof Error ? error.message : error,
-                fileUrl,
-                key
-            });
-            throw new Error('Failed to delete image from S3');
-        }
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    try {
+      await this.s3Client.send(command);
+      console.log('FileStorageService: Successfully deleted', { key });
+    } catch (error: any) {
+      console.error('FileStorageService: Failed to delete', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        key,
+      });
+      throw new Error(`Failed to delete file from S3: ${error.message}`);
     }
+  }
 }
