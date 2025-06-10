@@ -153,13 +153,13 @@ export class AuthController {
     }
   };
 
-  uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
+   uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
     try {
       console.log('AuthController: Uploading profile image...');
       console.log('Request user:', (req as any).user);
       console.log('Request file:', req.file);
 
-      const user = (req as any).user;
+      const user = (req as any).user; // From AuthMiddleware
       if (!user) {
         console.log('AuthController: No user found in request');
         res.status(401).json({
@@ -172,11 +172,13 @@ export class AuthController {
       const request = {
         file: req.file,
         userId: user.userId,
-        userType: user.userType
+        // userType is now derived from the token, not req.body
       };
 
       console.log('Processing upload request:', request);
-      const result = await this.uploadProfileImageUseCase.execute(request);
+
+      const result = await this.uploadProfileImageUseCase.execute(request, user.userType);
+
       console.log('Upload successful:', result);
 
       res.status(200).json({

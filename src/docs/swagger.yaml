@@ -421,12 +421,13 @@ paths:
                     message: "Too many login attempts. Please try again later."
 
 
+    paths:
   /api/auth/profile/image:
     post:
       tags:
         - Authentication
       summary: Upload profile image
-      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3.
+      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3. The user type (customer or restaurant_owner) is determined from the JWT access token provided in the Authorization header (`Authorization: Bearer <token>`) or as an HTTP-only cookie named `accessToken`.
       operationId: uploadProfileImage
       security:
         - BearerAuth: []
@@ -441,13 +442,8 @@ paths:
                   type: string
                   format: binary
                   description: Profile image file (JPEG, PNG, or GIF, max 5MB)
-                userType:
-                  type: string
-                  enum: ['customer', 'restaurant_owner']
-                  description: Type of user uploading the image
               required:
                 - profileImage
-                - userType
       responses:
         '200':
           description: Profile image uploaded successfully
@@ -491,11 +487,6 @@ paths:
                   value:
                     success: false
                     message: "File size must not exceed 5MB"
-                invalidUserType:
-                  summary: Invalid user type
-                  value:
-                    success: false
-                    message: "User type must be 'customer' or 'restaurant_owner'"
         '401':
           description: Unauthorized - Invalid or missing token
           content:
@@ -508,6 +499,15 @@ paths:
                   value:
                     success: false
                     message: "Unauthorized: User not authenticated"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
+      description: |
+        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`. The JWT payload includes `userId`, `userType` (either 'customer' or 'restaurant_owner'), `email`, `iat`, and `exp`.
 components:
   schemas:
     RegisterCustomerRequest:

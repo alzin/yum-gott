@@ -13,7 +13,6 @@ export class AuthRepository {
 
   async generateToken(payload: JwtPayload, isRefreshToken = false): Promise<any> {
     const tokenPayload = { ...payload };
-    // إذا لم يكن هناك exp في الـ payload، أضف expiresIn
     const options: jwt.SignOptions = {};
     if (!tokenPayload.exp) {
       options.expiresIn = isRefreshToken ? this.refreshTokenExpiration : this.jwtExpiration;
@@ -22,6 +21,7 @@ export class AuthRepository {
       const token = jwt.sign(tokenPayload, this.jwtSecret, options);
       console.log('AuthRepository: Token generated', {
         userId: tokenPayload.userId,
+        userType: tokenPayload.userType, 
         iat: tokenPayload.iat,
         exp: tokenPayload.exp || 'Set by expiresIn'
       });

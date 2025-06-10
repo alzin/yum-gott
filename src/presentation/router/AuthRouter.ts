@@ -67,60 +67,35 @@ export class AuthRouter {
       this.authController.restaurantOwnerLogin
     );
 
-    this.router.post(
-      '/profile/image',
-      (req: Request, res: Response, next: NextFunction) => {
-        this.upload.single('profileImage')(req, res, (err: any) => {
-          if (err instanceof multer.MulterError) {
-            if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-              return res.status(400).json({
-                success: false,
-                message: `Unexpected field: ${err.field}. Expected 'profileImage'.`
-              });
-            }
-            if (err.code === 'LIMIT_FILE_SIZE') {
-              return res.status(400).json({
-                success: false,
-                message: 'File size must not exceed 5MB'
-              });
-            }
-            return res.status(400).json({
-              success: false,
-              message: 'Image upload error'
-            });
-          } else if (err) {
-            return res.status(400).json({
-              success: false,
-              message: err.message
-            });
-          }
-          next();
-        });
-      },
-      (req: Request, res: Response, next: NextFunction): void => {
-        console.log('Before SanitizationMiddleware - req.body:', req.body);
-        console.log('Before SanitizationMiddleware - req.file:', req.file);
-        if (!req.file) {
-          res.status(400).json({
-            success: false,
-            message: 'Profile image is required'
-          });
-          return;
-        }
-        if (!req.body.userType) {
-          res.status(400).json({
-            success: false,
-            message: 'User type is required'
-          });
-          return;
-        }
-        next();
-      },
-      SanitizationMiddleware.sanitizeProfileImageUpload(),
-      authMiddleware.authenticate,
-      this.authController.uploadProfileImage
-    );
-
+this.router.post(
+  '/profile/image',
+  (req: Request, res: Response, next: NextFunction) => {
+    this.upload.single('profileImage')(req, res, (err: any) => {
+      if (err instanceof multer.MulterError) {
+        // Handle Multer errors
+        return res.status(400).json({ success: false, message: err.message });
+      } else if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      next();
+    });
+  },
+  (req: Request, res: Response, next: NextFunction): void => {
+    console.log('Before SanitizationMiddleware - req.body:', req.body);
+    console.log('Before SanitizationMiddleware - req.file:', req.file);
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'Profile image is required'
+      });
+      return;
+    }
+    // No userType validation here
+    next();
+  },
+  authMiddleware.authenticate,
+  this.authController.uploadProfileImage
+);
   
   }
 

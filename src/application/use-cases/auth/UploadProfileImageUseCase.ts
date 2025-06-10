@@ -4,7 +4,7 @@ import { ICustomerRepository , IRestaurantOwnerRepository} from '@/domain/reposi
 export interface UploadProfileImageRequest {
     file: Express.Multer.File | undefined;
     userId: string;
-    userType: 'customer' | 'restaurant_owner';
+    // Removed userType: 'customer' | 'restaurant_owner'; // Now derived from token
 }
 
 export interface UploadProfileImageResponse {
@@ -18,8 +18,8 @@ export class UploadProfileImageUseCase {
         private fileStorageService: IFileStorageService
     ) {}
 
-    async execute(request: UploadProfileImageRequest): Promise<UploadProfileImageResponse> {
-        const { file, userId, userType } = request;
+    async execute(request: UploadProfileImageRequest, userTypeFromToken: 'customer' | 'restaurant_owner'): Promise<UploadProfileImageResponse> {
+        const { file, userId } = request;
 
         // Validate file
         if (!file) {
@@ -34,7 +34,7 @@ export class UploadProfileImageUseCase {
 
         // Fetch existing user to check for old profile image
         let oldProfileImageUrl: string | null | undefined;
-        if (userType === 'customer') {
+        if (userTypeFromToken === 'customer') {
             const customer = await this.customerRepository.findById(userId);
             if (!customer) throw new Error('Customer not found');
             oldProfileImageUrl = customer.profileImageUrl;
@@ -47,7 +47,7 @@ export class UploadProfileImageUseCase {
         // Upload new image to S3
         let profileImageUrl: string;
         try {
-            profileImageUrl = await this.fileStorageService.uploadFile(file, userId, userType);
+            profileImageUrl = await this.fileStorageService.uploadFile(file, userId, userTypeFromToken);
         } catch (error) {
             console.error('UploadProfileImageUseCase: Failed to upload image to S3', error);
             throw new Error('Failed to upload image to S3');
@@ -55,7 +55,7 @@ export class UploadProfileImageUseCase {
 
         // Update database
         try {
-            if (userType === 'customer') {
+            if (userTypeFromToken === 'customer') {
                 await this.customerRepository.updateProfileImage(userId, profileImageUrl);
             } else {
                 await this.restaurantOwnerRepository.updateProfileImage(userId, profileImageUrl);
