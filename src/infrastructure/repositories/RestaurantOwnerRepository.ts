@@ -50,14 +50,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
 
-    async findByMobileNumber(mobileNumber: string): Promise<RestaurantOwner | null> {
-        const query = 'SELECT * FROM restaurant_owners WHERE mobile_number = $1';
-        const result = await this.db.query(query, [mobileNumber]);
-        if (result.rows.length === 0) {
-            return null;
-        }
-        return this.mapRowToRestaurantOwner(result.rows[0]);
-    }
+   
 
     async findById(id: string): Promise<RestaurantOwner | null> {
         const query = 'SELECT * FROM restaurant_owners WHERE id = $1';

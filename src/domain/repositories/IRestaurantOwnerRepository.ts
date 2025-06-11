@@ -4,7 +4,6 @@ import { RestaurantOwner } from '../entities/User';
 export interface IRestaurantOwnerRepository {
     create(restaurantOwner: RestaurantOwner): Promise<RestaurantOwner>;
     verifyEmail(token: string): Promise<RestaurantOwner>;
-    findByMobileNumber(mobileNumber: string): Promise<RestaurantOwner | null>;
     findById(id: string): Promise<RestaurantOwner | null>;
     findByEmail(email: string): Promise<RestaurantOwner | null>;
     update(id: string, restaurantOwner: Partial<RestaurantOwner>): Promise<RestaurantOwner>;
