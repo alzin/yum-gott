@@ -30,7 +30,7 @@ export class App {
     // CORS configuration
     this.app.use(cors({
       origin: function (origin, callback) {
-        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'https://yum-gott.onrender.com'];
+        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'https://yum-gott.onrender.com', "http://127.0.0.1:5500"];
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
@@ -40,7 +40,7 @@ export class App {
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-      exposedHeaders: ['Set-Cookie']
+      exposedHeaders: ['Set-Cookie'],
     }));
 
     // Logging

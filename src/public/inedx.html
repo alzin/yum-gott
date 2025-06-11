@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل الدخول وتحديد الموقع</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: right;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .message {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>تسجيل الدخول</h2>
+    <form id="loginForm" autocomplete="off">
+      <label for="email">البريد الإلكتروني:</label>
+      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
+
+      <label for="password">كلمة المرور:</label>
+      <input type="password" id="password" name="password" required placeholder="********" />
+
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      messageDiv.style.color = 'black';
+      messageDiv.textContent = 'جاري تسجيل الدخول...';
+
+      const email = form.email.value.trim();
+      const password = form.password.value.trim();
+
+      try {
+      const response = await fetch('http://localhost:3000/api/auth/login/restaurant-owner', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include', // مهم جداً لتمرير الكوكيز
+  body: JSON.stringify({ email, password }),
+});
+
+
+        const data = await response.json();
+        console.log("Login response:", data);
+
+        if (response.ok && data.success) {
+          messageDiv.style.color = 'green';
+          messageDiv.textContent = 'تم تسجيل الدخول بنجاح! جاري الحصول على موقعك...';
+          getLocationAndSend();
+        } else {
+          messageDiv.style.color = 'red';
+          messageDiv.textContent = data.message || 'فشل في تسجيل الدخول.';
+        }
+      } catch (error) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+        console.error('Login error:', error);
+      }
+    });
+
+    function getLocationAndSend() {
+      if (!navigator.geolocation) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'المتصفح لا يدعم تحديد الموقع.';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const address = `Lat: ${latitude}, Lng: ${longitude}`;
+
+        console.log('موقع المستخدم:', address);
+
+        try {
+         const res = await fetch('http://localhost:3000/api/auth/location/restaurant', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include', // هنا أيضًا ضروري حتى تُرسل الكوكيز تلقائياً
+  body: JSON.stringify({ address, latitude, longitude }),
+});
+
+          
+
+          const result = await res.json();
+          console.log('Response from location API:', result);
+
+          if (res.ok && result.success) {
+            messageDiv.style.color = 'green';
+            messageDiv.textContent = 'تم إرسال الموقع بنجاح!';
+          } else {
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = result.message || 'فشل في إرسال الموقع.';
+          }
+        } catch (err) {
+          messageDiv.style.color = 'red';
+          messageDiv.textContent = 'فشل في إرسال بيانات الموقع.';
+          console.error('Error sending location:', err);
+        }
+      }, (error) => {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'رفض الوصول إلى الموقع.';
+        console.error('Geolocation error:', error);
+      }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    }
+  </script>
+</body>
+</html>

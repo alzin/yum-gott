@@ -101,6 +101,8 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Restaurant owner login successful',
+        // data:result
+        
       });
     } catch (error) {
       res.status(401).json({
