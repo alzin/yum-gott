@@ -1,8 +1,8 @@
-import { Router, Request, Response, NextFunction } from 'express'; 
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
 import { AuthValidators } from '../validators/AuthValidators';
-import { ValidationMiddleware , SanitizationMiddleware } from '../middleware/index';
+import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class AuthRouter {
@@ -67,36 +67,42 @@ export class AuthRouter {
       this.authController.restaurantOwnerLogin
     );
 
-this.router.post(
-  '/profile/image',
-  (req: Request, res: Response, next: NextFunction) => {
-    this.upload.single('profileImage')(req, res, (err: any) => {
-      if (err instanceof multer.MulterError) {
-        // Handle Multer errors
-        return res.status(400).json({ success: false, message: err.message });
-      } else if (err) {
-        return res.status(400).json({ success: false, message: err.message });
-      }
-      next();
-    });
-  },
-  (req: Request, res: Response, next: NextFunction): void => {
-    console.log('Before SanitizationMiddleware - req.body:', req.body);
-    console.log('Before SanitizationMiddleware - req.file:', req.file);
-    if (!req.file) {
-      res.status(400).json({
-        success: false,
-        message: 'Profile image is required'
-      });
-      return;
-    }
-    // No userType validation here
-    next();
-  },
-  authMiddleware.authenticate,
-  this.authController.uploadProfileImage
-);
-  
+    this.router.post(
+      '/profile/image',
+      (req: Request, res: Response, next: NextFunction) => {
+        this.upload.single('profileImage')(req, res, (err: any) => {
+          if (err instanceof multer.MulterError) {
+            return res.status(400).json({ success: false, message: err.message });
+          } else if (err) {
+            return res.status(400).json({ success: false, message: err.message });
+          }
+          next();
+        });
+      },
+      (req: Request, res: Response, next: NextFunction): void => {
+        console.log('Before SanitizationMiddleware - req.body:', req.body);
+        console.log('Before SanitizationMiddleware - req.file:', req.file);
+        if (!req.file) {
+          res.status(400).json({
+            success: false,
+            message: 'Profile image is required'
+          });
+          return;
+        }
+        next();
+      },
+      authMiddleware.authenticate,
+      this.authController.uploadProfileImage
+    );
+
+    this.router.post(
+      '/location/restaurant',
+      authMiddleware.authenticate,
+      SanitizationMiddleware.sanitizeRestaurantLocationUpdate(),
+      AuthValidators.updateRestaurantLocation(),
+      ValidationMiddleware.handleValidationErrors(),
+      this.authController.updateRestaurantLocation
+    );
   }
 
   public getRouter(): Router {

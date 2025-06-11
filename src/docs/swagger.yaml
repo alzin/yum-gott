@@ -1,10 +1,6 @@
-
 openapi: 3.0.3
 info:
   title: Yum-Gott Platform - User API
- 
-
- 
 paths:
   /health:
     get:
@@ -191,13 +187,11 @@ paths:
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
-                   
                 restaurantOwnerVerified:
                   summary: Restaurant owner email verified
                   value:
                     success: true
                     message: "Email verified successfully. You can now login."
-                 
         '400':
           description: Invalid or expired token
           content:
@@ -234,11 +228,7 @@ paths:
                 value:
                   email: "ahmed@example.com"
                   password: "SecurePass123"
-              loginWithMobile:
-                summary: Login with mobile number
-                value:
-                  mobileNumber: "01234567890"
-                  password: "SecurePass123"
+          
       responses:
         '200':
           description: Customer login successful
@@ -261,7 +251,6 @@ paths:
                   value:
                     success: true
                     message: "Customer login successful"
-             
           headers:
             Set-Cookie:
               schema:
@@ -336,11 +325,7 @@ paths:
                 value:
                   email: "owner@example.com"
                   password: "SecurePass123"
-              loginWithMobile:
-                summary: Login with mobile number
-                value:
-                  mobileNumber: "09876543210"
-                  password: "SecurePass123"
+          
       responses:
         '200':
           description: Restaurant owner login successful
@@ -363,7 +348,6 @@ paths:
                   value:
                     success: true
                     message: "Restaurant owner login successful"
-               
           headers:
             Set-Cookie:
               schema:
@@ -419,15 +403,12 @@ paths:
                   value:
                     success: false
                     message: "Too many login attempts. Please try again later."
-
-
-    paths:
   /api/auth/profile/image:
     post:
       tags:
         - Authentication
       summary: Upload profile image
-      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3. The user type (customer or restaurant_owner) is determined from the JWT access token provided in the Authorization header (`Authorization: Bearer <token>`) or as an HTTP-only cookie named `accessToken`.
+      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3. The user type is determined from the JWT access token.
       operationId: uploadProfileImage
       security:
         - BearerAuth: []
@@ -499,7 +480,154 @@ paths:
                   value:
                     success: false
                     message: "Unauthorized: User not authenticated"
-
+  /api/auth/location/restaurant:
+    post:
+      tags:
+        - Authentication
+      summary: Update restaurant location
+      description: Updates the restaurant's address and GPS coordinates for an authenticated restaurant owner.
+      operationId: updateRestaurantLocation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestaurantLocationRequest'
+            examples:
+              validLocation:
+                summary: Valid location update
+                value:
+                  address: "123 Main St, City"
+                  latitude: 40.7128
+                  longitude: -74.0060
+      responses:
+        '200':
+          description: Restaurant location updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant location updated successfully"
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - User is not a restaurant owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    RegisterRestaurantOwnerRequest:
+      type: object
+      required:
+        - restaurantName
+        - organizationNumber
+        - email
+        - mobileNumber
+        - password
+      properties:
+        restaurantName:
+          type: string
+          minLength: 2
+          maxLength: 255
+          description: Name of the restaurant
+          example: "Tasty Bites"
+        organizationNumber:
+          type: string
+          minLength: 5
+          maxLength: 50
+          pattern: '^[A-Z0-9]+$'
+          description: Organization registration number (uppercase letters and numbers)
+          example: "ORG123456"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Restaurant owner's email address
+          example: "owner@example.com"
+        mobileNumber:
+          type: string
+          pattern: '^[0-9]{10,15}$'
+          description: Restaurant owner's mobile number (10-15 digits)
+          example: "09876543210"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+          description: Password (must contain lowercase, uppercase, and number)
+          example: "SecurePass123"
+    UpdateRestaurantLocationRequest:
+      type: object
+      required:
+        - address
+        - latitude
+        - longitude
+      properties:
+        address:
+          type: string
+          maxLength: 255
+          description: Restaurant address
+          example: "123 Main St, City"
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          description: GPS latitude of the restaurant
+          example: 40.7128
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          description: GPS longitude of the restaurant
+          example: -74.0060
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Error message
+          example: "Validation failed"
+        errors:
+          type: array
+          description: Detailed validation errors (when applicable)
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field name that caused the error
+                example: "email"
+              message:
+                type: string
+                description: Error message for the field
+                example: "Invalid email format"
+              value:
+                type: string
+                description: Invalid value that was provided
+                example: "invalid-email"
 components:
   securitySchemes:
     BearerAuth:
@@ -507,8 +635,7 @@ components:
       scheme: Bearer
       bearerFormat: JWT
       description: |
-        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`. The JWT payload includes `userId`, `userType` (either 'customer' or 'restaurant_owner'), `email`, `iat`, and `exp`.
-components:
+        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`.
   schemas:
     RegisterCustomerRequest:
       type: object
@@ -583,6 +710,47 @@ components:
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
           example: "SecurePass123"
+        address:
+          type: string
+          maxLength: 255
+          description: Restaurant address
+          example: "123 Main St, City"
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          description: GPS latitude of the restaurant
+          example: 40.7128
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          description: GPS longitude of the restaurant
+          example: -74.0060
+    UpdateRestaurantLocationRequest:
+      type: object
+      required:
+        - address
+        - latitude
+        - longitude
+      properties:
+        address:
+          type: string
+          maxLength: 255
+          description: Restaurant address
+          example: "123 Main St, City"
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          description: GPS latitude of the restaurant
+          example: 40.7128
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          description: GPS longitude of the restaurant
+          example: -74.0060
     LoginRequest:
       type: object
       required:
@@ -699,6 +867,18 @@ components:
           type: string
           description: URL of the restaurant owner's profile image
           example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/7db9be8e-72d8-49dd-95e4-bb5419667984-1698771234567.jpg"
+        address:
+          type: string
+          description: Restaurant address
+          example: "123 Main St, City"
+        latitude:
+          type: number
+          description: GPS latitude of the restaurant
+          example: 40.7128
+        longitude:
+          type: number
+          description: GPS longitude of the restaurant
+          example: -74.0060
     LoginResponse:
       type: object
       properties:
@@ -766,21 +946,9 @@ components:
         value:
           description: The invalid value that was provided
           example: "invalid-email"
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: Bearer
-      bearerFormat: JWT
-      description: |
-        JWT authentication. Include the token in the Authorization header:
-        `Authorization: Bearer <your_jwt_token>`
 security:
   - BearerAuth: []
 tags:
   - name: Health Check
     description: Server health monitoring endpoints
-  - name: Authentication
-    description: User authentication, registration, email verification, and token management endpoints
-externalDocs:
-  description: Find out more about this API
-  url: https://github.com/yourorg/restaurant-platform-api
+  - name:

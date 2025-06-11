@@ -9,7 +9,7 @@ export class SanitizationMiddleware {
       if (typeof req.body === 'object' && req.body !== null) {
         for (const field of allowedFields) {
           if (field in req.body) {
-            sanitizedBody[field] = xss(req.body[field]);
+            sanitizedBody[field] = typeof req.body[field] === 'string' ? xss(req.body[field]) : req.body[field];
           }
         }
       }
@@ -59,6 +59,14 @@ export class SanitizationMiddleware {
   static sanitizeProfileImageUpload() {
     return SanitizationMiddleware.allowedFields([
       'userType'
+    ]);
+  }
+
+  static sanitizeRestaurantLocationUpdate() {
+    return SanitizationMiddleware.allowedFields([
+      'address',
+      'latitude',
+      'longitude'
     ]);
   }
 }

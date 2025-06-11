@@ -5,3 +5,4 @@ export * from './LoginUseCase';
 export * from './UploadProfileImageUseCase';
 export * from './CustomerLoginUseCase';
 export * from './CleanupUnverifiedAccountsUseCase'
+export * from './UpdateRestaurantLocationUseCase'

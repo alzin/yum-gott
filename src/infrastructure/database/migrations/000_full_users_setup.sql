@@ -1,3 +1,4 @@
+
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -36,18 +37,21 @@ CREATE TABLE restaurant_owners (
     token_expires_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    profile_image_url VARCHAR(255)
+    profile_image_url VARCHAR(255),
+    address VARCHAR(255), -- New field
+    latitude DECIMAL(9,6), -- New field for GPS latitude
+    longitude DECIMAL(9,6) -- New field for GPS longitude
 );
 
 -- Create indexes for customers
 CREATE UNIQUE INDEX idx_customers_email ON customers(email);
-CREATE  INDEX idx_customers_mobile_number ON customers(mobile_number);
+CREATE INDEX idx_customers_mobile_number ON customers(mobile_number);
 CREATE INDEX idx_customers_verification_token ON customers(verification_token);
 
 -- Create indexes for restaurant_owners
 CREATE UNIQUE INDEX idx_restaurant_owners_email ON restaurant_owners(email);
 CREATE UNIQUE INDEX idx_restaurant_owners_organization_number ON restaurant_owners(organization_number);
-CREATE  INDEX idx_restaurant_owners_mobile_number ON restaurant_owners(mobile_number);
+CREATE INDEX idx_restaurant_owners_mobile_number ON restaurant_owners(mobile_number);
 CREATE INDEX idx_restaurant_owners_verification_token ON restaurant_owners(verification_token);
 
 -- Function to update updated_at timestamp

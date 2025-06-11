@@ -20,4 +20,7 @@ export interface RestaurantOwner extends BaseUser {
     restaurantName: string;
     organizationNumber: string;
     email: string;
+    address?: string | null;
+    latitude?: number | null; 
+    longitude?: number | null; 
 }

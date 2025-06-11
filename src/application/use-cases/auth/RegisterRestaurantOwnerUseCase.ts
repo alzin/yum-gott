@@ -17,19 +17,18 @@ export class RegisterRestaurantOwnerUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private passwordHasher: IPasswordHasher,
         private emailService: EmailService
-    ) {}
+    ) { }
 
     async execute(request: RegisterRestaurantOwnerRequest): Promise<void> {
         console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
-       
         await this.checkExistingUser(request);
-        
+
         const hashedPassword = await this.passwordHasher.hash(request.password);
         console.log('RegisterRestaurantOwnerUseCase: Password hashed');
-        
+
         const verificationToken = uuidv4();
         const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-        
+
         const restaurantOwner: RestaurantOwner = {
             restaurantName: request.restaurantName,
             organizationNumber: request.organizationNumber,
@@ -40,9 +39,12 @@ export class RegisterRestaurantOwnerUseCase {
             isEmailVerified: false,
             verificationToken: verificationToken,
             tokenExpiresAt: tokenExpiresAt,
-            profileImageUrl: null
+            profileImageUrl: null,
+            address: null,
+            latitude: null,
+            longitude: null
         };
-        
+
         console.log('RegisterRestaurantOwnerUseCase: Creating restaurant owner');
         await this.restaurantOwnerRepository.create(restaurantOwner);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
@@ -50,19 +52,13 @@ export class RegisterRestaurantOwnerUseCase {
     }
 
     private async checkExistingUser(request: RegisterRestaurantOwnerRequest): Promise<void> {
-        console.log('RegisterRestaurantOwnerUseCase: Checking for existing user with mobile', request.mobileNumber);
-     
-        
+
+
         console.log('RegisterRestaurantOwnerUseCase: Checking for existing email', request.email);
         const emailExists = await this.restaurantOwnerRepository.existsByEmail(request.email);
         if (emailExists) {
             throw new Error('User already exists with this email');
         }
-        
-        console.log('RegisterRestaurantOwnerUseCase: Checking for existing org number', request.organizationNumber);
-        const orgNumberExists = await this.restaurantOwnerRepository.existsByOrganizationNumber(request.organizationNumber);
-        if (orgNumberExists) {
-            throw new Error('Restaurant with this organization number already exists');
-        }
+
     }
 }

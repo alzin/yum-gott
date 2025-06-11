@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { RegisterCustomerUseCase , RegisterRestaurantOwnerUseCase , RestaurantOwnerLoginUseCase , UploadProfileImageUseCase , CustomerLoginUseCase} from '@/application/use-cases/auth/index';
+import { RegisterCustomerUseCase, RegisterRestaurantOwnerUseCase, RestaurantOwnerLoginUseCase, UploadProfileImageUseCase, CustomerLoginUseCase, UpdateRestaurantLocationUseCase } from '@/application/use-cases/auth/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class AuthController {
@@ -8,7 +8,8 @@ export class AuthController {
     private registerRestaurantOwnerUseCase: RegisterRestaurantOwnerUseCase,
     private customerLoginUseCase: CustomerLoginUseCase,
     private restaurantOwnerLoginUseCase: RestaurantOwnerLoginUseCase,
-    private uploadProfileImageUseCase: UploadProfileImageUseCase
+    private uploadProfileImageUseCase: UploadProfileImageUseCase,
+    private updateRestaurantLocationUseCase: UpdateRestaurantLocationUseCase
   ) {}
 
   registerCustomer = async (req: Request, res: Response): Promise<void> => {
@@ -84,7 +85,6 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Customer login successful',
-        // data: result
       });
     } catch (error) {
       res.status(401).json({
@@ -101,7 +101,6 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Restaurant owner login successful',
-        // data: result
       });
     } catch (error) {
       res.status(401).json({
@@ -153,7 +152,7 @@ export class AuthController {
     }
   };
 
-   uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
+  uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
     try {
       console.log('AuthController: Uploading profile image...');
       console.log('Request user:', (req as any).user);
@@ -172,7 +171,6 @@ export class AuthController {
       const request = {
         file: req.file,
         userId: user.userId,
-        // userType is now derived from the token, not req.body
       };
 
       console.log('Processing upload request:', request);
@@ -191,6 +189,43 @@ export class AuthController {
       res.status(400).json({
         success: false,
         message: error instanceof Error ? error.message : 'Image upload failed'
+      });
+    }
+  };
+
+  updateRestaurantLocation = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user; // From AuthMiddleware
+      if (!user || user.userType !== 'restaurant_owner') {
+        res.status(403).json({
+          success: false,
+          message: 'Forbidden: Only restaurant owners can update location'
+        });
+        return;
+      }
+
+      const request = {
+        userId: user.userId,
+        address: req.body.address,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude
+      };
+
+      const result = await this.updateRestaurantLocationUseCase.execute(request);
+
+      res.status(200).json({
+        success: true,
+        message: 'Restaurant location updated successfully',
+        data: {
+          address: result.restaurantOwner.address,
+          latitude: result.restaurantOwner.latitude,
+          longitude: result.restaurantOwner.longitude
+        }
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Location update failed'
       });
     }
   };

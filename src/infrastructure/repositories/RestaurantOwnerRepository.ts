@@ -9,7 +9,8 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         const query = `
             INSERT INTO restaurant_owners (
                 restaurant_name, organization_number, email, mobile_number, password, 
-                is_active, is_email_verified, verification_token, token_expires_at, profile_image_url
+                is_active, is_email_verified, verification_token, token_expires_at, 
+                profile_image_url
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
@@ -121,6 +122,18 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             fields.push(`profile_image_url = $${paramCount++}`);
             values.push(restaurantOwner.profileImageUrl);
         }
+        if (restaurantOwner.address !== undefined) {
+            fields.push(`address = $${paramCount++}`);
+            values.push(restaurantOwner.address);
+        }
+        if (restaurantOwner.latitude !== undefined) {
+            fields.push(`latitude = $${paramCount++}`);
+            values.push(restaurantOwner.latitude);
+        }
+        if (restaurantOwner.longitude !== undefined) {
+            fields.push(`longitude = $${paramCount++}`);
+            values.push(restaurantOwner.longitude);
+        }
 
         values.push(id);
         const query = `
@@ -142,6 +155,20 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             RETURNING *
         `;
         const result = await this.db.query(query, [profileImageUrl, id]);
+        if (result.rows.length === 0) {
+            throw new Error('Restaurant owner not found');
+        }
+        return this.mapRowToRestaurantOwner(result.rows[0]);
+    }
+
+    async updateLocation(id: string, location: { address: string; latitude: number; longitude: number }): Promise<RestaurantOwner> {
+        const query = `
+            UPDATE restaurant_owners 
+            SET address = $1, latitude = $2, longitude = $3
+            WHERE id = $4
+            RETURNING *
+        `;
+        const result = await this.db.query(query, [location.address, location.latitude, location.longitude, id]);
         if (result.rows.length === 0) {
             throw new Error('Restaurant owner not found');
         }
@@ -179,7 +206,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             RETURNING id
         `;
         const result = await this.db.query(query, [date]);
-        return result.rowCount || 0;
+        return result.rowCount;
     }
 
     private mapRowToRestaurantOwner(row: any): RestaurantOwner {
@@ -196,7 +223,10 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             tokenExpiresAt: row.token_expires_at,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
-            profileImageUrl: row.profile_image_url
+            profileImageUrl: row.profile_image_url,
+            address: row.address,
+            latitude: row.latitude,
+            longitude: row.longitude
         };
     }
 }
