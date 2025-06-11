@@ -8,31 +8,26 @@ import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter } from './presentation/router/AuthRouter';
 import path from "path";
 
+
 export class App {
   private app: Application;
   private diContainer: DIContainer;
-  private publicPath: string;
 
   constructor() {
     const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
-
-    this.publicPath = path.join(__dirname, 'public');
-
-    this.app.use(express.static(this.publicPath));
-
     this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
     this.diContainer = DIContainer.getInstance();
-
     this.setupMiddleware();
     this.setupRoutes();
     this.setupErrorHandling();
   }
 
   private setupMiddleware(): void {
+    // Security middleware
     this.app.use(helmet());
 
+    // CORS configuration
     this.app.use(cors({
       origin: function (origin, callback) {
         const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'https://yum-gott.onrender.com', "http://127.0.0.1:5500"];
@@ -46,19 +41,19 @@ export class App {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
       exposedHeaders: ['Set-Cookie'],
+      
     }));
 
+    // Logging
     this.app.use(morgan('combined'));
 
+    // Body parsing
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   }
 
   private setupRoutes(): void {
-    this.app.get('/index', (req: Request, res: Response) => {
-      res.sendFile(path.join(this.publicPath, 'index.html'));
-    });
-
+    // Health check
     this.app.get('/health', (req: Request, res: Response) => {
       res.status(200).json({
         status: 'OK',
@@ -67,10 +62,11 @@ export class App {
       });
     });
 
+    // API routes
     const authRouter = new AuthRouter(this.diContainer.authController);
     this.app.use('/api/auth', authRouter.getRouter());
 
-    // 404 handler
+    // 404 handler - must be after all other routes
     this.app.use((req: Request, res: Response) => {
       res.status(404).json({
         success: false,
@@ -80,6 +76,7 @@ export class App {
   }
 
   private setupErrorHandling(): void {
+    // Global error handler
     this.app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
       console.error('Global Error Handler:', error);
 
@@ -90,6 +87,8 @@ export class App {
       });
     });
   }
+
+
 
   public getApp(): Application {
     return this.app;
