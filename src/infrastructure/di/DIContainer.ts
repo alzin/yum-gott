@@ -1,18 +1,10 @@
-
 import { DatabaseConnection } from '../database/DataBaseConnection';
-import { UserRepository } from '../repositories/UserRepository';
-import { AuthRepository } from '../repositories/AuthRepository';
-import { PasswordHasher } from '../services/PasswordHasher';
-
-import { RegisterCustomerUseCase } from '@/application/use-cases/auth/RegisterCustomerUseCase';
-import { RegisterRestaurantOwnerUseCase } from '@/application/use-cases/auth/RegisterResturantOwnerUseCases';
-import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
-
+import { CustomerRepository, RestaurantOwnerRepository, AuthRepository } from '../repositories/index';
+import { PasswordHasher, EmailService, FileStorageService } from '../services/index';
+import { RegisterCustomerUseCase, RegisterRestaurantOwnerUseCase, UploadProfileImageUseCase, CustomerLoginUseCase, RestaurantOwnerLoginUseCase, UpdateRestaurantLocationUseCase } from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 
-// Types for dependency resolution
-type DependencyKey = keyof DIContainer;
 type DependencyFactory<T = any> = () => T;
 
 export class DIContainer {
@@ -22,6 +14,7 @@ export class DIContainer {
   private singletons: Set<string> = new Set();
 
   private constructor() {
+    console.log('DIContainer: Initializing dependency injection');
     this.registerDependencies();
   }
 
@@ -32,85 +25,132 @@ export class DIContainer {
     return DIContainer.instance;
   }
 
-  // Method to reset instance (useful for testing)
   public static resetInstance(): void {
+    console.log('DIContainer: Resetting instance');
     DIContainer.instance = undefined as any;
   }
 
   private registerDependencies(): void {
-    // Infrastructure - Register as singletons
-    this.registerSingleton('databaseConnection', () => DatabaseConnection.getInstance());
+    this.registerSingleton('databaseConnection', () => {
+      console.log('DIContainer: Registering databaseConnection');
+      return DatabaseConnection.getInstance();
+    });
     
-    this.registerSingleton('userRepository', () => 
-      new UserRepository(this.resolve('databaseConnection'))
-    );
+    this.registerSingleton('customerRepository', () => {
+      console.log('DIContainer: Registering customerRepository');
+      return new CustomerRepository(this.resolve('databaseConnection'));
+    });
     
-    this.registerSingleton('authRepository', () => new AuthRepository());
-    this.registerSingleton('passwordHasher', () => new PasswordHasher());
+    this.registerSingleton('restaurantOwnerRepository', () => {
+      console.log('DIContainer: Registering restaurantOwnerRepository');
+      return new RestaurantOwnerRepository(this.resolve('databaseConnection'));
+    });
+    
+    this.registerSingleton('authRepository', () => {
+      console.log('DIContainer: Registering authRepository');
+      return new AuthRepository();
+    });
+    
+    this.registerSingleton('passwordHasher', () => {
+      console.log('DIContainer: Registering passwordHasher');
+      return new PasswordHasher();
+    });
+    
+    this.registerSingleton('emailService', () => {
+      console.log('DIContainer: Registering emailService');
+      return new EmailService();
+    });
 
-    // Use Cases - Register as transients (new instance each time)
-    this.registerTransient('registerCustomerUseCase', () =>
-      new RegisterCustomerUseCase(
-        this.resolve('userRepository'),
-        this.resolve('passwordHasher')
-      )
-    );
+    this.registerSingleton('fileStorageService', () => {
+      console.log('DIContainer: Registering fileStorageService');
+      return new FileStorageService();
+    });
 
-    this.registerTransient('registerRestaurantOwnerUseCase', () =>
-      new RegisterRestaurantOwnerUseCase(
-        this.resolve('userRepository'),
-        this.resolve('passwordHasher')
-      )
-    );
+    this.registerTransient('registerCustomerUseCase', () => {
+      console.log('DIContainer: Registering registerCustomerUseCase');
+      return new RegisterCustomerUseCase(
+        this.resolve('customerRepository'),
+        this.resolve('passwordHasher'),
+        this.resolve('emailService')
+      );
+    });
 
-    this.registerTransient('loginUseCase', () =>
-      new LoginUseCase(
-        this.resolve('userRepository'),
+    this.registerTransient('registerRestaurantOwnerUseCase', () => {
+      console.log('DIContainer: Registering registerRestaurantOwnerUseCase');
+      return new RegisterRestaurantOwnerUseCase(
+        this.resolve('restaurantOwnerRepository'),
+        this.resolve('passwordHasher'),
+        this.resolve('emailService')
+      );
+    });
+
+    this.registerTransient('customerLoginUseCase', () => {
+      console.log('DIContainer: Registering customerLoginUseCase');
+      return new CustomerLoginUseCase(
+        this.resolve('customerRepository'),
         this.resolve('authRepository'),
         this.resolve('passwordHasher')
-      )
-    );
+      );
+    });
 
-    // Controllers - Register as singletons
-    this.registerSingleton('authController', () =>
-      new AuthController(
+    this.registerTransient('restaurantOwnerLoginUseCase', () => {
+      console.log('DIContainer: Registering restaurantOwnerLoginUseCase');
+      return new RestaurantOwnerLoginUseCase(
+        this.resolve('restaurantOwnerRepository'),
+        this.resolve('authRepository'),
+        this.resolve('passwordHasher')
+      );
+    });
+
+    this.registerTransient('uploadProfileImageUseCase', () => {
+      console.log('DIContainer: Registering uploadProfileImageUseCase');
+      return new UploadProfileImageUseCase(
+        this.resolve('customerRepository'),
+        this.resolve('restaurantOwnerRepository'),
+        this.resolve('fileStorageService')
+      );
+    });
+
+    this.registerTransient('updateRestaurantLocationUseCase', () => {
+      console.log('DIContainer: Registering updateRestaurantLocationUseCase');
+      return new UpdateRestaurantLocationUseCase(
+        this.resolve('restaurantOwnerRepository')
+      );
+    });
+
+    this.registerSingleton('authController', () => {
+      console.log('DIContainer: Registering authController');
+      return new AuthController(
         this.resolve('registerCustomerUseCase'),
         this.resolve('registerRestaurantOwnerUseCase'),
-        this.resolve('loginUseCase')
-      )
-    );
+        this.resolve('customerLoginUseCase'),
+        this.resolve('restaurantOwnerLoginUseCase'),
+        this.resolve('uploadProfileImageUseCase'),
+        this.resolve('updateRestaurantLocationUseCase')
+      );
+    });
 
-    // Middleware - Register as singletons
-    this.registerSingleton('authMiddleware', () =>
-      new AuthMiddleware(this.resolve('authRepository'))
-    );
+    this.registerSingleton('authMiddleware', () => {
+      console.log('DIContainer: Registering authMiddleware');
+      return new AuthMiddleware(this.resolve('authRepository'));
+    });
   }
 
-  /**
-   * Register a dependency as a singleton (single instance)
-   */
   private registerSingleton<T>(key: string, factory: DependencyFactory<T>): void {
     this.factories.set(key, factory);
     this.singletons.add(key);
   }
 
-  /**
-   * Register a dependency as transient (new instance each time)
-   */
   private registerTransient<T>(key: string, factory: DependencyFactory<T>): void {
     this.factories.set(key, factory);
   }
 
-  /**
-   * Resolve a dependency by key
-   */
   public resolve<T>(key: string): T {
-    // Check if it's a singleton and already created
     if (this.singletons.has(key) && this.dependencies.has(key)) {
+      console.log('DIContainer: Resolving cached singleton', key);
       return this.dependencies.get(key);
     }
 
-    // Get the factory
     const factory = this.factories.get(key);
     if (!factory) {
       throw new Error(`Dependency '${key}' not registered`);
@@ -118,39 +158,34 @@ export class DIContainer {
 
     try {
       const instance = factory();
-      
-      // Store singleton instances
       if (this.singletons.has(key)) {
         this.dependencies.set(key, instance);
+        console.log('DIContainer: Cached new singleton', key);
       }
-      
       return instance;
     } catch (error) {
       throw new Error(`Failed to resolve dependency '${key}': ${error}`);
     }
   }
 
-  /**
-   * Check if a dependency is registered
-   */
   public isRegistered(key: string): boolean {
     return this.factories.has(key);
   }
 
-  /**
-   * Get all registered dependency keys
-   */
   public getRegisteredKeys(): string[] {
     return Array.from(this.factories.keys());
   }
 
-  // Convenience getters for backward compatibility
   public get databaseConnection(): DatabaseConnection {
     return this.resolve('databaseConnection');
   }
 
-  public get userRepository(): UserRepository {
-    return this.resolve('userRepository');
+  public get customerRepository(): CustomerRepository {
+    return this.resolve('customerRepository');
+  }
+
+  public get restaurantOwnerRepository(): RestaurantOwnerRepository {
+    return this.resolve('restaurantOwnerRepository');
   }
 
   public get authRepository(): AuthRepository {
@@ -161,6 +196,14 @@ export class DIContainer {
     return this.resolve('passwordHasher');
   }
 
+  public get emailService(): EmailService {
+    return this.resolve('emailService');
+  }
+
+  public get fileStorageService(): FileStorageService {
+    return this.resolve('fileStorageService');
+  }
+
   public get registerCustomerUseCase(): RegisterCustomerUseCase {
     return this.resolve('registerCustomerUseCase');
   }
@@ -169,8 +212,20 @@ export class DIContainer {
     return this.resolve('registerRestaurantOwnerUseCase');
   }
 
-  public get loginUseCase(): LoginUseCase {
-    return this.resolve('loginUseCase');
+  public get customerLoginUseCase(): CustomerLoginUseCase {
+    return this.resolve('customerLoginUseCase');
+  }
+
+  public get restaurantOwnerLoginUseCase(): RestaurantOwnerLoginUseCase {
+    return this.resolve('restaurantOwnerLoginUseCase');
+  }
+
+  public get uploadProfileImageUseCase(): UploadProfileImageUseCase {
+    return this.resolve('uploadProfileImageUseCase');
+  }
+
+  public get updateRestaurantLocationUseCase(): UpdateRestaurantLocationUseCase {
+    return this.resolve('updateRestaurantLocationUseCase');
   }
 
   public get authController(): AuthController {

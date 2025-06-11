@@ -9,7 +9,7 @@ async function setupDatabase() {
     console.log('🔧 Setting up database...');
     
     // Fixed the migration path
-    const migrationPath = path.join(__dirname, 'migrations/001_create_users_table.sql');
+    const migrationPath = path.join(__dirname, 'migrations/000_full_users_setup.sql');
     
     // Check if migration file exists
     if (!fs.existsSync(migrationPath)) {

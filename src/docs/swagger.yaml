@@ -1,0 +1,843 @@
+openapi: 3.0.3
+info:
+  title: Yum-Gott Platform - User API
+paths:
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Health check endpoint
+      description: Check if the API server is running and healthy
+      operationId: checkHealth
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-06-09T13:06:00Z"
+                  uptime:
+                    type: number
+                    description: Server uptime in seconds
+                    example: 3600.5
+  /api/auth/register/customer:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new customer
+      description: Initiates customer registration by storing details in pending_users and sending a verification email.
+      operationId: registerCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCustomerRequest'
+            examples:
+              validCustomer:
+                summary: Valid customer registration
+                value:
+                  name: "Ahmed Mohamed"
+                  email: "ahmed@example.com"
+                  mobileNumber: "01234567890"
+                  password: "SecurePass123"
+      responses:
+        '201':
+          description: Customer registration initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Customer registration initiated. Please check your email for verification link."
+        '400':
+          description: Bad request - Validation errors or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation errors
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "email"
+                        message: "Invalid email format"
+                        value: "invalid-email"
+                      - field: "password"
+                        message: "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+                        value: "pass"
+                userExists:
+                  summary: User already exists
+                  value:
+                    success: false
+                    message: "User already exists with this mobile number"
+  /api/auth/register/restaurant-owner:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new restaurant owner
+      description: Initiates restaurant owner registration by storing details in pending_users and sending a verification email.
+      operationId: registerRestaurantOwner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRestaurantOwnerRequest'
+            examples:
+              validOwner:
+                summary: Valid restaurant owner registration
+                value:
+                  restaurantName: "Tasty Bites"
+                  organizationNumber: "ORG123456"
+                  email: "owner@example.com"
+                  mobileNumber: "09876543210"
+                  password: "SecurePass123"
+      responses:
+        '201':
+          description: Restaurant owner registration initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant owner registration initiated. Please check your email for verification link."
+        '400':
+          description: Bad request - Validation errors or organization already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation errors
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "organizationNumber"
+                        message: "Organization number must contain only uppercase letters and numbers"
+                        value: "org123"
+                orgExists:
+                  summary: Organization already exists
+                  value:
+                    success: false
+                    message: "Restaurant with this organization number already exists"
+  /api/auth/verify:
+    get:
+      tags:
+        - Authentication
+      summary: Verify email address
+      description: Verifies a user's email using a token sent in the verification email, moving the user from pending_users to the customers or restaurant_owners table.
+      operationId: verifyEmail
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Verification token sent to the user's email
+          example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Email verified successfully. You can now login."
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        oneOf:
+                          - $ref: '#/components/schemas/CustomerResponse'
+                          - $ref: '#/components/schemas/RestaurantOwnerResponse'
+              examples:
+                customerVerified:
+                  summary: Customer email verified
+                  value:
+                    success: true
+                    message: "Email verified successfully. You can now login."
+                restaurantOwnerVerified:
+                  summary: Restaurant owner email verified
+                  value:
+                    success: true
+                    message: "Email verified successfully. You can now login."
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidToken:
+                  summary: Invalid token
+                  value:
+                    success: false
+                    message: "Invalid or expired verification token"
+                missingToken:
+                  summary: Missing token
+                  value:
+                    success: false
+                    message: "Verification token is required"
+  /api/auth/login/customer:
+    post:
+      tags:
+        - Authentication
+      summary: Customer login
+      description: Authenticate a customer using email or mobile number and password. Returns JWT tokens as HTTP-only cookies.
+      operationId: loginCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              loginWithEmail:
+                summary: Login with email
+                value:
+                  email: "ahmed@example.com"
+                  password: "SecurePass123"
+          
+      responses:
+        '200':
+          description: Customer login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Customer login successful"
+                  data:
+                    $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    success: true
+                    message: "Customer login successful"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingCredentials:
+                  summary: Missing email or mobile number
+                  value:
+                    success: false
+                    message: "Email or mobile number is required"
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "email"
+                        message: "Invalid email format"
+                        value: "invalid-email"
+        '401':
+          description: Unauthorized - Invalid credentials or account deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Invalid credentials
+                  value:
+                    success: false
+                    message: "Invalid credentials"
+                accountDeactivated:
+                  summary: Account deactivated
+                  value:
+                    success: false
+                    message: "Account is deactivated"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimit:
+                  summary: Rate limit exceeded
+                  value:
+                    success: false
+                    message: "Too many login attempts. Please try again later."
+  /api/auth/login/restaurant-owner:
+    post:
+      tags:
+        - Authentication
+      summary: Restaurant owner login
+      description: Authenticate a restaurant owner using email or mobile number and password. Returns JWT tokens as HTTP-only cookies.
+      operationId: loginRestaurantOwner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              loginWithEmail:
+                summary: Login with email
+                value:
+                  email: "owner@example.com"
+                  password: "SecurePass123"
+          
+      responses:
+        '200':
+          description: Restaurant owner login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant owner login successful"
+                  data:
+                    $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    success: true
+                    message: "Restaurant owner login successful"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingCredentials:
+                  summary: Missing email or mobile number
+                  value:
+                    success: false
+                    message: "Email or mobile number is required"
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "email"
+                        message: "Invalid email format"
+                        value: "invalid-email"
+        '401':
+          description: Unauthorized - Invalid credentials or account deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Invalid credentials
+                  value:
+                    success: false
+                    message: "Invalid credentials"
+                accountDeactivated:
+                  summary: Account deactivated
+                  value:
+                    success: false
+                    message: "Account is deactivated"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimit:
+                  summary: Rate limit exceeded
+                  value:
+                    success: false
+                    message: "Too many login attempts. Please try again later."
+  /api/auth/profile/image:
+    post:
+      tags:
+        - Authentication
+      summary: Upload profile image
+      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3. The user type is determined from the JWT access token.
+      operationId: uploadProfileImage
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profileImage:
+                  type: string
+                  format: binary
+                  description: Profile image file (JPEG, PNG, or GIF, max 5MB)
+              required:
+                - profileImage
+      responses:
+        '200':
+          description: Profile image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profile image uploaded successfully"
+                  data:
+                    type: object
+                    properties:
+                      profileImageUrl:
+                        type: string
+                        description: URL of the uploaded image
+                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000-1698771234567.jpg"
+        '400':
+          description: Bad request - Validation errors or upload failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                noFile:
+                  summary: No file uploaded
+                  value:
+                    success: false
+                    message: "Profile image is required"
+                invalidFileType:
+                  summary: Invalid file type
+                  value:
+                    success: false
+                    message: "Only JPEG, PNG, and GIF images are allowed"
+                fileTooLarge:
+                  summary: File too large
+                  value:
+                    success: false
+                    message: "File size must not exceed 5MB"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  summary: Unauthorized
+                  value:
+                    success: false
+                    message: "Unauthorized: User not authenticated"
+  /api/auth/location/restaurant:
+    post:
+      tags:
+        - Authentication
+      summary: Update restaurant location
+      description: Updates the restaurant's address and GPS coordinates for an authenticated restaurant owner.
+      operationId: updateRestaurantLocation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestaurantLocationRequest'
+            examples:
+              validLocation:
+                summary: Valid location update
+                value:
+                  address: "123 Main St, City"
+                  latitude: 40.7128
+                  longitude: -74.0060
+      responses:
+        '200':
+          description: Restaurant location updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant location updated successfully"
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - User is not a restaurant owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
+      description: |
+        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`.
+  schemas:
+    RegisterCustomerRequest:
+      type: object
+      required:
+        - name
+        - email
+        - mobileNumber
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          pattern: '^[a-zA-Z\s]+$'
+          description: Customer's full name (letters and spaces only)
+          example: "Ahmed Mohamed"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Customer's email address
+          example: "ahmed@example.com"
+        mobileNumber:
+          type: string
+          pattern: '^[0-9]{10,15}$'
+          description: Customer's mobile number (10-15 digits)
+          example: "01234567890"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+          description: Password (must contain lowercase, uppercase, and number)
+          example: "SecurePass123"
+    RegisterRestaurantOwnerRequest:
+      type: object
+      required:
+        - restaurantName
+        - organizationNumber
+        - email
+        - mobileNumber
+        - password
+      properties:
+        restaurantName:
+          type: string
+          minLength: 2
+          maxLength: 255
+          description: Name of the restaurant
+          example: "Tasty Bites"
+        organizationNumber:
+          type: string
+          minLength: 5
+          maxLength: 50
+          pattern: '^[A-Z0-9]+$'
+          description: Organization registration number (uppercase letters and numbers)
+          example: "ORG123456"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Restaurant owner's email address
+          example: "owner@example.com"
+        mobileNumber:
+          type: string
+          pattern: '^[0-9]{10,15}$'
+          description: Restaurant owner's mobile number (10-15 digits)
+          example: "09876543210"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+          description: Password (must contain lowercase, uppercase, and number)
+          example: "SecurePass123"
+    UpdateRestaurantLocationRequest:
+      type: object
+      required:
+        - address
+        - latitude
+        - longitude
+      properties:
+        address:
+          type: string
+          maxLength: 255
+          description: Restaurant address
+          example: "123 Main St, City"
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          description: GPS latitude of the restaurant
+          example: 40.7128
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          description: GPS longitude of the restaurant
+          example: -74.0060
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Error message
+          example: "Validation failed"
+        errors:
+          type: array
+          description: Detailed validation errors (when applicable)
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field name that caused the error
+                example: "email"
+              message:
+                type: string
+                description: Error message for the field
+                example: "Invalid email format"
+              value:
+                type: string
+                description: Invalid value that was provided
+                example: "invalid-email"
+    LoginRequest:
+      type: object
+      required:
+        - password
+      oneOf:
+        - required: [email]
+        - required: [mobileNumber]
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "ahmed@example.com"
+        mobileNumber:
+          type: string
+          pattern: '^[0-9]{10,15}$'
+          description: User's mobile number (10-15 digits)
+          example: "01234567890"
+        password:
+          type: string
+          minLength: 6
+          description: User's password
+          example: "SecurePass123"
+      description: Either email or mobileNumber must be provided along with password
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/CustomerResponse'
+            - $ref: '#/components/schemas/RestaurantOwnerResponse'
+          description: User information (without password)
+        authToken:
+          $ref: '#/components/schemas/AuthToken'
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token for API authentication
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          description: JWT refresh token for token renewal
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: number
+          description: Access token expiration time in seconds
+          example: 86400
+    CustomerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique customer identifier
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Customer's full name
+          example: "Ahmed Mohamed"
+        email:
+          type: string
+          format: email
+          description: Customer's email address
+          example: "ahmed@example.com"
+        mobileNumber:
+          type: string
+          description: Customer's mobile number
+          example: "01234567890"
+        userType:
+          type: string
+          enum: ["customer"]
+          description: User type
+          example: "customer"
+        isActive:
+          type: boolean
+          description: Account status
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2025-06-09T13:06:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Account last update timestamp
+          example: "2025-06-09T13:06:00Z"
+        profileImageUrl:
+          type: string
+          description: URL of the customer's profile image
+          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000-1698771234567.jpg"
+    RestaurantOwnerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique restaurant owner identifier
+          example: "7db9be8e-72d8-49dd-95e4-bb5419667984"
+        restaurantName:
+          type: string
+          description: Name of the restaurant
+          example: "Tasty Bites"
+        organizationNumber:
+          type: string
+          description: Organization registration number
+          example: "ORG123456"
+        email:
+          type: string
+          format: email
+          description: Restaurant owner's email address
+          example: "owner@example.com"
+        mobileNumber:
+          type: string
+          description: Restaurant owner's mobile number
+          example: "09876543210"
+        userType:
+          type: string
+          enum: ["restaurant_owner"]
+          description: User type
+          example: "restaurant_owner"
+        isActive:
+          type: boolean
+          description: Account status
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2025-06-09T13:06:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Account last update timestamp
+          example: "2025-06-09T13:06:00Z"
+        profileImageUrl:
+          type: string
+          description: URL of the restaurant owner's profile image
+          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/7db9be8e-72d8-49dd-95e4-bb5419667984-1698771234567.jpg"
+        address:
+          type: string
+          description: Restaurant address
+          example: "123 Main St, City"
+        latitude:
+          type: number
+          description: GPS latitude of the restaurant
+          example: 40.7128
+        longitude:
+          type: number
+          description: GPS longitude of the restaurant
+          example: -74.0060
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name that failed validation
+          example: "email"
+        message:
+          type: string
+          description: Validation error message
+          example: "Invalid email format"
+        value:
+          description: The invalid value that was provided
+          example: "invalid-email"
+security:
+  - BearerAuth: []
+tags:
+  - name: Health Check
+    description: Server health monitoring endpoints
+  - name:

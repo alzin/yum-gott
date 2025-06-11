@@ -11,7 +11,6 @@ export class AuthValidators {
         .withMessage('Name must be between 2 and 100 characters')
         .matches(/^[a-zA-Z\s]+$/)
         .withMessage('Name can only contain letters and spaces'),
-
       body('email')
         .trim()
         .notEmpty()
@@ -20,15 +19,24 @@ export class AuthValidators {
         .withMessage('Invalid email format')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters'),
-
+        .withMessage('Email must not exceed 255 characters')
+        .custom((value) => {
+          const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const parts = value.split('@');
+          if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+            throw new Error('Invalid email domain (e.g., no repeated .com)');
+          }
+          if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+            throw new Error('Email domain contains repeated extensions');
+          }
+          return true;
+        }),
       body('mobileNumber')
         .trim()
         .notEmpty()
         .withMessage('Mobile number is required')
         .matches(/^[0-9]{10,15}$/)
         .withMessage('Mobile number must be 10-15 digits'),
-
       body('password')
         .notEmpty()
         .withMessage('Password is required')
@@ -47,17 +55,6 @@ export class AuthValidators {
         .withMessage('Restaurant name is required')
         .isLength({ min: 2, max: 255 })
         .withMessage('Restaurant name must be between 2 and 255 characters'),
-
-      body('email')
-        .trim()
-        .notEmpty()
-        .withMessage('Email is required')
-        .isEmail()
-        .withMessage('Invalid email format')
-        .normalizeEmail()
-        .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters'),
-
       body('organizationNumber')
         .trim()
         .notEmpty()
@@ -66,14 +63,32 @@ export class AuthValidators {
         .withMessage('Organization number must be between 5 and 50 characters')
         .matches(/^[A-Z0-9]+$/)
         .withMessage('Organization number must contain only uppercase letters and numbers'),
-
+      body('email')
+        .trim()
+        .notEmpty()
+        .withMessage('Email is required')
+        .isEmail()
+        .withMessage('Invalid email format')
+        .normalizeEmail()
+        .isLength({ max: 255 })
+        .withMessage('Email must not exceed 255 characters')
+        .custom((value) => {
+          const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const parts = value.split('@');
+          if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+            throw new Error('Invalid email domain (e.g., no repeated .com)');
+          }
+          if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+            throw new Error('Email domain contains repeated extensions');
+          }
+          return true;
+        }),
       body('mobileNumber')
         .trim()
         .notEmpty()
         .withMessage('Mobile number is required')
         .matches(/^[0-9]{10,15}$/)
         .withMessage('Mobile number must be 10-15 digits'),
-
       body('password')
         .notEmpty()
         .withMessage('Password is required')
@@ -87,18 +102,64 @@ export class AuthValidators {
   static login(): ValidationChain[] {
     return [
       body('email')
+        .optional()
         .trim()
-        .notEmpty()
-        .withMessage('Email is required')
         .isEmail()
         .withMessage('Invalid email format')
-        .normalizeEmail(),
-
+        .normalizeEmail()
+        .isLength({ max: 255 })
+        .withMessage('Email must not exceed 255 characters')
+        .custom((value) => {
+          if (!value) return true; 
+          const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const parts = value.split('@');
+          if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+            throw new Error('Invalid email domain (e.g., no repeated .com)');
+          }
+          if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+            throw new Error('Email domain contains repeated extensions');
+          }
+          return true;
+        }),
+      body('mobileNumber')
+        .optional()
+        .trim()
+        .matches(/^[0-9]{10,15}$/)
+        .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')
-        .isLength({ min: 1 })
-        .withMessage('Password cannot be empty')
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 characters'),
+      body().custom((value) => {
+        if (!value.email && !value.mobileNumber) {
+          throw new Error('Email or mobile number is required');
+        }
+        return true;
+      })
+    ];
+  }
+
+  static updateRestaurantLocation(): ValidationChain[] {
+    return [
+      body('address')
+        .trim()
+        .notEmpty()
+        .withMessage('Address is required')
+        .isLength({ max: 255 })
+        .withMessage('Address must not exceed 255 characters'),
+      body('latitude')
+        .notEmpty()
+        .withMessage('Latitude is required')
+        .isFloat({ min: -90, max: 90 })
+        .withMessage('Latitude must be a number between -90 and 90')
+        .toFloat(),
+      body('longitude')
+        .notEmpty()
+        .withMessage('Longitude is required')
+        .isFloat({ min: -180, max: 180 })
+        .withMessage('Longitude must be a number between -180 and 180')
+        .toFloat()
     ];
   }
 }

@@ -1,28 +1,26 @@
-export enum UserType {
-    CUSTOMER = "customer",
-    RESTAURANT_OWNER = "restaurant_owner"
-}
-
 export interface BaseUser {
     id?: string;
-    email: string; 
     mobileNumber: string;
     password: string;
-    userType: UserType;
     isActive: boolean;
+    isEmailVerified: boolean;
+    verificationToken?: string | null;
+    tokenExpiresAt?: Date | null;
     createdAt?: Date;
-    updatedAt?: Date; 
+    updatedAt?: Date;
+    profileImageUrl?: string | null;
 }
 
 export interface Customer extends BaseUser {
     name: string;
-    userType: UserType.CUSTOMER;
+    email: string;
 }
 
-export interface restaurantOwner extends BaseUser {
+export interface RestaurantOwner extends BaseUser {
     restaurantName: string;
     organizationNumber: string;
-    userType: UserType.RESTAURANT_OWNER;
+    email: string;
+    address?: string | null;
+    latitude?: number | null; 
+    longitude?: number | null; 
 }
-
-export type User = Customer | restaurantOwner;
