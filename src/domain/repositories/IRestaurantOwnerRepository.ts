@@ -1,4 +1,3 @@
-
 import { RestaurantOwner } from '../entities/User';
 
 export interface IRestaurantOwnerRepository {
