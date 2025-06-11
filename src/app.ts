@@ -19,7 +19,6 @@ export class App {
 
     this.publicPath = path.join(__dirname, 'public');
 
-    // serve static files - يجب أن يكون أولاً
     this.app.use(express.static(this.publicPath));
 
     this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -56,7 +55,6 @@ export class App {
   }
 
   private setupRoutes(): void {
-    // يمكنك إزالة هذا إذا تريد الاعتماد على express.static فقط
     this.app.get('/index', (req: Request, res: Response) => {
       res.sendFile(path.join(this.publicPath, 'index.html'));
     });

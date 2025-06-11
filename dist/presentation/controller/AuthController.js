@@ -1,0 +1,251 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthController = void 0;
+const DIContainer_1 = require("../../infrastructure/di/DIContainer");
+class AuthController {
+    constructor(registerCustomerUseCase, registerRestaurantOwnerUseCase, customerLoginUseCase, restaurantOwnerLoginUseCase, uploadProfileImageUseCase, updateRestaurantLocationUseCase) {
+        this.registerCustomerUseCase = registerCustomerUseCase;
+        this.registerRestaurantOwnerUseCase = registerRestaurantOwnerUseCase;
+        this.customerLoginUseCase = customerLoginUseCase;
+        this.restaurantOwnerLoginUseCase = restaurantOwnerLoginUseCase;
+        this.uploadProfileImageUseCase = uploadProfileImageUseCase;
+        this.updateRestaurantLocationUseCase = updateRestaurantLocationUseCase;
+        this.registerCustomer = async (req, res) => {
+            try {
+                await this.registerCustomerUseCase.execute(req.body);
+                res.status(201).json({
+                    success: true,
+                    message: 'Customer registration initiated. Please check your email for verification link.'
+                });
+            }
+            catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Registration failed'
+                });
+            }
+        };
+        this.registerRestaurantOwner = async (req, res) => {
+            try {
+                await this.registerRestaurantOwnerUseCase.execute(req.body);
+                res.status(201).json({
+                    success: true,
+                    message: 'Restaurant owner registration initiated. Please check your email for verification link.'
+                });
+            }
+            catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Registration failed'
+                });
+            }
+        };
+        this.verifyEmail = async (req, res) => {
+            try {
+                const { token } = req.query;
+                if (!token || typeof token !== 'string') {
+                    res.status(400).json({
+                        success: false,
+                        message: 'Verification token is required'
+                    });
+                    return;
+                }
+                const diContainer = DIContainer_1.DIContainer.getInstance();
+                const customerRepo = diContainer.customerRepository;
+                const restaurantOwnerRepo = diContainer.restaurantOwnerRepository;
+                try {
+                    const user = await customerRepo.verifyEmail(token);
+                    res.status(200).json({
+                        success: true,
+                        message: 'Email verified successfully. You can now login.'
+                    });
+                }
+                catch (customerError) {
+                    const user = await restaurantOwnerRepo.verifyEmail(token);
+                    res.status(200).json({
+                        success: true,
+                        message: 'Email verified successfully. You can now login.'
+                    });
+                }
+            }
+            catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Verification failed'
+                });
+            }
+        };
+        this.customerLogin = async (req, res) => {
+            try {
+                const result = await this.customerLoginUseCase.execute(req.body);
+                this.setAuthCookies(res, result.authToken);
+                res.status(200).json({
+                    success: true,
+                    message: 'Customer login successful',
+                });
+            }
+            catch (error) {
+                res.status(401).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Login failed'
+                });
+            }
+        };
+        this.restaurantOwnerLogin = async (req, res) => {
+            try {
+                const result = await this.restaurantOwnerLoginUseCase.execute(req.body);
+                this.setAuthCookies(res, result.authToken);
+                res.status(200).json({
+                    success: true,
+                    message: 'Restaurant owner login successful',
+                    // data:result
+                });
+            }
+            catch (error) {
+                res.status(401).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Login failed'
+                });
+            }
+        };
+        this.logout = async (req, res) => {
+            try {
+                this.clearAuthCookies(res);
+                res.status(200).json({
+                    success: true,
+                    message: 'Logout successful'
+                });
+            }
+            catch (error) {
+                res.status(500).json({
+                    success: false,
+                    message: 'Logout failed'
+                });
+            }
+        };
+        this.refreshToken = async (req, res) => {
+            try {
+                const refreshToken = req.cookies.refreshToken;
+                if (!refreshToken) {
+                    res.status(401).json({
+                        success: false,
+                        message: 'Refresh token not found'
+                    });
+                    return;
+                }
+                const authRepository = DIContainer_1.DIContainer.getInstance().authRepository;
+                const newTokens = await authRepository.refreshToken(refreshToken);
+                this.setAuthCookies(res, newTokens);
+                res.status(200).json({
+                    success: true,
+                    message: 'Token refreshed successfully'
+                });
+            }
+            catch (error) {
+                this.clearAuthCookies(res);
+                res.status(401).json({
+                    success: false,
+                    message: 'Invalid refresh token'
+                });
+            }
+        };
+        this.uploadProfileImage = async (req, res) => {
+            try {
+                console.log('AuthController: Uploading profile image...');
+                console.log('Request user:', req.user);
+                console.log('Request file:', req.file);
+                const user = req.user; // From AuthMiddleware
+                if (!user) {
+                    console.log('AuthController: No user found in request');
+                    res.status(401).json({
+                        success: false,
+                        message: 'Unauthorized: User not authenticated'
+                    });
+                    return;
+                }
+                const request = {
+                    file: req.file,
+                    userId: user.userId,
+                };
+                console.log('Processing upload request:', request);
+                const result = await this.uploadProfileImageUseCase.execute(request, user.userType);
+                console.log('Upload successful:', result);
+                res.status(200).json({
+                    success: true,
+                    message: 'Profile image uploaded successfully',
+                    data: { profileImageUrl: result.profileImageUrl }
+                });
+            }
+            catch (error) {
+                console.error('AuthController: Upload failed:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Image upload failed'
+                });
+            }
+        };
+        this.updateRestaurantLocation = async (req, res) => {
+            try {
+                const user = req.user; // From AuthMiddleware
+                if (!user || user.userType !== 'restaurant_owner') {
+                    res.status(403).json({
+                        success: false,
+                        message: 'Forbidden: Only restaurant owners can update location'
+                    });
+                    return;
+                }
+                const request = {
+                    userId: user.userId,
+                    address: req.body.address,
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude
+                };
+                const result = await this.updateRestaurantLocationUseCase.execute(request);
+                res.status(200).json({
+                    success: true,
+                    message: 'Restaurant location updated successfully',
+                    data: {
+                        address: result.restaurantOwner.address,
+                        latitude: result.restaurantOwner.latitude,
+                        longitude: result.restaurantOwner.longitude
+                    }
+                });
+            }
+            catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Location update failed'
+                });
+            }
+        };
+    }
+    setAuthCookies(res, authToken) {
+        const isProduction = process.env.NODE_ENV === 'production';
+        res.cookie('accessToken', authToken.accessToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: authToken.expiresIn * 1000,
+            path: '/'
+        });
+        res.cookie('refreshToken', authToken.refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/'
+        });
+    }
+    clearAuthCookies(res) {
+        console.log('AuthController: Clearing cookies for request', res.req?.originalUrl);
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/'
+        };
+        res.clearCookie('accessToken', cookieOptions);
+        res.clearCookie('refreshToken', cookieOptions);
+    }
+}
+exports.AuthController = AuthController;
