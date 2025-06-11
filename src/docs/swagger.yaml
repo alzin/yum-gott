@@ -535,7 +535,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
+      description: |
+        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`.
   schemas:
+    RegisterCustomerRequest:
+      type: object
+      required:
+        - name
+        - email
+        - mobileNumber
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          pattern: '^[a-zA-Z\s]+$'
+          description: Customer's full name (letters and spaces only)
+          example: "Ahmed Mohamed"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Customer's email address
+          example: "ahmed@example.com"
+        mobileNumber:
+          type: string
+          pattern: '^[0-9]{10,15}$'
+          description: Customer's mobile number (10-15 digits)
+          example: "01234567890"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+          description: Password (must contain lowercase, uppercase, and number)
+          example: "SecurePass123"
     RegisterRestaurantOwnerRequest:
       type: object
       required:
@@ -628,129 +668,6 @@ components:
                 type: string
                 description: Invalid value that was provided
                 example: "invalid-email"
-components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: Bearer
-      bearerFormat: JWT
-      description: |
-        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`.
-  schemas:
-    RegisterCustomerRequest:
-      type: object
-      required:
-        - name
-        - email
-        - mobileNumber
-        - password
-      properties:
-        name:
-          type: string
-          minLength: 2
-          maxLength: 100
-          pattern: '^[a-zA-Z\s]+$'
-          description: Customer's full name (letters and spaces only)
-          example: "Ahmed Mohamed"
-        email:
-          type: string
-          format: email
-          maxLength: 255
-          description: Customer's email address
-          example: "ahmed@example.com"
-        mobileNumber:
-          type: string
-          pattern: '^[0-9]{10,15}$'
-          description: Customer's mobile number (10-15 digits)
-          example: "01234567890"
-        password:
-          type: string
-          minLength: 6
-          maxLength: 100
-          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
-          description: Password (must contain lowercase, uppercase, and number)
-          example: "SecurePass123"
-    RegisterRestaurantOwnerRequest:
-      type: object
-      required:
-        - restaurantName
-        - organizationNumber
-        - email
-        - mobileNumber
-        - password
-      properties:
-        restaurantName:
-          type: string
-          minLength: 2
-          maxLength: 255
-          description: Name of the restaurant
-          example: "Tasty Bites"
-        organizationNumber:
-          type: string
-          minLength: 5
-          maxLength: 50
-          pattern: '^[A-Z0-9]+$'
-          description: Organization registration number (uppercase letters and numbers)
-          example: "ORG123456"
-        email:
-          type: string
-          format: email
-          maxLength: 255
-          description: Restaurant owner's email address
-          example: "owner@example.com"
-        mobileNumber:
-          type: string
-          pattern: '^[0-9]{10,15}$'
-          description: Restaurant owner's mobile number (10-15 digits)
-          example: "09876543210"
-        password:
-          type: string
-          minLength: 6
-          maxLength: 100
-          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
-          description: Password (must contain lowercase, uppercase, and number)
-          example: "SecurePass123"
-        address:
-          type: string
-          maxLength: 255
-          description: Restaurant address
-          example: "123 Main St, City"
-        latitude:
-          type: number
-          minimum: -90
-          maximum: 90
-          description: GPS latitude of the restaurant
-          example: 40.7128
-        longitude:
-          type: number
-          minimum: -180
-          maximum: 180
-          description: GPS longitude of the restaurant
-          example: -74.0060
-    UpdateRestaurantLocationRequest:
-      type: object
-      required:
-        - address
-        - latitude
-        - longitude
-      properties:
-        address:
-          type: string
-          maxLength: 255
-          description: Restaurant address
-          example: "123 Main St, City"
-        latitude:
-          type: number
-          minimum: -90
-          maximum: 90
-          description: GPS latitude of the restaurant
-          example: 40.7128
-        longitude:
-          type: number
-          minimum: -180
-          maximum: 180
-          description: GPS longitude of the restaurant
-          example: -74.0060
     LoginRequest:
       type: object
       required:
@@ -775,6 +692,31 @@ components:
           description: User's password
           example: "SecurePass123"
       description: Either email or mobileNumber must be provided along with password
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/CustomerResponse'
+            - $ref: '#/components/schemas/RestaurantOwnerResponse'
+          description: User information (without password)
+        authToken:
+          $ref: '#/components/schemas/AuthToken'
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token for API authentication
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          description: JWT refresh token for token renewal
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: number
+          description: Access token expiration time in seconds
+          example: 86400
     CustomerResponse:
       type: object
       properties:
@@ -879,59 +821,6 @@ components:
           type: number
           description: GPS longitude of the restaurant
           example: -74.0060
-    LoginResponse:
-      type: object
-      properties:
-        user:
-          oneOf:
-            - $ref: '#/components/schemas/CustomerResponse'
-            - $ref: '#/components/schemas/RestaurantOwnerResponse'
-          description: User information (without password)
-        authToken:
-          $ref: '#/components/schemas/AuthToken'
-    AuthToken:
-      type: object
-      properties:
-        accessToken:
-          type: string
-          description: JWT access token for API authentication
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-        refreshToken:
-          type: string
-          description: JWT refresh token for token renewal
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-        expiresIn:
-          type: number
-          description: Access token expiration time in seconds
-          example: 86400
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          description: Error message
-          example: "Validation failed"
-        errors:
-          type: array
-          description: Detailed validation errors (when applicable)
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-                description: Field name that caused the error
-                example: "email"
-              message:
-                type: string
-                description: Error message for the field
-                example: "Invalid email format"
-              value:
-                type: string
-                description: Invalid value that was provided
-                example: "invalid-email"
     ValidationError:
       type: object
       properties:

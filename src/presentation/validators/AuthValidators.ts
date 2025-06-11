@@ -1,4 +1,3 @@
-
 import { body, ValidationChain } from 'express-validator';
 
 export class AuthValidators {
@@ -20,7 +19,18 @@ export class AuthValidators {
         .withMessage('Invalid email format')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters'),
+        .withMessage('Email must not exceed 255 characters')
+        .custom((value) => {
+          const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const parts = value.split('@');
+          if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+            throw new Error('Invalid email domain (e.g., no repeated .com)');
+          }
+          if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+            throw new Error('Email domain contains repeated extensions');
+          }
+          return true;
+        }),
       body('mobileNumber')
         .trim()
         .notEmpty()
@@ -61,7 +71,18 @@ export class AuthValidators {
         .withMessage('Invalid email format')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters'),
+        .withMessage('Email must not exceed 255 characters')
+        .custom((value) => {
+          const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const parts = value.split('@');
+          if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+            throw new Error('Invalid email domain (e.g., no repeated .com)');
+          }
+          if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+            throw new Error('Email domain contains repeated extensions');
+          }
+          return true;
+        }),
       body('mobileNumber')
         .trim()
         .notEmpty()
@@ -87,7 +108,19 @@ export class AuthValidators {
         .withMessage('Invalid email format')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters'),
+        .withMessage('Email must not exceed 255 characters')
+        .custom((value) => {
+          if (!value) return true; 
+          const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const parts = value.split('@');
+          if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+            throw new Error('Invalid email domain (e.g., no repeated .com)');
+          }
+          if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+            throw new Error('Email domain contains repeated extensions');
+          }
+          return true;
+        }),
       body('mobileNumber')
         .optional()
         .trim()
