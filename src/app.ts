@@ -17,6 +17,7 @@ export class App {
     const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
     this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    this.app.use(express.static(path.join(__dirname, 'public')));
     this.diContainer = DIContainer.getInstance();
     this.setupMiddleware();
     this.setupRoutes();
