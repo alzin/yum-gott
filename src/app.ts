@@ -19,7 +19,7 @@ export class App {
     // CORS configuration
     this.app.use(cors({
       origin: function (origin, callback) {
-        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'https://yum-gott.onrender.com', "http://127.0.0.1:5500"];
+        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://192.168.1.106:3000','http://localhost:3000', 'https://yum-gott.onrender.com', "http://127.0.0.1:5500"];
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
