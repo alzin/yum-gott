@@ -237,14 +237,14 @@ export class AuthController {
     res.cookie('accessToken', authToken.accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: authToken.expiresIn * 1000,
       path: '/'
     });
     res.cookie('refreshToken', authToken.refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/'
     });
@@ -255,7 +255,7 @@ export class AuthController {
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
+      sameSite: 'none' as const,
       path: '/'
     };
     res.clearCookie('accessToken', cookieOptions);
