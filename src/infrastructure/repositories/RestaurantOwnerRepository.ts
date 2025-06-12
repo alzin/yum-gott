@@ -50,14 +50,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
 
-    async findByMobileNumber(mobileNumber: string): Promise<RestaurantOwner | null> {
-        const query = 'SELECT * FROM restaurant_owners WHERE mobile_number = $1';
-        const result = await this.db.query(query, [mobileNumber]);
-        if (result.rows.length === 0) {
-            return null;
-        }
-        return this.mapRowToRestaurantOwner(result.rows[0]);
-    }
+   
 
     async findById(id: string): Promise<RestaurantOwner | null> {
         const query = 'SELECT * FROM restaurant_owners WHERE id = $1';
@@ -180,11 +173,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         await this.db.query(query, [id]);
     }
 
-    async existsByMobileNumber(mobileNumber: string): Promise<boolean> {
-        const query = 'SELECT 1 FROM restaurant_owners WHERE mobile_number = $1 LIMIT 1';
-        const result = await this.db.query(query, [mobileNumber]);
-        return result.rows.length > 0;
-    }
+ 
 
     async existsByEmail(email: string): Promise<boolean> {
         const query = 'SELECT 1 FROM restaurant_owners WHERE email = $1 LIMIT 1';

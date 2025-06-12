@@ -35,27 +35,27 @@ export class DIContainer {
       console.log('DIContainer: Registering databaseConnection');
       return DatabaseConnection.getInstance();
     });
-    
+
     this.registerSingleton('customerRepository', () => {
       console.log('DIContainer: Registering customerRepository');
       return new CustomerRepository(this.resolve('databaseConnection'));
     });
-    
+
     this.registerSingleton('restaurantOwnerRepository', () => {
       console.log('DIContainer: Registering restaurantOwnerRepository');
       return new RestaurantOwnerRepository(this.resolve('databaseConnection'));
     });
-    
+
     this.registerSingleton('authRepository', () => {
       console.log('DIContainer: Registering authRepository');
       return new AuthRepository();
     });
-    
+
     this.registerSingleton('passwordHasher', () => {
       console.log('DIContainer: Registering passwordHasher');
       return new PasswordHasher();
     });
-    
+
     this.registerSingleton('emailService', () => {
       console.log('DIContainer: Registering emailService');
       return new EmailService();
@@ -70,6 +70,7 @@ export class DIContainer {
       console.log('DIContainer: Registering registerCustomerUseCase');
       return new RegisterCustomerUseCase(
         this.resolve('customerRepository'),
+        this.resolve('authRepository'),
         this.resolve('passwordHasher'),
         this.resolve('emailService')
       );
@@ -80,6 +81,7 @@ export class DIContainer {
       return new RegisterRestaurantOwnerUseCase(
         this.resolve('restaurantOwnerRepository'),
         this.resolve('passwordHasher'),
+        this.resolve('authRepository'),
         this.resolve('emailService')
       );
     });

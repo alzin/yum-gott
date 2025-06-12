@@ -55,7 +55,6 @@ export class AuthRepository {
   async refreshToken(refreshToken: string): Promise<any> {
     try {
       const payload = await this.verifyToken(refreshToken);
-      // إزالة exp القديم من الـ payload
       const { exp, iat, nbf, ...newPayload } = payload;
       const newTokens = await this.generateToken(newPayload, false);
       console.log('AuthRepository: Token refreshed', {

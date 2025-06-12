@@ -10,14 +10,15 @@ export class AuthController {
     private restaurantOwnerLoginUseCase: RestaurantOwnerLoginUseCase,
     private uploadProfileImageUseCase: UploadProfileImageUseCase,
     private updateRestaurantLocationUseCase: UpdateRestaurantLocationUseCase
-  ) {}
+  ) { }
 
   registerCustomer = async (req: Request, res: Response): Promise<void> => {
     try {
-      await this.registerCustomerUseCase.execute(req.body);
+      const result = await this.registerCustomerUseCase.execute(req.body);
+      this.setAuthCookies(res, result.authToken);
       res.status(201).json({
         success: true,
-        message: 'Customer registration initiated. Please check your email for verification link.'
+        message: 'Customer registration initiated. Please check your email for verification link.',
       });
     } catch (error) {
       res.status(400).json({
@@ -29,10 +30,11 @@ export class AuthController {
 
   registerRestaurantOwner = async (req: Request, res: Response): Promise<void> => {
     try {
-      await this.registerRestaurantOwnerUseCase.execute(req.body);
+      const result = await this.registerRestaurantOwnerUseCase.execute(req.body);
+      this.setAuthCookies(res, result.authToken);
       res.status(201).json({
         success: true,
-        message: 'Restaurant owner registration initiated. Please check your email for verification link.'
+        message: 'Restaurant owner registration initiated. Please check your email for verification link.',
       });
     } catch (error) {
       res.status(400).json({
@@ -85,6 +87,7 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Customer login successful',
+        data: result
       });
     } catch (error) {
       res.status(401).json({
@@ -102,7 +105,7 @@ export class AuthController {
         success: true,
         message: 'Restaurant owner login successful',
         // data:result
-        
+
       });
     } catch (error) {
       res.status(401).json({

@@ -1,7 +1,8 @@
 import { RestaurantOwner } from '@/domain/entities/User';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { IRestaurantOwnerRepository , IAuthRepository} from '@/domain/repositories/index';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 import { EmailService } from '@/infrastructure/services/EmailService';
+import { JWTpayload, AuthToken } from '@/domain/entities/AuthToken';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface RegisterRestaurantOwnerRequest {
@@ -16,10 +17,14 @@ export class RegisterRestaurantOwnerUseCase {
     constructor(
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private passwordHasher: IPasswordHasher,
+        private authRepository: IAuthRepository,
         private emailService: EmailService
     ) { }
 
-    async execute(request: RegisterRestaurantOwnerRequest): Promise<void> {
+    async execute(request: RegisterRestaurantOwnerRequest): Promise<{
+        user: Omit<RestaurantOwner, 'password'>;
+        authToken: AuthToken;
+    }> {
         console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
         await this.checkExistingUser(request);
 
@@ -49,6 +54,20 @@ export class RegisterRestaurantOwnerUseCase {
         await this.restaurantOwnerRepository.create(restaurantOwner);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
         console.log('RegisterRestaurantOwnerUseCase: Verification email sent');
+         const jwtPayload: JWTpayload = {
+            userId: restaurantOwner.id!,
+            userType: 'customer',
+            email: request.email
+        };
+
+        const authToken = await this.authRepository.generateToken(jwtPayload);
+
+        const { password, ...userWithoutPassword } = restaurantOwner;
+
+        return {
+            user: userWithoutPassword,
+            authToken
+        };
     }
 
     private async checkExistingUser(request: RegisterRestaurantOwnerRequest): Promise<void> {
