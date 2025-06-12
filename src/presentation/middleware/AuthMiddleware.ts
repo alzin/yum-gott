@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { JWTpayload } from '@/domain/entities/AuthToken';
+import { clearAuthCookies, setAuthCookies } from '@/shared/utils/cookieUtils';
 
 export interface AuthenticatedRequest extends Request {
   user?: JWTpayload;
@@ -70,7 +71,7 @@ export class AuthMiddleware {
         try {
           console.log('Attempting to refresh token...');
           const newTokens = await this.authRepository.refreshToken(refreshToken);
-          this.setAuthCookies(res, newTokens);
+          setAuthCookies(res, newTokens);
           const payload = await this.authRepository.verifyToken(newTokens.accessToken);
           req.user = payload;
 
@@ -98,33 +99,10 @@ export class AuthMiddleware {
     }
   };
 
-  private setAuthCookies(res: Response, authToken: any): void {
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('accessToken', authToken.accessToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: authToken.expiresIn * 1000,
-      path: '/'
-    });
-    res.cookie('refreshToken', authToken.refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/'
-    });
+  // Note: setAuthCookies is now imported from cookieUtils
+  
+  private clearAuthCookies(res: Response): void {
+    console.log('AuthMiddleware: Clearing cookies for request', res.req?.originalUrl);
+    clearAuthCookies(res);
   }
-// في AuthMiddleware.ts
-private clearAuthCookies(res: Response): void {
-  console.log('AuthMiddleware: Clearing cookies for request', res.req?.originalUrl);
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
-    path: '/'
-  };
-  res.clearCookie('accessToken', cookieOptions);
-  res.clearCookie('refreshToken', cookieOptions);
-}
 }

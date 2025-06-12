@@ -403,12 +403,129 @@ paths:
                   value:
                     success: false
                     message: "Too many login attempts. Please try again later."
+  /api/auth/profile/restaurant-owner:
+    get:
+      tags:
+        - Authentication
+      summary: Get restaurant owner profile
+      description: Retrieve the restaurant name and profile image URL for the authenticated restaurant owner
+      operationId: getRestaurantOwnerProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Restaurant owner profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      restaurantName:
+                        type: string
+                        example: "Gourmet Delight"
+                      profileImageUrl:
+                        type: string
+                        nullable: true
+                        example: "https://example.com/profiles/restaurant123.jpg"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User is not a restaurant owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Forbidden: Only restaurant owners can access this endpoint
+
+  /api/auth/location/restaurant:
+    post:
+      tags:
+        - Authentication
+      summary: Update restaurant location
+      description: Updates the location of the restaurant for the authenticated restaurant owner
+      BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestaurantLocationRequest'
+            example:
+              address: "123 Main St, City, Country"
+              latitude: "29.9756"
+              longitude: "31.1373"
+      responses:
+        '200':
+          description: Restaurant location updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant location updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                        example: "123 Main St, City, Country"
+                      latitude:
+                        type: string
+                        example: "29.9756"
+                      longitude:
+                        type: string
+                        example: "31.1373"
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation errors
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "latitude"
+                        message: "Latitude must be a valid number"
+                      - field: "longitude"
+                        message: "Longitude must be between -180 and 180"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
   /api/auth/profile/image:
     post:
       tags:
         - Authentication
       summary: Upload profile image
-      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3. The user type is determined from the JWT access token.
+      description: |
+        Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3.
+        The user type is determined from the JWT access token.
+        
+        **Note for Swagger UI users:**
+        1. Click "Try it out"
+        2. Click the upload button next to the profileImage field
+        3. Select your image file
+        4. Execute the request
       operationId: uploadProfileImage
       security:
         - BearerAuth: []
@@ -418,13 +535,19 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - profileImage
               properties:
                 profileImage:
                   type: string
                   format: binary
                   description: Profile image file (JPEG, PNG, or GIF, max 5MB)
-              required:
-                - profileImage
+              x-www-form-urlencoded:
+                type: object
+                properties:
+                  profileImage: 
+                    type: string
+                    format: binary
       responses:
         '200':
           description: Profile image uploaded successfully
@@ -543,6 +666,26 @@ components:
       description: |
         JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`.
   schemas:
+    UpdateRestaurantLocationRequest:
+      type: object
+      required:
+        - address
+        - latitude
+        - longitude
+      properties:
+        address:
+          type: string
+          description: The full address of the restaurant
+          example: "123 Main St, City, Country"
+        latitude:
+          type: string
+          description: Latitude coordinate as a string
+          example: "29.9756"
+        longitude:
+          type: string
+          description: Longitude coordinate as a string
+          example: "31.1373"
+
     RegisterCustomerRequest:
       type: object
       required:

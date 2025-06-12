@@ -1,9 +1,10 @@
 import { Customer } from '@/domain/entities/User';
-import { ICustomerRepository, IAuthRepository } from '@/domain/repositories/index';
+import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 import { EmailService } from '@/infrastructure/services/EmailService';
-import { JWTpayload, AuthToken } from '@/domain/entities/AuthToken';
+import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { v4 as uuidv4 } from 'uuid';
+import { AuthToken } from '@/domain/entities/AuthToken';
 
 export interface RegisterCustomerRequest {
     name: string;
@@ -15,16 +16,13 @@ export interface RegisterCustomerRequest {
 export class RegisterCustomerUseCase {
     constructor(
         private customerRepository: ICustomerRepository,
-        private authRepository: IAuthRepository,
         private passwordHasher: IPasswordHasher,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private authRepository: IAuthRepository
     ) { }
 
-    async execute(request: RegisterCustomerRequest): Promise<{
-        user: Omit<Customer, 'password'>;
-        authToken: AuthToken;
-    }> {
-
+    async execute(request: RegisterCustomerRequest): Promise<AuthToken> {
+        
         await this.checkExistingUser(request);
         const hashedPassword = await this.passwordHasher.hash(request.password);
         const verificationToken = uuidv4();
@@ -42,23 +40,17 @@ export class RegisterCustomerUseCase {
             profileImageUrl: null
         };
 
-        await this.customerRepository.create(customer);
+        const createdCustomer = await this.customerRepository.create(customer);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
-        const jwtPayload: JWTpayload = {
-            userId: customer.id!,
+        
+        // Generate tokens
+        const tokens = await this.authRepository.generateToken({
+            userId: createdCustomer.id!,
             userType: 'customer',
-            email: request.email
-        };
-
-        const authToken = await this.authRepository.generateToken(jwtPayload);
-
-        const { password, ...userWithoutPassword } = customer;
-
-        return {
-            user: userWithoutPassword,
-            authToken
-        };
-
+            email: createdCustomer.email
+        });
+        
+        return tokens;
     }
 
     private async checkExistingEmail(email: string): Promise<void> {
@@ -71,6 +63,4 @@ export class RegisterCustomerUseCase {
     private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> {
         await this.checkExistingEmail(request.email);
     }
-
-
 }

@@ -198,6 +198,21 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return result.rowCount;
     }
 
+    async getRestaurantOwnerProfile(id: string): Promise<{ restaurantName: string; profileImageUrl: string | null }> {
+        const query = `
+            SELECT restaurant_name as "restaurantName", profile_image_url as "profileImageUrl"
+            FROM restaurant_owners
+            WHERE id = $1
+        `;
+        const result = await this.db.query(query, [id]);
+        
+        if (result.rows.length === 0) {
+            throw new Error('Restaurant owner not found');
+        }
+        
+        return result.rows[0];
+    }
+
     private mapRowToRestaurantOwner(row: any): RestaurantOwner {
         return {
             id: row.id,

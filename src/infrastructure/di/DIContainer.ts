@@ -1,7 +1,15 @@
 import { DatabaseConnection } from '../database/DataBaseConnection';
 import { CustomerRepository, RestaurantOwnerRepository, AuthRepository } from '../repositories/index';
 import { PasswordHasher, EmailService, FileStorageService } from '../services/index';
-import { RegisterCustomerUseCase, RegisterRestaurantOwnerUseCase, UploadProfileImageUseCase, CustomerLoginUseCase, RestaurantOwnerLoginUseCase, UpdateRestaurantLocationUseCase } from '@/application/use-cases/auth/index';
+import { 
+  RegisterCustomerUseCase, 
+  RegisterRestaurantOwnerUseCase, 
+  UploadProfileImageUseCase, 
+  CustomerLoginUseCase, 
+  RestaurantOwnerLoginUseCase, 
+  UpdateRestaurantLocationUseCase,
+  GetRestaurantOwnerProfileUseCase 
+} from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 
@@ -35,27 +43,27 @@ export class DIContainer {
       console.log('DIContainer: Registering databaseConnection');
       return DatabaseConnection.getInstance();
     });
-
+    
     this.registerSingleton('customerRepository', () => {
       console.log('DIContainer: Registering customerRepository');
       return new CustomerRepository(this.resolve('databaseConnection'));
     });
-
+    
     this.registerSingleton('restaurantOwnerRepository', () => {
       console.log('DIContainer: Registering restaurantOwnerRepository');
       return new RestaurantOwnerRepository(this.resolve('databaseConnection'));
     });
-
+    
     this.registerSingleton('authRepository', () => {
       console.log('DIContainer: Registering authRepository');
       return new AuthRepository();
     });
-
+    
     this.registerSingleton('passwordHasher', () => {
       console.log('DIContainer: Registering passwordHasher');
       return new PasswordHasher();
     });
-
+    
     this.registerSingleton('emailService', () => {
       console.log('DIContainer: Registering emailService');
       return new EmailService();
@@ -70,9 +78,9 @@ export class DIContainer {
       console.log('DIContainer: Registering registerCustomerUseCase');
       return new RegisterCustomerUseCase(
         this.resolve('customerRepository'),
-        this.resolve('authRepository'),
         this.resolve('passwordHasher'),
-        this.resolve('emailService')
+        this.resolve('emailService'),
+        this.resolve('authRepository')
       );
     });
 
@@ -81,8 +89,8 @@ export class DIContainer {
       return new RegisterRestaurantOwnerUseCase(
         this.resolve('restaurantOwnerRepository'),
         this.resolve('passwordHasher'),
-        this.resolve('authRepository'),
-        this.resolve('emailService')
+        this.resolve('emailService'),
+        this.resolve('authRepository')
       );
     });
 
@@ -120,6 +128,13 @@ export class DIContainer {
       );
     });
 
+    this.registerTransient('getRestaurantOwnerProfileUseCase', () => {
+      console.log('DIContainer: Registering getRestaurantOwnerProfileUseCase');
+      return new GetRestaurantOwnerProfileUseCase(
+        this.resolve('restaurantOwnerRepository')
+      );
+    });
+
     this.registerSingleton('authController', () => {
       console.log('DIContainer: Registering authController');
       return new AuthController(
@@ -128,7 +143,8 @@ export class DIContainer {
         this.resolve('customerLoginUseCase'),
         this.resolve('restaurantOwnerLoginUseCase'),
         this.resolve('uploadProfileImageUseCase'),
-        this.resolve('updateRestaurantLocationUseCase')
+        this.resolve('updateRestaurantLocationUseCase'),
+        this.resolve('getRestaurantOwnerProfileUseCase')
       );
     });
 

@@ -1,3 +1,4 @@
+
 import { RestaurantOwner } from '../entities/User';
 
 export interface IRestaurantOwnerRepository {
@@ -12,4 +13,5 @@ export interface IRestaurantOwnerRepository {
     updateProfileImage(id: string, profileImage: string): Promise<RestaurantOwner>;
     updateLocation(id: string, location: { address: string; latitude: number; longitude: number }): Promise<RestaurantOwner>;
     deleteUnverifiedOlderThan(date: Date): Promise<number>;
+    getRestaurantOwnerProfile(id: string): Promise<{ restaurantName: string; profileImageUrl: string | null }>;
 }

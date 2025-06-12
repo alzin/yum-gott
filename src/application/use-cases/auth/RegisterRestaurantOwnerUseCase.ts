@@ -1,9 +1,10 @@
 import { RestaurantOwner } from '@/domain/entities/User';
-import { IRestaurantOwnerRepository , IAuthRepository} from '@/domain/repositories/index';
+import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 import { EmailService } from '@/infrastructure/services/EmailService';
-import { JWTpayload, AuthToken } from '@/domain/entities/AuthToken';
+import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { v4 as uuidv4 } from 'uuid';
+import { AuthToken } from '@/domain/entities/AuthToken';
 
 export interface RegisterRestaurantOwnerRequest {
     restaurantName: string;
@@ -17,14 +18,11 @@ export class RegisterRestaurantOwnerUseCase {
     constructor(
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private passwordHasher: IPasswordHasher,
-        private authRepository: IAuthRepository,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private authRepository: IAuthRepository
     ) { }
 
-    async execute(request: RegisterRestaurantOwnerRequest): Promise<{
-        user: Omit<RestaurantOwner, 'password'>;
-        authToken: AuthToken;
-    }> {
+    async execute(request: RegisterRestaurantOwnerRequest): Promise<AuthToken> {
         console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
         await this.checkExistingUser(request);
 
@@ -51,23 +49,18 @@ export class RegisterRestaurantOwnerUseCase {
         };
 
         console.log('RegisterRestaurantOwnerUseCase: Creating restaurant owner');
-        await this.restaurantOwnerRepository.create(restaurantOwner);
+        const createdOwner = await this.restaurantOwnerRepository.create(restaurantOwner);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
         console.log('RegisterRestaurantOwnerUseCase: Verification email sent');
-         const jwtPayload: JWTpayload = {
-            userId: restaurantOwner.id!,
-            userType: 'customer',
-            email: request.email
-        };
-
-        const authToken = await this.authRepository.generateToken(jwtPayload);
-
-        const { password, ...userWithoutPassword } = restaurantOwner;
-
-        return {
-            user: userWithoutPassword,
-            authToken
-        };
+        
+        // Generate tokens
+        const tokens = await this.authRepository.generateToken({
+            userId: createdOwner.id!,
+            userType: 'restaurant_owner',
+            email: createdOwner.email
+        });
+        
+        return tokens;
     }
 
     private async checkExistingUser(request: RegisterRestaurantOwnerRequest): Promise<void> {

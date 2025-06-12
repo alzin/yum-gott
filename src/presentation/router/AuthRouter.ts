@@ -1,4 +1,5 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response, NextFunction, Request } from 'express';
+import { AuthenticatedRequest } from '../middleware/AuthMiddleware';
 import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
 import { AuthValidators } from '../validators/AuthValidators';
@@ -29,6 +30,27 @@ export class AuthRouter {
 
   private setupRoutes(): void {
     const authMiddleware = DIContainer.getInstance().authMiddleware;
+
+    // Middleware to check if user is a restaurant owner
+    const requireRestaurantOwner = (req: Request, res: Response, next: NextFunction): void => {
+      const authReq = req as AuthenticatedRequest;
+      if (!authReq.user || authReq.user.userType !== 'restaurant_owner') {
+        res.status(403).json({
+          success: false,
+          message: 'Forbidden: Only restaurant owners can access this endpoint'
+        });
+        return;
+      }
+      next();
+    };
+
+    // Get restaurant owner profile
+    this.router.get(
+      '/profile/restaurant-owner',
+      authMiddleware.authenticate,
+      requireRestaurantOwner,
+      (req: Request, res: Response) => this.authController.getRestaurantOwnerProfile(req as AuthenticatedRequest, res)
+    );
 
     this.router.post(
       '/register/customer',
@@ -70,7 +92,7 @@ export class AuthRouter {
     this.router.post(
       '/profile/image',
       (req: Request, res: Response, next: NextFunction) => {
-        this.upload.single('profileImage')(req, res, (err: any) => {
+        this.upload.single('profileImage')(req as any, res as any, (err: any) => {
           if (err instanceof multer.MulterError) {
             return res.status(400).json({ success: false, message: err.message });
           } else if (err) {
@@ -81,8 +103,9 @@ export class AuthRouter {
       },
       (req: Request, res: Response, next: NextFunction): void => {
         console.log('Before SanitizationMiddleware - req.body:', req.body);
-        console.log('Before SanitizationMiddleware - req.file:', req.file);
-        if (!req.file) {
+        const file = (req as any).file;
+        console.log('Before SanitizationMiddleware - req.file:', file);
+        if (!file) {
           res.status(400).json({
             success: false,
             message: 'Profile image is required'
@@ -92,7 +115,7 @@ export class AuthRouter {
         next();
       },
       authMiddleware.authenticate,
-      this.authController.uploadProfileImage
+      (req: Request, res: Response) => this.authController.uploadProfileImage(req as AuthenticatedRequest, res)
     );
 
     this.router.post(
@@ -103,6 +126,8 @@ export class AuthRouter {
       ValidationMiddleware.handleValidationErrors(),
       this.authController.updateRestaurantLocation
     );
+
+
   }
 
   public getRouter(): Router {

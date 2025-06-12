@@ -1,6 +1,16 @@
 import { Request, Response } from 'express';
-import { RegisterCustomerUseCase, RegisterRestaurantOwnerUseCase, RestaurantOwnerLoginUseCase, UploadProfileImageUseCase, CustomerLoginUseCase, UpdateRestaurantLocationUseCase } from '@/application/use-cases/auth/index';
+import { 
+  RegisterCustomerUseCase, 
+  RegisterRestaurantOwnerUseCase, 
+  RestaurantOwnerLoginUseCase, 
+  UploadProfileImageUseCase, 
+  CustomerLoginUseCase, 
+  UpdateRestaurantLocationUseCase,
+  GetRestaurantOwnerProfileUseCase 
+} from '@/application/use-cases/auth/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import { AuthToken } from '@/domain/entities/AuthToken';
+import { setAuthCookies } from '@/shared/utils/cookieUtils';
 
 export class AuthController {
   constructor(
@@ -9,16 +19,19 @@ export class AuthController {
     private customerLoginUseCase: CustomerLoginUseCase,
     private restaurantOwnerLoginUseCase: RestaurantOwnerLoginUseCase,
     private uploadProfileImageUseCase: UploadProfileImageUseCase,
-    private updateRestaurantLocationUseCase: UpdateRestaurantLocationUseCase
-  ) { }
+    private updateRestaurantLocationUseCase: UpdateRestaurantLocationUseCase,
+    private getRestaurantOwnerProfileUseCase: GetRestaurantOwnerProfileUseCase
+  ) {}
+
+
 
   registerCustomer = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.registerCustomerUseCase.execute(req.body);
-      this.setAuthCookies(res, result.authToken);
+      const tokens = await this.registerCustomerUseCase.execute(req.body);
+      this.setAuthCookies(res, tokens);
       res.status(201).json({
         success: true,
-        message: 'Customer registration initiated. Please check your email for verification link.',
+        message: 'Registration successful. Please check your email for verification link.'
       });
     } catch (error) {
       res.status(400).json({
@@ -30,11 +43,12 @@ export class AuthController {
 
   registerRestaurantOwner = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.registerRestaurantOwnerUseCase.execute(req.body);
-      this.setAuthCookies(res, result.authToken);
+      const tokens = await this.registerRestaurantOwnerUseCase.execute(req.body);
+      this.setAuthCookies(res, tokens);
       res.status(201).json({
         success: true,
-        message: 'Restaurant owner registration initiated. Please check your email for verification link.',
+        message: 'Restaurant owner registration successful. Please check your email for verification link.',
+       
       });
     } catch (error) {
       res.status(400).json({
@@ -86,8 +100,7 @@ export class AuthController {
       this.setAuthCookies(res, result.authToken);
       res.status(200).json({
         success: true,
-        message: 'Customer login successful',
-        data: result
+        message: 'Customer login successful'
       });
     } catch (error) {
       res.status(401).json({
@@ -103,9 +116,7 @@ export class AuthController {
       this.setAuthCookies(res, result.authToken);
       res.status(200).json({
         success: true,
-        message: 'Restaurant owner login successful',
-        // data:result
-
+        message: 'Restaurant owner login successful'
       });
     } catch (error) {
       res.status(401).json({
@@ -117,7 +128,6 @@ export class AuthController {
 
   logout = async (req: Request, res: Response): Promise<void> => {
     try {
-      this.clearAuthCookies(res);
       res.status(200).json({
         success: true,
         message: 'Logout successful'
@@ -149,7 +159,6 @@ export class AuthController {
         message: 'Token refreshed successfully'
       });
     } catch (error) {
-      this.clearAuthCookies(res);
       res.status(401).json({
         success: false,
         message: 'Invalid refresh token'
@@ -235,33 +244,42 @@ export class AuthController {
     }
   };
 
-  private setAuthCookies(res: Response, authToken: any): void {
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('accessToken', authToken.accessToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: authToken.expiresIn * 1000,
-      path: '/'
-    });
-    res.cookie('refreshToken', authToken.refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/'
-    });
-  }
 
-  private clearAuthCookies(res: Response): void {
-    console.log('AuthController: Clearing cookies for request', res.req?.originalUrl);
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
-      path: '/'
-    };
-    res.clearCookie('accessToken', cookieOptions);
-    res.clearCookie('refreshToken', cookieOptions);
+  getRestaurantOwnerProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user; // From AuthMiddleware
+      if (!user || user.userType !== 'restaurant_owner') {
+        res.status(403).json({
+          success: false,
+          message: 'Forbidden: Only restaurant owners can access this endpoint'
+        });
+        return;
+      }
+
+      const result = await this.getRestaurantOwnerProfileUseCase.execute(user.userId);
+      
+      if (!result.success) {
+        res.status(404).json({
+          success: false,
+          message: result.message || 'Restaurant owner not found'
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: result.data
+      });
+    } catch (error) {
+      console.error('Error getting restaurant owner profile:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error while fetching restaurant owner profile'
+      });
+    }
+  };
+
+  private setAuthCookies(res: Response, authToken: AuthToken): void {
+    setAuthCookies(res, authToken);
   }
 }

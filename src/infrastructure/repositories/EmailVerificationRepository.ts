@@ -1,4 +1,3 @@
-// src/infrastructure/repositories/EmailVerificationRepository.ts
 import { DatabaseConnection } from '../database/DataBaseConnection';
 import { injectable } from 'tsyringe';
 

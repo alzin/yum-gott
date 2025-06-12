@@ -12,17 +12,6 @@ import path from "path";
 export class App {
   private app: Application;
   private diContainer: DIContainer;
-
-  constructor() {
-    const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
-    this.app = express();
-    this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-    this.diContainer = DIContainer.getInstance();
-    this.setupMiddleware();
-    this.setupRoutes();
-    this.setupErrorHandling();
-  }
-
   private setupMiddleware(): void {
     // Security middleware
     this.app.use(helmet());
@@ -41,7 +30,7 @@ export class App {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
       exposedHeaders: ['Set-Cookie'],
-      
+
     }));
 
     // Logging
@@ -51,6 +40,44 @@ export class App {
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   }
+
+  constructor() {
+    const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
+    this.app = express();
+    
+    // Enable CORS for Swagger UI
+    this.app.use('/docs', (req, res, next) => {
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Origin', req.headers.origin);
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      next();
+    });
+
+    // Swagger UI setup with credentials support
+    const swaggerOptions = {
+      swaggerOptions: {
+        withCredentials: true,
+        requestInterceptor: (req: any) => {
+          // This ensures cookies are sent with each request
+          req.credentials = 'include';
+          return req;
+        }
+      }
+    };
+    
+    this.app.use(
+      "/docs",
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerDocument, swaggerOptions)
+    );
+    
+    this.diContainer = DIContainer.getInstance();
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupErrorHandling();
+  }
+
 
   private setupRoutes(): void {
     // Health check
