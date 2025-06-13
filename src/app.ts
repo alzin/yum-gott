@@ -16,21 +16,9 @@ export class App {
     // Security middleware
     this.app.use(helmet());
 
-    // CORS configuration
     this.app.use(cors({
-      origin: function (origin, callback) {
-        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://192.168.1.106:3000','http://localhost:3000', 'https://yum-gott.onrender.com', "http://127.0.0.1:5500"];
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
+      origin: true,
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-      exposedHeaders: ['Set-Cookie'],
-
     }));
 
     // Logging
@@ -121,16 +109,29 @@ export class App {
     return this.app;
   }
 
-  public async start(port: number = 3000): Promise<void> {
+public async start(port: number = 3000): Promise<void> {
     try {
-      this.app.listen(port, () => {
-        console.log(`🚀 Server is running on port ${port}`);
-        console.log(`📱 Health check: http://localhost:${port}/health`);
-        console.log(`🔐 Auth API: http://localhost:${port}/api/auth`);
+      this.app.listen(port, '0.0.0.0', () => {
+        console.log(`🚀 Server is running on http://localhost:${port}`);
+        console.log(`🌐 Network URL: http://${this.getLocalIpAddress()}:${port}`);
       });
     } catch (error) {
       console.error('Failed to start server:', error);
       process.exit(1);
     }
+  }
+
+  // Helper to get local IP
+  private getLocalIpAddress(): string {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]!) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          return iface.address;
+        }
+      }
+    }
+    return 'localhost';
   }
 }
