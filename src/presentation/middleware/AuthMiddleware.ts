@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { JWTpayload } from '@/domain/entities/AuthToken';
-import { clearAuthCookies, setAuthCookies } from '@/shared/utils/cookieUtils';
+import { setAuthCookies } from '@/shared/utils/cookieUtils';
 
 export interface AuthenticatedRequest extends Request {
   user?: JWTpayload;
@@ -54,15 +54,6 @@ export class AuthMiddleware {
       console.log('Token payload:', payload);
       req.user = payload;
 
-      // Additional check for userType consistency in requests with userType field
-      if (req.body.userType && req.body.userType !== payload.userType) {
-        res.status(403).json({
-          success: false,
-          message: 'User type mismatch: Provided user type does not match authenticated user'
-        });
-        return;
-      }
-
       next();
     } catch (error) {
       console.error('AuthMiddleware: Authentication error:', error);
@@ -75,20 +66,9 @@ export class AuthMiddleware {
           const payload = await this.authRepository.verifyToken(newTokens.accessToken);
           req.user = payload;
 
-          // Check userType consistency after refresh
-          if (req.body.userType && req.body.userType !== payload.userType) {
-            res.status(403).json({
-              success: false,
-              message: 'User type mismatch: Provided user type does not match authenticated user'
-            });
-            return;
-          }
-
           next();
-          return;
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
-          this.clearAuthCookies(res);
         }
       }
 
@@ -98,11 +78,4 @@ export class AuthMiddleware {
       });
     }
   };
-
-  // Note: setAuthCookies is now imported from cookieUtils
-  
-  private clearAuthCookies(res: Response): void {
-    console.log('AuthMiddleware: Clearing cookies for request', res.req?.originalUrl);
-    clearAuthCookies(res);
-  }
 }
