@@ -17,10 +17,10 @@ export class App {
     this.app.use(helmet());
 
     this.app.use(cors({
-      origin: true,
       credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+      exposedHeaders: ['Set-Cookie']
     }));
-
     // Logging
     this.app.use(morgan('combined'));
 
@@ -32,7 +32,7 @@ export class App {
   constructor() {
     const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
-    
+
     // Enable CORS for Swagger UI
     this.app.use('/docs', (req, res, next) => {
       res.header('Access-Control-Allow-Credentials', 'true');
@@ -45,21 +45,26 @@ export class App {
     // Swagger UI setup with credentials support
     const swaggerOptions = {
       swaggerOptions: {
-        withCredentials: true,
+        withCredentials: true, // This is the key addition
         requestInterceptor: (req: any) => {
           // This ensures cookies are sent with each request
           req.credentials = 'include';
           return req;
-        }
+        },
+        persistAuthorization: true,
+        displayOperationId: false,
+        tryItOutEnabled: true
       }
+
     };
-    
+
     this.app.use(
       "/docs",
       swaggerUi.serve,
       swaggerUi.setup(swaggerDocument, swaggerOptions)
     );
-    
+
+
     this.diContainer = DIContainer.getInstance();
     this.setupMiddleware();
     this.setupRoutes();
@@ -109,7 +114,7 @@ export class App {
     return this.app;
   }
 
-public async start(port: number = 3000): Promise<void> {
+  public async start(port: number = 3000): Promise<void> {
     try {
       this.app.listen(port, '0.0.0.0', () => {
         console.log(`🚀 Server is running on http://localhost:${port}`);
