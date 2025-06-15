@@ -12,7 +12,7 @@ export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
   res.cookie('accessToken', authToken.accessToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite:'none',
+    sameSite:'lax',
     maxAge: authToken.expiresIn * 1000,
     path: '/'
   });
@@ -20,7 +20,7 @@ export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
   res.cookie('refreshToken', authToken.refreshToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'none',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/'
   });
@@ -31,12 +31,12 @@ export const clearAuthCookies = (res: Response): void => {
   const cookieOptions: {
     httpOnly: boolean;
     secure: boolean;
-    sameSite:'none';
+    sameSite:'lax';
     path: string;
   } = {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'none',
+    sameSite: 'lax',
     path: '/'
   };
   
