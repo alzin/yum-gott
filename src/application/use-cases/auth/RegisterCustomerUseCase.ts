@@ -33,7 +33,7 @@ export class RegisterCustomerUseCase {
             email: request.email,
             mobileNumber: request.mobileNumber,
             password: hashedPassword,
-            isActive: true,
+            isActive: false,
             isEmailVerified: false,
             verificationToken: verificationToken,
             tokenExpiresAt: tokenExpiresAt,
