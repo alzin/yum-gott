@@ -14,7 +14,7 @@ CREATE TABLE customers (
     email VARCHAR(255) UNIQUE NOT NULL,
     mobile_number VARCHAR(15) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    is_active BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
     is_email_verified BOOLEAN DEFAULT false,
     verification_token VARCHAR(255),
     token_expires_at TIMESTAMP,

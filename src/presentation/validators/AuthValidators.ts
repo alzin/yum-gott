@@ -126,7 +126,7 @@ export class AuthValidators {
         .isLength({ max: 255 })
         .withMessage('Email must not exceed 255 characters')
         .custom((value) => {
-          if (!value) return true; 
+          if (!value) return true;
           const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
           const parts = value.split('@');
           if (parts.length !== 2 || !domainRegex.test(parts[1])) {
@@ -178,4 +178,22 @@ export class AuthValidators {
         .toFloat()
     ];
   }
+
+  static validateProfileImage(): ValidationChain[] {
+    return [
+      body('profileImage')
+        .custom((_, { req }) => {
+          if (!req.file) {
+            throw new Error('Profile image is required');
+          }
+          const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+          if (!allowedTypes.includes(req.file.mimetype)) {
+            throw new Error('Only JPEG, PNG, and GIF images are allowed');
+          }
+          return true;
+        })
+    ];
+  }
+
+
 }

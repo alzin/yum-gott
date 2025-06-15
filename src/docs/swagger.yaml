@@ -679,10 +679,10 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
       description: JWT Bearer token authentication. Use format: 'Bearer {token}'
   
   schemas:
@@ -804,7 +804,7 @@ components:
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
           example: "SecurePass123"
-      RegisterRestaurantOwnerRequest:
+    RegisterRestaurantOwnerRequest:
       type: object
       required:
         - restaurantName
@@ -844,7 +844,8 @@ components:
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
           example: "SecurePass123"
-      UpdateRestaurantLocationRequest:
+          
+    UpdateRestaurantLocationRequest:
       type: object
       required:
         - address
@@ -1065,7 +1066,7 @@ components:
           example: "invalid-email"
 
 security:
-  - bearerAuth: []
+  - cookieAuth: []
 
 tags:
   - name: Health Check

@@ -3,28 +3,30 @@ import cors from 'cors';
 import helmet from 'helmet';
 import swaggerUi from "swagger-ui-express";
 import YAML from 'yamljs';
+import cookieParser from 'cookie-parser'
 import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter } from './presentation/router/AuthRouter';
 import path from "path";
 
 
+
 export class App {
   private app: Application;
   private diContainer: DIContainer;
   private setupMiddleware(): void {
-    // Security middleware
     this.app.use(helmet());
+    this.app.use(cookieParser());
 
-    this.app.use(cors({
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-      exposedHeaders: ['Set-Cookie']
-    }));
-    // Logging
+   this.app.use(cors({
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie']
+}));
+
     this.app.use(morgan('combined'));
 
-    // Body parsing
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   }
@@ -33,21 +35,12 @@ export class App {
     const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
 
-    // Enable CORS for Swagger UI
-    this.app.use('/docs', (req, res, next) => {
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.header('Access-Control-Allow-Origin', req.headers.origin);
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      next();
-    });
+  
 
-    // Swagger UI setup with credentials support
     const swaggerOptions = {
       swaggerOptions: {
-        withCredentials: true, // This is the key addition
+        withCredentials: true,
         requestInterceptor: (req: any) => {
-          // This ensures cookies are sent with each request
           req.credentials = 'include';
           return req;
         },

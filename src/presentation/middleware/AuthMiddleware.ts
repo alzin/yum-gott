@@ -1,4 +1,3 @@
-// src/presentation/middleware/AuthMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { JWTpayload } from '@/domain/entities/AuthToken';
@@ -11,71 +10,65 @@ export interface AuthenticatedRequest extends Request {
 export class AuthMiddleware {
   constructor(private authRepository: IAuthRepository) { }
 
+  private extractToken(req: Request): string | null {
+    if (req.cookies?.accessToken) {
+      return req.cookies.accessToken;
+    }
+
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7);
+    }
+
+    return null;
+  }
+
+  private async tryRefreshToken(req: Request, res: Response): Promise<JWTpayload | null> {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) return null;
+
+    try {
+      const newTokens = await this.authRepository.refreshToken(refreshToken);
+      setAuthCookies(res, newTokens);
+      return await this.authRepository.verifyToken(newTokens.accessToken);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  requireRestaurantOwner = (req: Request, res: Response, next: NextFunction): void => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user || authReq.user.userType !== 'restaurant_owner') {
+      res.status(403).json({
+        success: false,
+        message: 'Forbidden: Only restaurant owners can access this endpoint'
+      });
+      return;
+    }
+    next();
+  };
+
   authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      console.log('AuthMiddleware: Checking authentication...');
-      console.log('Raw cookies:', req.headers.cookie);
-
-      // Parse cookies manually if not already parsed
-      if (!req.cookies && req.headers.cookie) {
-        req.cookies = req.headers.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
-          const [key, value] = cookie.trim().split('=');
-          acc[key] = value;
-          return acc;
-        }, {});
-      }
-
-      console.log('Parsed cookies:', req.cookies);
-      console.log('Headers:', req.headers);
-
-      let token = req.cookies?.accessToken;
-      if (!token) {
-        const authHeader = req.headers.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-          token = authHeader.substring(7);
-        }
-      }
-
-      console.log('Token found:', !!token);
-      if (token) {
-        console.log('Token value:', token);
-      }
+      let token = this.extractToken(req);
 
       if (!token) {
-        console.log('AuthMiddleware: No token found');
-        res.status(401).json({
-          success: false,
-          message: 'Access token required'
-        });
+        res.status(401).json({ success: false, message: 'Access token required' });
         return;
       }
 
       const payload = await this.authRepository.verifyToken(token);
-      console.log('Token payload:', payload);
       req.user = payload;
-
       next();
+
     } catch (error) {
-      console.error('AuthMiddleware: Authentication error:', error);
-      const refreshToken = req.cookies?.refreshToken;
-      if (refreshToken) {
-        try {
-          console.log('Attempting to refresh token...');
-          const newTokens = await this.authRepository.refreshToken(refreshToken);
-          setAuthCookies(res, newTokens);
-          const payload = await this.authRepository.verifyToken(newTokens.accessToken);
-          req.user = payload;
-
-          next();
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
-        }
+      const refreshedPayload = await this.tryRefreshToken(req, res);
+      if (refreshedPayload) {
+        req.user = refreshedPayload;
+        next();
+      } else {
+        res.status(401).json({ success: false, message: 'Invalid or expired token' });
       }
-
-      res.status(401).json({
-        success: false,
-        message: 'Invalid or expired token'
-      });
     }
   };
 }

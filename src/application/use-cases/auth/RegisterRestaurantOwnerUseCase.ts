@@ -23,11 +23,9 @@ export class RegisterRestaurantOwnerUseCase {
     ) { }
 
     async execute(request: RegisterRestaurantOwnerRequest): Promise<AuthToken> {
-        console.log('RegisterRestaurantOwnerUseCase: Starting registration for', request.email);
-        await this.checkExistingUser(request);
+        await this.checkExistingByEmail(request);
 
         const hashedPassword = await this.passwordHasher.hash(request.password);
-        console.log('RegisterRestaurantOwnerUseCase: Password hashed');
 
         const verificationToken = uuidv4();
         const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -48,12 +46,9 @@ export class RegisterRestaurantOwnerUseCase {
             longitude: null
         };
 
-        console.log('RegisterRestaurantOwnerUseCase: Creating restaurant owner');
         const createdOwner = await this.restaurantOwnerRepository.create(restaurantOwner);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
-        console.log('RegisterRestaurantOwnerUseCase: Verification email sent');
         
-        // Generate tokens
         const tokens = await this.authRepository.generateToken({
             userId: createdOwner.id!,
             userType: 'restaurant_owner',
@@ -63,10 +58,7 @@ export class RegisterRestaurantOwnerUseCase {
         return tokens;
     }
 
-    private async checkExistingUser(request: RegisterRestaurantOwnerRequest): Promise<void> {
-
-
-        console.log('RegisterRestaurantOwnerUseCase: Checking for existing email', request.email);
+    private async checkExistingByEmail(request: RegisterRestaurantOwnerRequest): Promise<void> {
         const emailExists = await this.restaurantOwnerRepository.existsByEmail(request.email);
         if (emailExists) {
             throw new Error('User already exists with this email');

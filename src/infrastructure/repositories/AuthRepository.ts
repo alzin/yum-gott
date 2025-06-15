@@ -12,8 +12,8 @@ export class AuthRepository {
 
   constructor() {
     this.jwtSecret = process.env.JWT_SECRET || 'your-super-secret-key';
-    this.jwtExpiration = 24 * 60 * 60; // 24 hours in seconds
-    this.refreshTokenExpiration = 7 * 24 * 60 * 60; // 7 days in seconds
+    this.jwtExpiration = 24 * 60 * 60; 
+    this.refreshTokenExpiration = 7 * 24 * 60 * 60; 
   }
 
   async generateToken(payload: JwtPayloadWithUser, isRefreshToken = false): Promise<{ accessToken: string; expiresIn: number; refreshToken: string | null }> {

@@ -22,8 +22,8 @@ export class RegisterCustomerUseCase {
     ) { }
 
     async execute(request: RegisterCustomerRequest): Promise<AuthToken> {
-        
-        await this.checkExistingUser(request);
+        await this.checkExistingEmail(request.email);
+
         const hashedPassword = await this.passwordHasher.hash(request.password);
         const verificationToken = uuidv4();
         const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -33,7 +33,7 @@ export class RegisterCustomerUseCase {
             email: request.email,
             mobileNumber: request.mobileNumber,
             password: hashedPassword,
-            isActive: false,
+            isActive: true,
             isEmailVerified: false,
             verificationToken: verificationToken,
             tokenExpiresAt: tokenExpiresAt,
@@ -42,14 +42,13 @@ export class RegisterCustomerUseCase {
 
         const createdCustomer = await this.customerRepository.create(customer);
         await this.emailService.sendVerificationEmail(request.email, verificationToken);
-        
-        // Generate tokens
+
         const tokens = await this.authRepository.generateToken({
             userId: createdCustomer.id!,
             userType: 'customer',
             email: createdCustomer.email
         });
-        
+
         return tokens;
     }
 
@@ -58,9 +57,5 @@ export class RegisterCustomerUseCase {
         if (emailExists) {
             throw new Error('User already exists with this email');
         }
-    }
-
-    private async checkExistingUser(request: RegisterCustomerRequest): Promise<void> {
-        await this.checkExistingEmail(request.email);
     }
 }
