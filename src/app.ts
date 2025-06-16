@@ -102,6 +102,20 @@ export class App {
   }
 
 
+    // Helper to get local IP
+  private getLocalIpAddress(): string {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]!) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          return iface.address;
+        }
+      }
+    }
+    return 'localhost';
+  }
+
 
   public getApp(): Application {
     return this.app;
@@ -119,17 +133,5 @@ export class App {
     }
   }
 
-  // Helper to get local IP
-  private getLocalIpAddress(): string {
-    const os = require('os');
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-      for (const iface of interfaces[name]!) {
-        if (iface.family === 'IPv4' && !iface.internal) {
-          return iface.address;
-        }
-      }
-    }
-    return 'localhost';
-  }
+
 }
