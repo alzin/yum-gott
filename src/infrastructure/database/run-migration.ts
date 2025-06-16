@@ -11,45 +11,35 @@ async function setupAndMigrateDatabase() {
   try {
     console.log('🔧 Setting up and migrating database...');
 
-    const migrationPath = path.join(__dirname, 'migrations/000_full_users_setup.sql');
+    const migrationPaths = [
+      path.join(__dirname, 'migrations', '000_full_users_setup.sql'),
+      path.join(__dirname, 'migrations', '001_create_products_table.sql')
+    ];
 
-    if (!fs.existsSync(migrationPath)) {
-      console.error(`❌ Migration file not found at: ${migrationPath}`);
-      process.exit(1);
+    for (const filePath of migrationPaths) {
+      if (!fs.existsSync(filePath)) {
+        console.error(`❌ Migration file not found: ${filePath}`);
+        process.exit(1);
+      }
     }
 
-    const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+    for (const filePath of migrationPaths) {
+      const sql = fs.readFileSync(filePath, 'utf-8');
+      console.log(`📂 Running migration: ${path.basename(filePath)}`);
+      await db.query(sql);
+    }
 
+    console.log('✅ All migrations executed successfully');
 
-    await db.query(migrationSQL);
-    console.log('✅ Migration completed successfully');
-
- 
     const result = await db.query('SELECT current_database(), current_user, version()');
     console.log('📊 Database info:', result.rows[0]);
 
- const tableCheckCustomers = await db.query(`
-  SELECT EXISTS (
-    SELECT FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'customers'
-  );
-`);
 
-const tableCheckRestaurantOwners = await db.query(`
-  SELECT EXISTS (
-    SELECT FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'restaurant_owners'
-  );
-`);
-
-console.log('👥 Customers table exists:', tableCheckCustomers.rows[0].exists);
-console.log('🏢 Restaurant owners table exists:', tableCheckRestaurantOwners.rows[0].exists)
 
   } catch (error) {
     console.error('❌ Database setup/migration failed:', error);
     process.exit(1);
   } finally {
-
     await db.close();
   }
 }
