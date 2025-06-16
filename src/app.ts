@@ -18,12 +18,12 @@ export class App {
     this.app.use(helmet());
     this.app.use(cookieParser());
 
-   this.app.use(cors({
-  credentials: true, 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-  exposedHeaders: ['Set-Cookie']
-}));
+    this.app.use(cors({
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+      exposedHeaders: ['Set-Cookie']
+    }));
 
     this.app.use(morgan('combined'));
 
@@ -35,7 +35,7 @@ export class App {
     const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
 
-  
+
 
     const swaggerOptions = {
       swaggerOptions: {
@@ -76,7 +76,7 @@ export class App {
     });
 
     // API routes
-    const authRouter = new AuthRouter(this.diContainer.authController);
+    const authRouter = new AuthRouter();
     this.app.use('/api/auth', authRouter.getRouter());
 
     // 404 handler - must be after all other routes

@@ -10,7 +10,7 @@ import {
   UpdateRestaurantLocationUseCase,
   GetRestaurantOwnerProfileUseCase 
 } from '@/application/use-cases/auth/index';
-import { AuthController } from '@/presentation/controller/AuthController';
+import { AuthController } from '@/presentation/controller/index';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 
 type DependencyFactory<T = any> = () => T;
@@ -137,15 +137,7 @@ export class DIContainer {
 
     this.registerSingleton('authController', () => {
       console.log('DIContainer: Registering authController');
-      return new AuthController(
-        this.resolve('registerCustomerUseCase'),
-        this.resolve('registerRestaurantOwnerUseCase'),
-        this.resolve('customerLoginUseCase'),
-        this.resolve('restaurantOwnerLoginUseCase'),
-        this.resolve('uploadProfileImageUseCase'),
-        this.resolve('updateRestaurantLocationUseCase'),
-        this.resolve('getRestaurantOwnerProfileUseCase')
-      );
+  
     });
 
     this.registerSingleton('authMiddleware', () => {
