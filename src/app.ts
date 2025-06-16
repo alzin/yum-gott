@@ -8,7 +8,7 @@ import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter } from './presentation/router/AuthRouter';
 import path from "path";
-
+import { ProductRouter } from './presentation/router/ProductRouter';
 
 
 export class App {
@@ -65,6 +65,7 @@ export class App {
   }
 
 
+
   private setupRoutes(): void {
     // Health check
     this.app.get('/health', (req: Request, res: Response) => {
@@ -78,6 +79,13 @@ export class App {
     // API routes
     const authRouter = new AuthRouter();
     this.app.use('/api/auth', authRouter.getRouter());
+
+
+
+    // API Product
+
+    const productRouter = new ProductRouter();
+    this.app.use('/api/products', productRouter.getRouter());
 
     // 404 handler - must be after all other routes
     this.app.use((req: Request, res: Response) => {
