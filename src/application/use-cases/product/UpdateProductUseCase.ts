@@ -19,13 +19,12 @@ export interface UpdateProductRequest {
 export class UpdateProductUseCase {
     constructor(
         private productRepository: IProductRepository,
-        private restaurantOwnerRepository: IRestaurantOwnerRepository,
+        // private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
     async execute(request: UpdateProductRequest): Promise<Product> {
         const { productId, restaurantOwnerId, image, addSize } = request;
 
-        // Validate product and ownership
         const product = await this.productRepository.findById(productId);
         if (!product) {
             throw new Error('Product not found');
@@ -34,12 +33,10 @@ export class UpdateProductUseCase {
             throw new Error('Unauthorized: Product does not belong to this restaurant owner');
         }
 
-        // Validate addSize if provided
         if (addSize && !Object.values(SizeOption).includes(addSize)) {
             throw new Error('Invalid size option');
         }
 
-        // Handle image update
         let imageUrl = product.imageUrl;
         if (image) {
             if (product.imageUrl) {
