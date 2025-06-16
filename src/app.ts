@@ -102,7 +102,7 @@ export class App {
   }
 
 
-    // Helper to get local IP
+  // Helper to get local IP
   private getLocalIpAddress(): string {
     const os = require('os');
     const interfaces = os.networkInterfaces();

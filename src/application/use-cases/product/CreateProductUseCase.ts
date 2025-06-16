@@ -4,7 +4,7 @@ import { IRestaurantOwnerRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
 import { v4 as uuidv4 } from 'uuid'
 
-export interface CreateProductUseCase {
+export interface CreateProductRequest {
     category: string;
     productName: string;
     description: string;
@@ -21,7 +21,7 @@ export class CreateProductUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
-    async execute(request: CreateProductUseCase): Promise<Product> {
+    async execute(request: CreateProductRequest): Promise<Product> {
         const { restaurantOwnerId, image, addSize } = request
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
@@ -54,5 +54,4 @@ export class CreateProductUseCase {
 
         return await this.productRepository.create(product);
     }
-
 }

@@ -6,7 +6,6 @@ import { setAuthCookies } from '@/shared/utils/cookieUtils';
 export interface AuthenticatedRequest extends Request {
   user?: JWTpayload;
 }
-
 export class AuthMiddleware {
   constructor(private authRepository: IAuthRepository) { }
 
