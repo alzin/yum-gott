@@ -1,4 +1,3 @@
-export * from './AuthController'
 export * from './customerLogin'
 export * from './getRestaurantOwnerProfile'
 export * from './registerCustomer'

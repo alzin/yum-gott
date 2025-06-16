@@ -10,7 +10,7 @@ import {
   UpdateRestaurantLocationUseCase,
   GetRestaurantOwnerProfileUseCase
 } from '@/application/use-cases/auth/index';
-import { AuthController } from '@/presentation/controller/index';
+import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 // import { Container } from 'inversify';
 import { ProductRepository } from '../repositories/index';
