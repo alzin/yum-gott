@@ -21,18 +21,18 @@ export class UpdateRestaurantLocationUseCase {
         const { userId, address, latitude, longitude } = request;
 
         // Validate user exists
-        const restaurantOwner = await this.restaurantOwnerRepository.findById(userId);
-        if (!restaurantOwner) {
+        const restaurantOwnerExist = await this.restaurantOwnerRepository.findById(userId);
+        if (!restaurantOwnerExist) {
             throw new Error('Restaurant owner not found');
         }
 
         // Update location
-        const updatedRestaurantOwner = await this.restaurantOwnerRepository.updateLocation(userId, {
+        const updatedRestaurantOwnerLocation = await this.restaurantOwnerRepository.updateLocation(userId, {
             address,
             latitude,
             longitude
         });
 
-        return { restaurantOwner: updatedRestaurantOwner };
+        return { restaurantOwner: updatedRestaurantOwnerLocation };
     }
 }

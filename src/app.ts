@@ -3,54 +3,67 @@ import cors from 'cors';
 import helmet from 'helmet';
 import swaggerUi from "swagger-ui-express";
 import YAML from 'yamljs';
+import cookieParser from 'cookie-parser'
 import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter } from './presentation/router/AuthRouter';
 import path from "path";
 
 
+
 export class App {
   private app: Application;
   private diContainer: DIContainer;
+  private setupMiddleware(): void {
+    this.app.use(helmet());
+    this.app.use(cookieParser());
+
+    this.app.use(cors({
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+      exposedHeaders: ['Set-Cookie']
+    }));
+
+    this.app.use(morgan('combined'));
+
+    this.app.use(express.json({ limit: '10mb' }));
+    this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  }
 
   constructor() {
     const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
     this.app = express();
-    this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
+
+    const swaggerOptions = {
+      swaggerOptions: {
+        withCredentials: true,
+        requestInterceptor: (req: any) => {
+          req.credentials = 'include';
+          return req;
+        },
+        persistAuthorization: true,
+        displayOperationId: false,
+        tryItOutEnabled: true
+      }
+
+    };
+
+    this.app.use(
+      "/docs",
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerDocument, swaggerOptions)
+    );
+
+
     this.diContainer = DIContainer.getInstance();
     this.setupMiddleware();
     this.setupRoutes();
     this.setupErrorHandling();
   }
 
-  private setupMiddleware(): void {
-    // Security middleware
-    this.app.use(helmet());
-
-    // CORS configuration
-    this.app.use(cors({
-      origin: function (origin, callback) {
-        const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'https://yum-gott.onrender.com', "http://127.0.0.1:5500"];
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-      exposedHeaders: ['Set-Cookie'],
-      
-    }));
-
-    // Logging
-    this.app.use(morgan('combined'));
-
-    // Body parsing
-    this.app.use(express.json({ limit: '10mb' }));
-    this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  }
 
   private setupRoutes(): void {
     // Health check
@@ -63,7 +76,7 @@ export class App {
     });
 
     // API routes
-    const authRouter = new AuthRouter(this.diContainer.authController);
+    const authRouter = new AuthRouter();
     this.app.use('/api/auth', authRouter.getRouter());
 
     // 404 handler - must be after all other routes
@@ -89,6 +102,20 @@ export class App {
   }
 
 
+    // Helper to get local IP
+  private getLocalIpAddress(): string {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]!) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          return iface.address;
+        }
+      }
+    }
+    return 'localhost';
+  }
+
 
   public getApp(): Application {
     return this.app;
@@ -96,14 +123,15 @@ export class App {
 
   public async start(port: number = 3000): Promise<void> {
     try {
-      this.app.listen(port, () => {
-        console.log(`🚀 Server is running on port ${port}`);
-        console.log(`📱 Health check: http://localhost:${port}/health`);
-        console.log(`🔐 Auth API: http://localhost:${port}/api/auth`);
+      this.app.listen(port, '0.0.0.0', () => {
+        console.log(`🚀 Server is running on http://localhost:${port}`);
+        console.log(`🌐 Network URL: http://${this.getLocalIpAddress()}:${port}`);
       });
     } catch (error) {
       console.error('Failed to start server:', error);
       process.exit(1);
     }
   }
+
+
 }

@@ -403,28 +403,151 @@ paths:
                   value:
                     success: false
                     message: "Too many login attempts. Please try again later."
+  /api/auth/profile/restaurant-owner:
+    get:
+      tags:
+        - Authentication
+      summary: Get restaurant owner profile
+      description: Retrieve the restaurant name and profile image URL for the authenticated restaurant owner
+      operationId: getRestaurantOwnerProfile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Restaurant owner profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      restaurantName:
+                        type: string
+                        example: "Gourmet Delight"
+                      profileImageUrl:
+                        type: string
+                        nullable: true
+                        example: "https://example.com/profiles/restaurant123.jpg"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - User is not a restaurant owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Forbidden: Only restaurant owners can access this endpoint
+
+  /api/auth/location/restaurant:
+    post:
+      tags:
+        - Authentication
+      summary: Update restaurant location
+      description: Updates the location of the restaurant for the authenticated restaurant owner
+      BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestaurantLocationRequest'
+            example:
+              address: "123 Main St, City, Country"
+              latitude: "29.9756"
+              longitude: "31.1373"
+      responses:
+        '200':
+          description: Restaurant location updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant location updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                        example: "123 Main St, City, Country"
+                      latitude:
+                        type: string
+                        example: "29.9756"
+                      longitude:
+                        type: string
+                        example: "31.1373"
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation errors
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "latitude"
+                        message: "Latitude must be a valid number"
+                      - field: "longitude"
+                        message: "Longitude must be between -180 and 180"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
   /api/auth/profile/image:
     post:
       tags:
         - Authentication
       summary: Upload profile image
-      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3. The user type is determined from the JWT access token.
+      description: |
+        Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3.
+        The user type is determined from the JWT access token.
+        
+        **Note for Swagger UI users:**
+        1. Click "Try it out"
+        2. Click the upload button next to the profileImage field
+        3. Select your image file
+        4. Execute the request
       operationId: uploadProfileImage
       security:
-        - BearerAuth: []
+        - cookieAuth: []
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - profileImage
               properties:
                 profileImage:
                   type: string
                   format: binary
                   description: Profile image file (JPEG, PNG, or GIF, max 5MB)
-              required:
-                - profileImage
+              x-www-form-urlencoded:
+                type: object
+                properties:
+                  profileImage: 
+                    type: string
+                    format: binary
       responses:
         '200':
           description: Profile image uploaded successfully
@@ -488,7 +611,7 @@ paths:
       description: Updates the restaurant's address and GPS coordinates for an authenticated restaurant owner.
       operationId: updateRestaurantLocation
       security:
-        - BearerAuth: []
+        - cookieAuth: []
       requestBody:
         required: true
         content:
@@ -535,14 +658,119 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
+  responses:
+    UnauthorizedError:
+      description: Unauthorized - Authentication credentials are missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Unauthorized - Please log in"
+    ForbiddenError:
+      description: Forbidden - User is not a restaurant owner
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: Bearer
-      bearerFormat: JWT
-      description: |
-        JWT authentication. Include the token in the Authorization header: `Authorization: Bearer <your_jwt_token>`. Alternatively, the token can be provided as an HTTP-only cookie named `accessToken`.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
+      description: JWT Bearer token authentication. Use format: 'Bearer {token}'
+  
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful
+          example: false
+        message:
+          type: string
+          description: A message describing the error
+          example: "An error occurred"
+        errors:
+          type: array
+          description: Optional array of error details
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: The field that caused the error
+                example: "email"
+              message:
+                type: string
+                description: Error message for this field
+                example: "Invalid email format"
+    
+    LoginRequest:
+      type: object
+      required:
+        - password
+      oneOf:
+        - required: [email]
+        - required: [mobileNumber]
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address (required if mobileNumber is not provided)
+          example: "user@example.com"
+        mobileNumber:
+          type: string
+          description: User's mobile number (required if email is not provided)
+          example: "01234567890"
+        password:
+          type: string
+          format: password
+          minLength: 6
+          description: User's password
+          example: "SecurePass123"
+
+    LoginResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        mobileNumber:
+          type: string
+          description: User's mobile number
+          example: "01234567890"
+        userType:
+          type: string
+          enum: ["customer", "restaurant_owner"]
+          description: Type of the user
+          example: "restaurant_owner"
+        accessToken:
+          type: string
+          description: JWT access token for API authentication
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          description: JWT refresh token for getting new access tokens
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpUVCJ9..."
+        expiresIn:
+          type: integer
+          description: Time in seconds until the access token expires
+          example: 3600
+    
     RegisterCustomerRequest:
       type: object
       required:
@@ -616,6 +844,7 @@ components:
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           description: Password (must contain lowercase, uppercase, and number)
           example: "SecurePass123"
+          
     UpdateRestaurantLocationRequest:
       type: object
       required:
@@ -640,7 +869,7 @@ components:
           maximum: 180
           description: GPS longitude of the restaurant
           example: -74.0060
-    ErrorResponse:
+      ErrorResponse:
       type: object
       properties:
         success:
@@ -668,7 +897,7 @@ components:
                 type: string
                 description: Invalid value that was provided
                 example: "invalid-email"
-    LoginRequest:
+      LoginRequest:
       type: object
       required:
         - password
@@ -692,7 +921,7 @@ components:
           description: User's password
           example: "SecurePass123"
       description: Either email or mobileNumber must be provided along with password
-    LoginResponse:
+      LoginResponse:
       type: object
       properties:
         user:
@@ -702,7 +931,7 @@ components:
           description: User information (without password)
         authToken:
           $ref: '#/components/schemas/AuthToken'
-    AuthToken:
+          AuthToken:
       type: object
       properties:
         accessToken:
@@ -717,7 +946,7 @@ components:
           type: number
           description: Access token expiration time in seconds
           example: 86400
-    CustomerResponse:
+      CustomerResponse:
       type: object
       properties:
         id:
@@ -761,7 +990,7 @@ components:
           type: string
           description: URL of the customer's profile image
           example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000-1698771234567.jpg"
-    RestaurantOwnerResponse:
+        RestaurantOwnerResponse:
       type: object
       properties:
         id:
@@ -821,7 +1050,7 @@ components:
           type: number
           description: GPS longitude of the restaurant
           example: -74.0060
-    ValidationError:
+      ValidationError:
       type: object
       properties:
         field:
@@ -835,8 +1064,10 @@ components:
         value:
           description: The invalid value that was provided
           example: "invalid-email"
+
 security:
-  - BearerAuth: []
+  - cookieAuth: []
+
 tags:
   - name: Health Check
     description: Server health monitoring endpoints

@@ -3,7 +3,7 @@ import { ICustomerRepository } from "@/domain/repositories/ICustomerRepository";
 import { DatabaseConnection } from "../database/DataBaseConnection";
 
 export class CustomerRepository implements ICustomerRepository {
-    constructor(private db: DatabaseConnection) {}
+    constructor(private db: DatabaseConnection) { }
 
     async create(customer: Customer): Promise<Customer> {
         const query = `
@@ -14,7 +14,7 @@ export class CustomerRepository implements ICustomerRepository {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
         `;
-        
+
         const values = [
             customer.name,
             customer.email,
@@ -40,20 +40,11 @@ export class CustomerRepository implements ICustomerRepository {
             RETURNING *
         `;
         const result = await this.db.query(query, [token]);
-        
+
         if (result.rows.length === 0) {
             throw new Error('Invalid or expired verification token');
         }
-        
-        return this.mapRowToCustomer(result.rows[0]);
-    }
 
-    async findByMobileNumber(mobileNumber: string): Promise<Customer | null> {
-        const query = 'SELECT * FROM customers WHERE mobile_number = $1';
-        const result = await this.db.query(query, [mobileNumber]);
-        if (result.rows.length === 0) {
-            return null;
-        }
         return this.mapRowToCustomer(result.rows[0]);
     }
 
@@ -148,12 +139,7 @@ export class CustomerRepository implements ICustomerRepository {
         await this.db.query(query, [id]);
     }
 
-    async existsByMobileNumber(mobileNumber: string): Promise<boolean> {
-        const query = 'SELECT 1 FROM customers WHERE mobile_number = $1 LIMIT 1';
-        const result = await this.db.query(query, [mobileNumber]);
-        return result.rows.length > 0;
-    }
-
+ 
     async existsByEmail(email: string): Promise<boolean> {
         const query = 'SELECT 1 FROM customers WHERE email = $1 LIMIT 1';
         const result = await this.db.query(query, [email]);

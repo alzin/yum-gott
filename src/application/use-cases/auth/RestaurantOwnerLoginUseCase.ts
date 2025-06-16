@@ -18,10 +18,6 @@ export class RestaurantOwnerLoginUseCase {
             throw new Error('Invalid credentials');
         }
 
-        if (!restaurantOwner.isActive) {
-            throw new Error('Account is deactivated');
-        }
-
         if (!restaurantOwner.isEmailVerified) {
             throw new Error('Please verify your email before logging in. Check your email for the verification link.');
         }

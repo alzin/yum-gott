@@ -1,41 +1,59 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import multer from 'multer';
-import { AuthController } from '../controller/AuthController';
+import { Router, Response, NextFunction, Request } from 'express';
+import { AuthenticatedRequest } from '../middleware/AuthMiddleware';
+import {
+  getRestaurantOwnerProfile,
+  registerCustomer,
+  registerRestaurantOwner,
+  customerLogin,
+  restaurantOwnerLogin,
+  verifyEmail,
+  uploadProfileImage,
+  updateRestaurantLocation
+} from '../controller';
 import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import multer from 'multer';
 
 export class AuthRouter {
   private router: Router;
   private upload: multer.Multer;
+  private diContainer: DIContainer;
 
-  constructor(private authController: AuthController) {
-    this.router = Router();
+  constructor() {
+    const storage = multer.memoryStorage();
     this.upload = multer({
-      storage: multer.memoryStorage(),
-      fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (!allowedTypes.includes(file.mimetype)) {
-          return cb(new Error('Only JPEG, PNG, and GIF images are allowed'));
-        }
-        cb(null, true);
-      },
-      limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-      }
+      storage: storage,
+      limits: { fileSize: 5 * 1024 * 1024 }
     });
+
+    this.diContainer = DIContainer.getInstance();
+    this.router = Router();
     this.setupRoutes();
   }
 
   private setupRoutes(): void {
-    const authMiddleware = DIContainer.getInstance().authMiddleware;
+    const authMiddleware = this.diContainer.authMiddleware;
+
+    this.router.get(
+      '/profile/restaurant-owner',
+      authMiddleware.authenticate,
+      authMiddleware.requireRestaurantOwner,
+      (req: Request, res: Response) => {
+        const controller = new getRestaurantOwnerProfile(this.diContainer.resolve('getRestaurantOwnerProfileUseCase'));
+        controller.getRestaurantOwnerProfile(req as AuthenticatedRequest, res);
+      }
+    );
 
     this.router.post(
       '/register/customer',
       SanitizationMiddleware.sanitizeCustomerRegistration(),
       AuthValidators.registerCustomer(),
       ValidationMiddleware.handleValidationErrors(),
-      this.authController.registerCustomer
+      (req: Request, res: Response) => {
+        const controller = new registerCustomer(this.diContainer.resolve('registerCustomerUseCase'));
+        controller.registerCustomer(req, res);
+      }
     );
 
     this.router.post(
@@ -43,12 +61,18 @@ export class AuthRouter {
       SanitizationMiddleware.sanitizeRestaurantOwnerRegistration(),
       AuthValidators.registerRestaurantOwner(),
       ValidationMiddleware.handleValidationErrors(),
-      this.authController.registerRestaurantOwner
+      (req: Request, res: Response) => {
+        const controller = new registerRestaurantOwner(this.diContainer.resolve('registerRestaurantOwnerUseCase'));
+        controller.registerRestaurantOwner(req, res);
+      }
     );
 
     this.router.get(
       '/verify',
-      this.authController.verifyEmail
+      (req: Request, res: Response) => {
+        const controller = new verifyEmail();
+        controller.verifyEmail(req, res);
+      }
     );
 
     this.router.post(
@@ -56,7 +80,10 @@ export class AuthRouter {
       SanitizationMiddleware.sanitizeLoginRequest(),
       AuthValidators.login(),
       ValidationMiddleware.handleValidationErrors(),
-      this.authController.customerLogin
+      (req: Request, res: Response) => {
+        const controller = new customerLogin(this.diContainer.resolve('customerLoginUseCase'));
+        controller.customerLogin(req, res);
+      }
     );
 
     this.router.post(
@@ -64,35 +91,22 @@ export class AuthRouter {
       SanitizationMiddleware.sanitizeLoginRequest(),
       AuthValidators.login(),
       ValidationMiddleware.handleValidationErrors(),
-      this.authController.restaurantOwnerLogin
+      (req: Request, res: Response) => {
+        const controller = new restaurantOwnerLogin(this.diContainer.resolve('restaurantOwnerLoginUseCase'));
+        controller.restaurantOwnerLogin(req, res);
+      }
     );
 
     this.router.post(
       '/profile/image',
-      (req: Request, res: Response, next: NextFunction) => {
-        this.upload.single('profileImage')(req, res, (err: any) => {
-          if (err instanceof multer.MulterError) {
-            return res.status(400).json({ success: false, message: err.message });
-          } else if (err) {
-            return res.status(400).json({ success: false, message: err.message });
-          }
-          next();
-        });
-      },
-      (req: Request, res: Response, next: NextFunction): void => {
-        console.log('Before SanitizationMiddleware - req.body:', req.body);
-        console.log('Before SanitizationMiddleware - req.file:', req.file);
-        if (!req.file) {
-          res.status(400).json({
-            success: false,
-            message: 'Profile image is required'
-          });
-          return;
-        }
-        next();
-      },
+      this.upload.single('profileImage'),
       authMiddleware.authenticate,
-      this.authController.uploadProfileImage
+      AuthValidators.validateProfileImage(),
+      ValidationMiddleware.handleValidationErrors(),
+      (req: Request, res: Response) => {
+        const controller = new uploadProfileImage(this.diContainer.resolve('uploadProfileImageUseCase'));
+        controller.uploadProfileImage(req, res);
+      }
     );
 
     this.router.post(
@@ -101,7 +115,10 @@ export class AuthRouter {
       SanitizationMiddleware.sanitizeRestaurantLocationUpdate(),
       AuthValidators.updateRestaurantLocation(),
       ValidationMiddleware.handleValidationErrors(),
-      this.authController.updateRestaurantLocation
+      (req: Request, res: Response) => {
+        const controller = new updateRestaurantLocation(this.diContainer.resolve('updateRestaurantLocationUseCase'));
+        controller.updateRestaurantLocation(req, res);
+      }
     );
   }
 

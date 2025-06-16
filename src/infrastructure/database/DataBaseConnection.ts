@@ -7,12 +7,7 @@ export class DatabaseConnection {
   private constructor() {
     const connectionString = process.env.DATABASE_URL;
 
-    if (!connectionString) {
-      throw new Error('DATABASE_URL is not defined in environment variables');
-    }
-
-    console.log('Attempting to connect to database...');
-    console.log('Connection string:', connectionString.replace(/:[^:@]+@/, ':****@')); // Hide password in logs
+   
 
     this.pool = new Pool({
       connectionString,

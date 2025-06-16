@@ -1,5 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
+
+interface JwtPayloadWithUser extends JwtPayload {
+  userId: string;
+  userType: string;
+}
 export class AuthRepository {
   private readonly jwtSecret: string;
   private readonly jwtExpiration: number;
@@ -7,12 +12,15 @@ export class AuthRepository {
 
   constructor() {
     this.jwtSecret = process.env.JWT_SECRET || 'your-super-secret-key';
-    this.jwtExpiration = 24 * 60 * 60; // 24 hours in seconds
-    this.refreshTokenExpiration = 7 * 24 * 60 * 60; // 7 days in seconds
+    this.jwtExpiration = 24 * 60 * 60; 
+    this.refreshTokenExpiration = 7 * 24 * 60 * 60; 
   }
 
-  async generateToken(payload: JwtPayload, isRefreshToken = false): Promise<any> {
-    const tokenPayload = { ...payload };
+  async generateToken(payload: JwtPayloadWithUser, isRefreshToken = false): Promise<{ accessToken: string; expiresIn: number; refreshToken: string | null }> {
+    const tokenPayload = { 
+      ...payload,
+      iat: Math.floor(Date.now() / 1000)  // Set the issued at time in the payload
+    };
     const options: jwt.SignOptions = {};
     if (!tokenPayload.exp) {
       options.expiresIn = isRefreshToken ? this.refreshTokenExpiration : this.jwtExpiration;
@@ -36,12 +44,13 @@ export class AuthRepository {
     }
   }
 
- async verifyToken(token: string): Promise<JwtPayload> {
+ async verifyToken(token: string): Promise<JwtPayloadWithUser> {
   try {
-    const decoded = jwt.verify(token, this.jwtSecret) as JwtPayload;
+    const decoded = jwt.verify(token, this.jwtSecret) as JwtPayloadWithUser;
     console.log('AuthRepository: Token verified', {
       userId: decoded.userId,
       userType: decoded.userType,
+      iat: decoded.iat,
       exp: decoded.exp,
       expirationDate: decoded.exp ? new Date(decoded.exp * 1000).toISOString() : 'No expiration'
     });
@@ -52,17 +61,27 @@ export class AuthRepository {
   }
 }
 
-  async refreshToken(refreshToken: string): Promise<any> {
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string; expiresIn: number; refreshToken: string }> {
     try {
       const payload = await this.verifyToken(refreshToken);
-      // إزالة exp القديم من الـ payload
       const { exp, iat, nbf, ...newPayload } = payload;
-      const newTokens = await this.generateToken(newPayload, false);
+      
+      // Generate new access token
+      const accessToken = jwt.sign(newPayload, this.jwtSecret, { expiresIn: this.jwtExpiration });
+      
+      // Generate new refresh token
+      const newRefreshToken = jwt.sign(newPayload, this.jwtSecret, { expiresIn: this.refreshTokenExpiration });
+      
       console.log('AuthRepository: Token refreshed', {
         userId: newPayload.userId,
         userType: newPayload.userType
       });
-      return newTokens;
+      
+      return {
+        accessToken,
+        refreshToken: newRefreshToken,
+        expiresIn: this.jwtExpiration
+      };
     } catch (error) {
       console.error('AuthRepository: Refresh token failed', error);
       throw new Error('Invalid or expired refresh token');
