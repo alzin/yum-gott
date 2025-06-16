@@ -108,4 +108,64 @@ export class FileStorageService implements IFileStorageService {
       throw new Error(`Failed to delete file from S3: ${error.message}`);
     }
   }
+
+    async uploadProductFile(
+        file: Express.Multer.File,
+        id: string,
+        type: 'customer' | 'restaurant_owner' | 'product'
+    ): Promise<string> {
+        const extension = 'jpg';
+        let fileBuffer = file.buffer;
+
+        if (file.mimetype !== 'image/jpeg') {
+            try {
+                fileBuffer = await sharp(file.buffer)
+                    .jpeg({ quality: 80 })
+                    .toBuffer();
+                console.log('FileStorageService: Converted image to JPG', {
+                    originalMimetype: file.mimetype,
+                    id,
+                    type
+                });
+            } catch (error: any) {
+                console.error('FileStorageService: Image conversion failed', {
+                    errorName: error.name,
+                    errorMessage: error.message
+                });
+                throw new Error('Failed to convert image to JPG');
+            }
+        }
+
+        const key = `${type}/${id}.jpg`;
+
+        console.log('FileStorageService: Uploading file', {
+            key,
+            bucket: this.bucketName,
+            mimetype: file.mimetype,
+            size: fileBuffer.length
+        });
+
+        const command = new PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: key,
+            Body: fileBuffer,
+            ContentType: 'image/jpeg'
+        });
+
+        try {
+            await this.s3Client.send(command);
+            const fileUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
+            console.log('FileStorageService: Successfully uploaded', { fileUrl });
+            return fileUrl;
+        } catch (error: any) {
+            console.error('FileStorageService: Failed to upload', {
+                errorName: error.name,
+                errorMessage: error.message,
+                errorStack: error.stack,
+                key,
+                bucket: this.bucketName
+            });
+            throw new Error(`Failed to upload image to S3: ${error.message}`);
+        }
+    }
 }
