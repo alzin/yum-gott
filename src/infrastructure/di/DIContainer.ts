@@ -12,7 +12,7 @@ import {
 } from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/index';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
-import { Container } from 'inversify';
+// import { Container } from 'inversify';
 import { ProductRepository } from '../repositories/index';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 
@@ -35,11 +35,27 @@ export class DIContainer {
 
       // Register product-related dependencies
       DIContainer.instance.registerSingleton('IProductRepository', () => new ProductRepository(DIContainer.instance.databaseConnection));
-      DIContainer.instance.registerTransient('createProductUseCase', () => new CreateProductUseCase(DIContainer.instance.resolve('IProductRepository')));
-      DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(DIContainer.instance.resolve('IProductRepository')));
-      DIContainer.instance.registerTransient('getProductsByRestaurantUseCase', () => new GetProductsByRestaurantUseCase(DIContainer.instance.resolve('IProductRepository')));
-      DIContainer.instance.registerTransient('updateProductUseCase', () => new UpdateProductUseCase(DIContainer.instance.resolve('IProductRepository')));
-      DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(DIContainer.instance.resolve('IProductRepository')));
+      DIContainer.instance.registerTransient('createProductUseCase', () => new CreateProductUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository'),
+        DIContainer.instance.resolve('fileStorageService')
+      ));
+      DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(
+        DIContainer.instance.resolve('IProductRepository')
+      ));
+      DIContainer.instance.registerTransient('getProductsByRestaurantUseCase', () => new GetProductsByRestaurantUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository')
+      ));
+      DIContainer.instance.registerTransient('updateProductUseCase', () => new UpdateProductUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('fileStorageService')
+      ));
+      DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository'),
+        DIContainer.instance.resolve('fileStorageService')
+      ));
     }
     return DIContainer.instance;
   }
