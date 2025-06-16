@@ -3,7 +3,7 @@ export enum SizeOption {
     MEDIUM = 'Medium',
     LARGE = 'Large'
 }
-export interface Products {
+export interface Product {
     id?: string;
     category: string;
     productName: string;
