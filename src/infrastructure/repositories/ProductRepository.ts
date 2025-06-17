@@ -84,6 +84,10 @@ export class ProductRepository implements IProductRepository {
             values.push(product.updatedAt);
         }
 
+        if (fields.length === 0) {
+            throw new Error('No fields supplied for update');
+        }
+
         values.push(id);
         const query = `
             UPDATE products 
