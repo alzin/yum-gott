@@ -23,6 +23,41 @@ export class FileStorageService implements IFileStorageService {
     this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'yum-gott-profile-images';
   }
 
+  private parseS3Url(url: string): { key: string; isValid: boolean } {
+    try {
+      const parsedUrl = new URL(url);
+
+      // Check if the hostname contains our bucket name
+      const hostname = parsedUrl.hostname;
+      const expectedHostname = `${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com`;
+
+      if (!hostname.includes(this.bucketName)) {
+        console.error('FileStorageService: Invalid S3 URL - bucket name mismatch', {
+          url,
+          expectedBucket: this.bucketName,
+          hostname
+        });
+        return { key: '', isValid: false };
+      }
+
+      // Remove leading slash and any query parameters
+      const key = parsedUrl.pathname.replace(/^\//, '').split('?')[0];
+
+      if (!key) {
+        console.error('FileStorageService: Invalid S3 URL - no key found', { url });
+        return { key: '', isValid: false };
+      }
+
+      return { key, isValid: true };
+    } catch (error) {
+      console.error('FileStorageService: Failed to parse S3 URL', {
+        url,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      return { key: '', isValid: false };
+    }
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     userId: string,
@@ -86,8 +121,12 @@ export class FileStorageService implements IFileStorageService {
   }
 
   async deleteFile(fileUrl: string): Promise<void> {
-    // Extract key from URL
-    const key = fileUrl.split(`https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/`)[1];
+    const { key, isValid } = this.parseS3Url(fileUrl);
+
+    if (!isValid) {
+      throw new Error('Invalid S3 URL format');
+    }
+
     console.log('FileStorageService: Deleting file', { key, fileUrl });
 
     const command = new DeleteObjectCommand({
@@ -109,73 +148,75 @@ export class FileStorageService implements IFileStorageService {
     }
   }
 
-    async uploadProductFile(
-        file: Express.Multer.File,
-        id: string,
-        type:  'restaurant_owner' | 'product',
-        existingUrl?: string
-    ): Promise<string> {
-        let fileBuffer = file.buffer;
+  async uploadProductFile(
+    file: Express.Multer.File,
+    id: string,
+    type: 'restaurant_owner' | 'product',
+    existingUrl?: string
+  ): Promise<string> {
+    let fileBuffer = file.buffer;
 
-        // Convert to JPG if needed
-        if (file.mimetype !== 'image/jpeg') {
-            try {
-                fileBuffer = await sharp(file.buffer)
-                    .jpeg({ quality: 80 })
-                    .toBuffer();
-                console.log('FileStorageService: Converted image to JPG', {
-                    originalMimetype: file.mimetype,
-                    id,
-                    type
-                });
-            } catch (error: any) {
-                console.error('FileStorageService: Image conversion failed', {
-                    errorName: error.name,
-                    errorMessage: error.message
-                });
-                throw new Error('Failed to convert image to JPG');
-            }
-        }
-
-        // Use existing URL's key if provided, otherwise generate a new key
-        let key: string;
-        if (existingUrl) {
-            // Extract the key from the existing URL
-            const urlParts = existingUrl.split('/');
-            key = urlParts.slice(3).join('/');
-            console.log('FileStorageService: Using existing URL key', { key });
-        } else {
-            key = `${type}/${id}`;
-        }
-
-        console.log('FileStorageService: Uploading file', {
-            key,
-            bucket: this.bucketName,
-            mimetype: file.mimetype,
-            size: fileBuffer.length
+    // Convert to JPG if needed
+    if (file.mimetype !== 'image/jpeg') {
+      try {
+        fileBuffer = await sharp(file.buffer)
+          .jpeg({ quality: 80 })
+          .toBuffer();
+        console.log('FileStorageService: Converted image to JPG', {
+          originalMimetype: file.mimetype,
+          id,
+          type
         });
-
-        const command = new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: key,
-            Body: fileBuffer,
-            ContentType: 'image/jpeg'
+      } catch (error: any) {
+        console.error('FileStorageService: Image conversion failed', {
+          errorName: error.name,
+          errorMessage: error.message
         });
-
-        try {
-            await this.s3Client.send(command);
-            const fileUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
-            console.log('FileStorageService: Successfully uploaded', { fileUrl });
-            return fileUrl;
-        } catch (error: any) {
-            console.error('FileStorageService: Failed to upload', {
-                errorName: error.name,
-                errorMessage: error.message,
-                errorStack: error.stack,
-                key,
-                bucket: this.bucketName
-            });
-            throw new Error(`Failed to upload image to S3: ${error.message}`);
-        }
+        throw new Error('Failed to convert image to JPG');
+      }
     }
+
+    // Use existing URL's key if provided, otherwise generate a new key
+    let key: string;
+    if (existingUrl) {
+      const { key: existingKey, isValid } = this.parseS3Url(existingUrl);
+      if (!isValid) {
+        throw new Error('Invalid existing S3 URL format');
+      }
+      key = existingKey;
+      console.log('FileStorageService: Using existing URL key', { key });
+    } else {
+      key = `${type}/${id}`;
+    }
+
+    console.log('FileStorageService: Uploading file', {
+      key,
+      bucket: this.bucketName,
+      mimetype: file.mimetype,
+      size: fileBuffer.length
+    });
+
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: fileBuffer,
+      ContentType: 'image/jpeg'
+    });
+
+    try {
+      await this.s3Client.send(command);
+      const fileUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
+      console.log('FileStorageService: Successfully uploaded', { fileUrl });
+      return fileUrl;
+    } catch (error: any) {
+      console.error('FileStorageService: Failed to upload', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        key,
+        bucket: this.bucketName
+      });
+      throw new Error(`Failed to upload image to S3: ${error.message}`);
+    }
+  }
 }
