@@ -57,17 +57,17 @@ export class ProductRouter {
         );
 
         this.router.get(
-            '/:id',
-            ProductValidators.productId(),
-            ValidationMiddleware.handleValidationErrors(),
-            (req: Request, res: Response) => controller.getProduct(req, res)
-        );
-
-        this.router.get(
             '/restaurant',
             authMiddleware.authenticate,
             authMiddleware.requireRestaurantOwner,
             (req: AuthenticatedRequest, res: Response) => controller.getProductsByRestaurant(req, res)
+        );
+
+        this.router.get(
+            '/:id',
+            ProductValidators.productId(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: Request, res: Response) => controller.getProduct(req, res)
         );
 
         this.router.put(

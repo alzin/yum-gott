@@ -9,7 +9,7 @@ export class ProductController {
         private getProductsByRestaurantUseCase: GetProductsByRestaurantUseCase,
         private updateProductUseCase: UpdateProductUseCase,
         private deleteProductUseCase: DeleteProductUseCase
-    ) {}
+    ) { }
 
     async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -28,7 +28,7 @@ export class ProductController {
                 // restaurantOwnerId: user.userId, 
             };
 
-            const product = await this.createProductUseCase.execute(request , user.userId);
+            const product = await this.createProductUseCase.execute(request, user.userId);
             res.status(201).json({
                 success: true,
                 message: 'Product created successfully',
@@ -46,6 +46,7 @@ export class ProductController {
             const product = await this.getProductUseCase.execute(req.params.id);
             res.status(200).json({
                 success: true,
+                message: 'Get Product successfully',
                 data: product,
             });
         } catch (error) {
@@ -68,9 +69,11 @@ export class ProductController {
             }
 
             const products = await this.getProductsByRestaurantUseCase.execute(user.userId);
+            const productsWithoutId = products.map(({ id, restaurantOwnerId, createdAt, updatedAt, ...rest }) => rest);
             res.status(200).json({
                 success: true,
-                data: products,
+                message: 'Get All Products successfully',
+                data: productsWithoutId,
             });
         } catch (error) {
             res.status(400).json({
