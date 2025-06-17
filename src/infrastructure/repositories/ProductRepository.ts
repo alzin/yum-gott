@@ -30,7 +30,7 @@ export class ProductRepository implements IProductRepository {
         ];
 
         const result = await this.db.query(query, values);
-        return this.mapRowToProduct(result.row[0]);
+        return this.mapRowToProduct(result.rows[0]);
     }
     async findById(id: string): Promise<Product | null> {
         const query = 'SELECT * FROM products WHERE id = $1';

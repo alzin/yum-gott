@@ -25,14 +25,13 @@ export class ProductController {
             const request = {
                 ...req.body,
                 image: req.file,
-                restaurantOwnerId: user.userId, // Derived from token
+                // restaurantOwnerId: user.userId, 
             };
 
-            const product = await this.createProductUseCase.execute(request);
+            const product = await this.createProductUseCase.execute(request , user.userId);
             res.status(201).json({
                 success: true,
                 message: 'Product created successfully',
-                data: product,
             });
         } catch (error) {
             res.status(400).json({

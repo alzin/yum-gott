@@ -2,7 +2,7 @@ import { Product, SizeOption } from "@/domain/entities/Product";
 import { IProductRepository } from "@/domain/repositories";
 import { IRestaurantOwnerRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
 
 export interface CreateProductRequest {
     category: string;
@@ -12,7 +12,7 @@ export interface CreateProductRequest {
     discount?: number;
     addSize?: SizeOption;
     image?: Express.Multer.File;
-    restaurantOwnerId: string;
+    // Removed restaurantOwnerId from the request interface
 }
 
 export class CreateProductUseCase {
@@ -21,14 +21,15 @@ export class CreateProductUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
-    async execute(request: CreateProductRequest): Promise<Product> {
-        const { restaurantOwnerId, image, addSize } = request
+
+    async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
+        const { image, addSize } = request;
+
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
-        // Validate addSize if provided
         if (addSize && !Object.values(SizeOption).includes(addSize)) {
             throw new Error('Invalid size option');
         }
@@ -38,6 +39,7 @@ export class CreateProductUseCase {
         if (image) {
             imageUrl = await this.fileStorageService.uploadFile(image, uuidv4(), 'product');
         }
+
         const product: Product = {
             id: uuidv4(),
             category: request.category,

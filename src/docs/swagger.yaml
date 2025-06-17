@@ -380,7 +380,7 @@ paths:
       tags:
         - Products
       summary: Create a new product
-      description: Allows restaurant owners to create a new product with optional image upload
+      description: Allows restaurant owners to create a new product with optional image upload. The restaurant owner ID is derived from the authenticated user's access token.
       operationId: createProduct
       security:
         - cookieAuth: []
@@ -925,43 +925,34 @@ components:
       properties:
         category:
           type: string
-          maxLength: 100
           example: "Main Course"
+          maxLength: 100
         productName:
           type: string
+          example: "Grilled Salmon"
           maxLength: 255
-          example: "Chicken Alfredo"
         description:
           type: string
-          example: "Creamy pasta with grilled chicken"
+          example: "Freshly grilled salmon with herbs"
         price:
           type: number
           format: float
-          minimum: 0
           example: 15.99
+          minimum: 0
         discount:
           type: number
           format: float
+          example: 10
           minimum: 0
           maximum: 100
-          nullable: true
-          example: 10
         addSize:
           type: string
-          enum:
-            - Small
-            - Medium
-            - Large
-          nullable: true
-          example: "Medium"
+          enum: [Small, Medium, Large]
+          example: Medium
         image:
           type: string
           format: binary
           description: Product image file (JPEG, PNG, or GIF, max 5MB)
-        restaurantOwnerId:
-          type: string
-          format: uuid
-          example: "7db9be8e-72d8-1234-a456-426614174000"
     UpdateProductRequest:
       type: object
       properties:
