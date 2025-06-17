@@ -30,9 +30,21 @@ export class ProductValidators {
                 .isFloat({ min: 0, max: 100 })
                 .withMessage('Discount must be between 0 and 100'),
             body('addSize')
-                .optional()
+                .notEmpty()
+                .withMessage("Size is requierd")
                 .isIn(Object.values(SizeOption))
-                .withMessage('Size must be one of: Small, Medium, Large')
+                .withMessage('Size must be one of: Small, Medium, Large'),
+            body('image')
+                .custom((_, { req }) => {
+                    if (!req.file) {
+                        throw new Error('Product image is required');
+                    }
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(req.file.mimetype)) {
+                        throw new Error('Only JPEG, PNG, and GIF images are allowed');
+                    }
+                    return true;
+                })
         ];
     }
 
@@ -60,10 +72,23 @@ export class ProductValidators {
                 .isFloat({ min: 0, max: 100 })
                 .withMessage('Discount must be between 0 and 100'),
             body('addSize')
+                .notEmpty()
+                .withMessage('Size is required')
+                .isIn(['Small', 'Medium', 'Large'])
+                .withMessage('Size must be one of: Small, Medium, Large'),
+            body('image')
                 .optional()
-                .isIn(Object.values(SizeOption))
-                .withMessage('Size must be one of: Small, Medium, Large')
+                .custom((_, { req }) => {
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(req.file.mimetype)) {
+                        throw new Error('Only JPEG, PNG, and GIF images are allowed');
+                    }
+                    return true;
+                })
         ];
+
+
+
     }
 
     static productId(): ValidationChain[] {

@@ -1,7 +1,7 @@
 import { DatabaseConnection } from '../database/DataBaseConnection';
 import { injectable } from 'tsyringe';
-
-@injectable()
+ 
+@injectable() 
 export class EmailVerificationRepository {
   constructor(private db: DatabaseConnection) {}
 

@@ -37,7 +37,7 @@ export class CreateProductUseCase {
         // Upload image if provided
         let imageUrl: string | null = null;
         if (image) {
-            imageUrl = await this.fileStorageService.uploadFile(image, uuidv4(), 'product');
+            imageUrl = await this.fileStorageService.uploadProductFile(image, uuidv4(), 'product');
         }
 
         const product: Product = {
@@ -54,6 +54,13 @@ export class CreateProductUseCase {
             updatedAt: new Date()
         };
 
+        await this.checkExistingByName(request);
         return await this.productRepository.create(product);
+    }
+    private async checkExistingByName(request: CreateProductRequest): Promise<void> {
+        const productExists = await this.productRepository.checkExistingByName(request.productName);
+        if (productExists) {
+            throw new Error('Product already exists with this name');
+        }
     }
 }

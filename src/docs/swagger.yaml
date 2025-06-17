@@ -3,11 +3,7 @@ info:
   title: Yum-Gott Platform API
   description: API for the Yum-Gott platform, supporting customer and restaurant owner authentication, profile management, and product management.
   version: 1.0.0
-servers:
-  - url: http://localhost:3000
-    description: Local development server
-  - url: https://api.yum-gott.com
-    description: Production server
+
 paths:
   /health:
     get:
@@ -380,7 +376,7 @@ paths:
       tags:
         - Products
       summary: Create a new product
-      description: Allows restaurant owners to create a new product with optional image upload. The restaurant owner ID is derived from the authenticated user's access token.
+      description: Allows restaurant owners to create a new product with an image upload. The restaurant owner ID is derived from the authenticated user's access token.
       operationId: createProduct
       security:
         - cookieAuth: []
@@ -389,7 +385,44 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreateProductRequest'
+              type: object
+              required: []
+              properties:
+                category:
+                  type: string
+                  description: The category of the product
+                  example: "Pizza"
+                productName:
+                  type: string
+                  description: The name of the product
+                  example: "Margherita Pizza"
+                description:
+                  type: string
+                  description: A description of the product
+                  example: "Classic pizza with tomato sauce and mozzarella"
+                price:
+                  type: number
+                  format: float
+                  description: The price of the product
+                  example: 12.99
+                discount:
+                  type: number
+                  format: float
+                  description: Optional discount amount
+                  example: 1.50
+                addSize:
+                  type: string
+                  enum: [Small, Medium, Large]
+                  description: Optional size option
+                  example: "Medium"
+                image:
+                  type: string
+                  format: binary
+                  description: |
+                    Product image file
+                    - Max size: 5MB
+                    - Allowed formats: JPEG, PNG, GIF
+                    - Image will be automatically converted to JPG format
       responses:
         '201':
           description: Product created successfully
@@ -922,37 +955,43 @@ components:
         - productName
         - description
         - price
+        - image
       properties:
         category:
           type: string
-          example: "Main Course"
-          maxLength: 100
+          description: The category of the product
+          example: "Pizza"
         productName:
           type: string
-          example: "Grilled Salmon"
-          maxLength: 255
+          description: The name of the product
+          example: "Margherita Pizza"
         description:
           type: string
-          example: "Freshly grilled salmon with herbs"
+          description: A description of the product
+          example: "Classic pizza with tomato sauce and mozzarella"
         price:
           type: number
           format: float
-          example: 15.99
-          minimum: 0
+          description: The price of the product
+          example: 12.99
         discount:
           type: number
           format: float
-          example: 10
-          minimum: 0
-          maximum: 100
+          description: Optional discount amount
+          example: 1.50
         addSize:
           type: string
           enum: [Small, Medium, Large]
-          example: Medium
+          description: Optional size option
+          example: "Medium"
         image:
           type: string
           format: binary
-          description: Product image file (JPEG, PNG, or GIF, max 5MB)
+          description: |
+            Product image file (required)
+            - Max size: 5MB
+            - Allowed formats: JPEG, PNG, GIF
+            - Image will be automatically converted to JPG format
     UpdateProductRequest:
       type: object
       properties:

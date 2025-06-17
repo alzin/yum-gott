@@ -25,7 +25,7 @@ export class ProductController {
             const request = {
                 ...req.body,
                 image: req.file,
-                // restaurantOwnerId: user.userId, 
+                restaurantOwnerId: user.userId
             };
 
             const product = await this.createProductUseCase.execute(request, user.userId);
@@ -40,14 +40,18 @@ export class ProductController {
             });
         }
     }
-
     async getProduct(req: Request, res: Response): Promise<void> {
         try {
             const product = await this.getProductUseCase.execute(req.params.id);
+    
+            if (!product) throw new Error('Product not found');
+    
+            const { id, restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
+    
             res.status(200).json({
                 success: true,
                 message: 'Get Product successfully',
-                data: product,
+                data: productWithoutId,
             });
         } catch (error) {
             res.status(404).json({
@@ -56,6 +60,7 @@ export class ProductController {
             });
         }
     }
+    
 
     async getProductsByRestaurant(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -105,7 +110,6 @@ export class ProductController {
             res.status(200).json({
                 success: true,
                 message: 'Product updated successfully',
-                data: product,
             });
         } catch (error) {
             res.status(400).json({

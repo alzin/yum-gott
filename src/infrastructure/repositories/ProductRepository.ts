@@ -103,6 +103,12 @@ export class ProductRepository implements IProductRepository {
         await this.db.query(query, [id]);
     }
 
+    async checkExistingByName(productName: string): Promise<boolean> {
+        const query = 'SELECT 1 FROM products WHERE product_name = $1 LIMIT 1';
+        const result = await this.db.query(query, [productName]);
+        return result.rows.length > 0;
+    }
+
     private mapRowToProduct(row: any): Product {
         return {
             id: row.id,

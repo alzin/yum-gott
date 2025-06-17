@@ -1,8 +1,7 @@
 import { Product, SizeOption } from '@/domain/entities/Product';
 import { IProductRepository } from '@/domain/repositories/IProductRepository';
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
-import { v4 as uuidv4 } from 'uuid';
+
 
 export interface UpdateProductRequest {
     productId: string;
@@ -39,10 +38,23 @@ export class UpdateProductUseCase {
 
         let imageUrl = product.imageUrl;
         if (image) {
+            // If there's an existing image, delete it first
             if (product.imageUrl) {
-                await this.fileStorageService.deleteFile(product.imageUrl);
+                try {
+                    await this.fileStorageService.deleteFile(product.imageUrl);
+                } catch (error) {
+                    console.error('Failed to delete old image:', error);
+                    // Continue with upload even if deletion fails
+                }
             }
-            imageUrl = await this.fileStorageService.uploadFile(image, uuidv4(), 'product');
+            
+            // Upload the new image
+            imageUrl = await this.fileStorageService.uploadProductFile(
+                image, 
+                productId, 
+                'product',
+                product.imageUrl || undefined
+            );
         }
 
         const updatedProduct: Partial<Product> = {
@@ -58,4 +70,4 @@ export class UpdateProductUseCase {
 
         return await this.productRepository.update(productId, updatedProduct);
     }
-}
+} 

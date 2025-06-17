@@ -112,11 +112,12 @@ export class FileStorageService implements IFileStorageService {
     async uploadProductFile(
         file: Express.Multer.File,
         id: string,
-        type: 'customer' | 'restaurant_owner' | 'product'
+        type:  'restaurant_owner' | 'product',
+        existingUrl?: string
     ): Promise<string> {
-        const extension = 'jpg';
         let fileBuffer = file.buffer;
 
+        // Convert to JPG if needed
         if (file.mimetype !== 'image/jpeg') {
             try {
                 fileBuffer = await sharp(file.buffer)
@@ -136,7 +137,16 @@ export class FileStorageService implements IFileStorageService {
             }
         }
 
-        const key = `${type}/${id}.jpg`;
+        // Use existing URL's key if provided, otherwise generate a new key
+        let key: string;
+        if (existingUrl) {
+            // Extract the key from the existing URL
+            const urlParts = existingUrl.split('/');
+            key = urlParts.slice(3).join('/');
+            console.log('FileStorageService: Using existing URL key', { key });
+        } else {
+            key = `${type}/${id}`;
+        }
 
         console.log('FileStorageService: Uploading file', {
             key,
