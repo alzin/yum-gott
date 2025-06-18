@@ -1,3 +1,3 @@
 export * from './EmailService'
-export * from './FileStorageService'
+export * from './UploadImageStorageService'
 export * from './PasswordHasher'

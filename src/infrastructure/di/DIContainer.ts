@@ -1,17 +1,20 @@
 import { DatabaseConnection } from '../database/DataBaseConnection';
 import { CustomerRepository, RestaurantOwnerRepository, AuthRepository } from '../repositories/index';
 import { PasswordHasher, EmailService, FileStorageService } from '../services/index';
-import { 
-  RegisterCustomerUseCase, 
-  RegisterRestaurantOwnerUseCase, 
-  UploadProfileImageUseCase, 
-  CustomerLoginUseCase, 
-  RestaurantOwnerLoginUseCase, 
+import {
+  RegisterCustomerUseCase,
+  RegisterRestaurantOwnerUseCase,
+  UploadProfileImageUseCase,
+  CustomerLoginUseCase,
+  RestaurantOwnerLoginUseCase,
   UpdateRestaurantLocationUseCase,
-  GetRestaurantOwnerProfileUseCase 
+  GetRestaurantOwnerProfileUseCase
 } from '@/application/use-cases/auth/index';
-import { AuthController } from '@/presentation/controller/index';
+import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
+// import { Container } from 'inversify';
+import { ProductRepository } from '../repositories/index';
+import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 
 type DependencyFactory<T = any> = () => T;
 
@@ -29,6 +32,30 @@ export class DIContainer {
   public static getInstance(): DIContainer {
     if (!DIContainer.instance) {
       DIContainer.instance = new DIContainer();
+
+      // Register product-related dependencies
+      DIContainer.instance.registerSingleton('IProductRepository', () => new ProductRepository(DIContainer.instance.databaseConnection));
+      DIContainer.instance.registerTransient('createProductUseCase', () => new CreateProductUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository'),
+        DIContainer.instance.resolve('fileStorageService')
+      ));
+      DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(
+        DIContainer.instance.resolve('IProductRepository')
+      ));
+      DIContainer.instance.registerTransient('getProductsByRestaurantUseCase', () => new GetProductsByRestaurantUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository')
+      ));
+      DIContainer.instance.registerTransient('updateProductUseCase', () => new UpdateProductUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('fileStorageService')
+      ));
+      DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository'),
+        DIContainer.instance.resolve('fileStorageService')
+      ));
     }
     return DIContainer.instance;
   }
@@ -43,27 +70,27 @@ export class DIContainer {
       console.log('DIContainer: Registering databaseConnection');
       return DatabaseConnection.getInstance();
     });
-    
+
     this.registerSingleton('customerRepository', () => {
       console.log('DIContainer: Registering customerRepository');
       return new CustomerRepository(this.resolve('databaseConnection'));
     });
-    
+
     this.registerSingleton('restaurantOwnerRepository', () => {
       console.log('DIContainer: Registering restaurantOwnerRepository');
       return new RestaurantOwnerRepository(this.resolve('databaseConnection'));
     });
-    
+
     this.registerSingleton('authRepository', () => {
       console.log('DIContainer: Registering authRepository');
       return new AuthRepository();
     });
-    
+
     this.registerSingleton('passwordHasher', () => {
       console.log('DIContainer: Registering passwordHasher');
       return new PasswordHasher();
     });
-    
+
     this.registerSingleton('emailService', () => {
       console.log('DIContainer: Registering emailService');
       return new EmailService();
@@ -137,7 +164,7 @@ export class DIContainer {
 
     this.registerSingleton('authController', () => {
       console.log('DIContainer: Registering authController');
-  
+      return new AuthController();
     });
 
     this.registerSingleton('authMiddleware', () => {
@@ -150,6 +177,8 @@ export class DIContainer {
     this.factories.set(key, factory);
     this.singletons.add(key);
   }
+
+
 
   private registerTransient<T>(key: string, factory: DependencyFactory<T>): void {
     this.factories.set(key, factory);

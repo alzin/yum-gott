@@ -9,7 +9,7 @@ import {
   verifyEmail,
   uploadProfileImage,
   updateRestaurantLocation
-} from '../controller';
+} from '../controller/Users';
 import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';

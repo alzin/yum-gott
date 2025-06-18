@@ -2,9 +2,9 @@ import { Product, SizeOption } from "@/domain/entities/Product";
 import { IProductRepository } from "@/domain/repositories";
 import { IRestaurantOwnerRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
 
-export interface CreateProductUseCase {
+export interface CreateProductRequest {
     category: string;
     productName: string;
     description: string;
@@ -12,7 +12,7 @@ export interface CreateProductUseCase {
     discount?: number;
     addSize?: SizeOption;
     image?: Express.Multer.File;
-    restaurantOwnerId: string;
+    // Removed restaurantOwnerId from the request interface
 }
 
 export class CreateProductUseCase {
@@ -21,14 +21,15 @@ export class CreateProductUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
-    async execute(request: CreateProductUseCase): Promise<Product> {
-        const { restaurantOwnerId, image, addSize } = request
+
+    async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
+        const { image, addSize } = request;
+
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
-        // Validate addSize if provided
         if (addSize && !Object.values(SizeOption).includes(addSize)) {
             throw new Error('Invalid size option');
         }
@@ -36,8 +37,9 @@ export class CreateProductUseCase {
         // Upload image if provided
         let imageUrl: string | null = null;
         if (image) {
-            imageUrl = await this.fileStorageService.uploadFile(image, uuidv4(), 'product');
+            imageUrl = await this.fileStorageService.UploadProductImage(image, uuidv4(), 'product');
         }
+
         const product: Product = {
             id: uuidv4(),
             category: request.category,
@@ -52,7 +54,13 @@ export class CreateProductUseCase {
             updatedAt: new Date()
         };
 
+        await this.ExistingByNameAndRestaurantId(request, restaurantOwnerId);
         return await this.productRepository.create(product);
     }
-
+    private async ExistingByNameAndRestaurantId(request: CreateProductRequest, restaurantOwnerId: string): Promise<void> {
+        const productExists = await this.productRepository.ExistingByNameAndRestaurantId(request.productName, restaurantOwnerId);
+        if (productExists) {
+            throw new Error('Product already exists with this name in your restaurant');
+        }
+    }
 }

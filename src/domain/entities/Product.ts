@@ -1,5 +1,5 @@
 export enum SizeOption {
-    SMALL = 'small',
+    SMALL = 'Small',
     MEDIUM = 'Medium',
     LARGE = 'Large'
 }

@@ -38,7 +38,7 @@ export class UploadProfileImageUseCase {
 
         let profileImageUrl: string;
         try {
-            profileImageUrl = await this.fileStorageService.uploadFile(file, userId, userTypeFromToken);
+            profileImageUrl = await this.fileStorageService.UploadImageProfile(file, userId, userTypeFromToken);
         } catch (error) {
             throw new Error('Failed to upload image to S3');
         }
@@ -50,7 +50,7 @@ export class UploadProfileImageUseCase {
                 await this.restaurantOwnerRepository.updateProfileImage(userId, profileImageUrl);
             }
         } catch (error) {
-            await this.fileStorageService.deleteFile(profileImageUrl);
+            await this.fileStorageService.DeleteOldImage(profileImageUrl);
             throw new Error('Failed to update profile image in database');
         }
         return { profileImageUrl };

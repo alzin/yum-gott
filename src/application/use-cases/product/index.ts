@@ -1,3 +1,5 @@
 export * from './CreateProductUseCase'
 export * from './GetProductUseCase'
 export * from './GetProductsByRestaurantUseCase'
+export * from './UpdateProductUseCase'
+export * from './DeleteProductUseCase'
