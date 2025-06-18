@@ -164,7 +164,7 @@ export class DIContainer {
 
     this.registerSingleton('authController', () => {
       console.log('DIContainer: Registering authController');
-
+      return new AuthController();
     });
 
     this.registerSingleton('authMiddleware', () => {

@@ -11,9 +11,9 @@ async function setupAndMigrateDatabase() {
   try {
     console.log('🔧 Setting up and migrating database...');
 
-    const migrationPaths = [
-      path.join(__dirname, 'migrations', '000_full_users_setup.sql'),
-      path.join(__dirname, 'migrations', '001_create_products_table.sql')
+    const migrationPaths = [ 
+      path.join(__dirname, 'migrations', 'full_users_setup.sql'),
+      path.join(__dirname, 'migrations', 'create_products_table.sql')
     ];
 
     for (const filePath of migrationPaths) {

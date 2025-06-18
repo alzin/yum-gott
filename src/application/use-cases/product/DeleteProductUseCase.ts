@@ -26,7 +26,7 @@ export class DeleteProductUseCase {
         }
 
         if (product.imageUrl) {
-            await this.fileStorageService.deleteFile(product.imageUrl);
+            await this.fileStorageService.DeleteOldImage(product.imageUrl);
         }
 
         await this.productRepository.delete(productId)

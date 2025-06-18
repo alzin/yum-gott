@@ -7,7 +7,7 @@ export class getRestaurantOwnerProfile {
 
     getRestaurantOwnerProfile = async (req: Request, res: Response): Promise<void> => {
         try {
-            const user = (req as any).user; // From AuthMiddleware
+            const user = (req as any).user;
             if (!user || user.userType !== 'restaurant_owner') {
                 res.status(403).json({
                     success: false,

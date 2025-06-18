@@ -41,7 +41,7 @@ export class UpdateProductUseCase {
             // If there's an existing image, delete it first
             if (product.imageUrl) {
                 try {
-                    await this.fileStorageService.deleteFile(product.imageUrl);
+                    await this.fileStorageService.DeleteOldImage(product.imageUrl);
                 } catch (error) {
                     console.error('Failed to delete old image:', error);
                     // Continue with upload even if deletion fails
@@ -49,7 +49,7 @@ export class UpdateProductUseCase {
             }
             
             // Upload the new image
-            imageUrl = await this.fileStorageService.uploadProductFile(
+            imageUrl = await this.fileStorageService.UploadProductImage(
                 image, 
                 productId, 
                 'product',

@@ -39,7 +39,7 @@ export class ProductValidators {
                     if (!req.file) {
                         throw new Error('Product image is required');
                     }
-                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    const allowedTypes = ['image/jpeg', 'image/png'];
                     if (!allowedTypes.includes(req.file.mimetype)) {
                         throw new Error('Only JPEG, PNG, and GIF images are allowed');
                     }
@@ -79,7 +79,7 @@ export class ProductValidators {
             body('image')
                 .optional()
                 .custom((_, { req }) => {
-                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    const allowedTypes = ['image/jpeg', 'image/png'];
                     if (!allowedTypes.includes(req.file.mimetype)) {
                         throw new Error('Only JPEG, PNG, and GIF images are allowed');
                     }

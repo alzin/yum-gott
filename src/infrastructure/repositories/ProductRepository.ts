@@ -107,9 +107,9 @@ export class ProductRepository implements IProductRepository {
         await this.db.query(query, [id]);
     }
 
-    async checkExistingByName(productName: string): Promise<boolean> {
-        const query = 'SELECT 1 FROM products WHERE product_name = $1 LIMIT 1';
-        const result = await this.db.query(query, [productName]);
+    async ExistingByNameAndRestaurantId(productName: string, restaurantOwnerId: string): Promise<boolean> {
+        const query = 'SELECT 1 FROM products WHERE product_name = $1 AND restaurant_owner_id = $2 LIMIT 1';
+        const result = await this.db.query(query, [productName, restaurantOwnerId]);
         return result.rows.length > 0;
     }
 
