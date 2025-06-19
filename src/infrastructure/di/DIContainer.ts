@@ -1,5 +1,5 @@
 import { DatabaseConnection } from '../database/DataBaseConnection';
-import { CustomerRepository, RestaurantOwnerRepository, AuthRepository } from '../repositories/index';
+import { CustomerRepository, RestaurantOwnerRepository, AuthRepository, ProductRepository } from '../repositories/index';
 import { PasswordHasher, EmailService, FileStorageService } from '../services/index';
 import {
   RegisterCustomerUseCase,
@@ -12,9 +12,10 @@ import {
 } from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
-// import { Container } from 'inversify';
-import { ProductRepository } from '../repositories/index';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
+// import { IProductOptionRepository, IProductOptionValueRepository, IRestaurantOwnerRepository, IProductRepository } from '@/domain/repositories/index';
+import { ProductOptionRepository, ProductOptionValueRepository } from '@/infrastructure/repositories/index';
+import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
 
 type DependencyFactory<T = any> = () => T;
 
@@ -55,6 +56,36 @@ export class DIContainer {
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('restaurantOwnerRepository'),
         DIContainer.instance.resolve('fileStorageService')
+      ));
+
+      // Register product option repositories and use cases
+      DIContainer.instance.registerSingleton('productOptionRepository', () => new ProductOptionRepository(DIContainer.instance.databaseConnection));
+      DIContainer.instance.registerSingleton('productOptionValueRepository', () => new ProductOptionValueRepository(DIContainer.instance.databaseConnection));
+
+      DIContainer.instance.registerTransient('createProductOptionUseCase', () => new CreateProductOptionUseCase(
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('IProductRepository')
+      ));
+      DIContainer.instance.registerTransient('createProductOptionValueUseCase', () => new CreateProductOptionValueUseCase(
+        DIContainer.instance.resolve('productOptionValueRepository'),
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('IProductRepository')
+      ));
+      DIContainer.instance.registerTransient('getProductOptionsUseCase', () => new GetProductOptionsUseCase(
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('productOptionValueRepository'),
+        DIContainer.instance.resolve('IProductRepository')
+      ));
+      DIContainer.instance.registerTransient('deleteProductOptionUseCase', () => new DeleteProductOptionUseCase(
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('productOptionValueRepository'),
+        DIContainer.instance.resolve('IProductRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository')
+      ));
+      DIContainer.instance.registerTransient('deleteProductOptionValueUseCase', () => new DeleteProductOptionValueUseCase(
+        DIContainer.instance.resolve('productOptionValueRepository'),
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('IProductRepository')
       ));
     }
     return DIContainer.instance;
@@ -177,8 +208,6 @@ export class DIContainer {
     this.factories.set(key, factory);
     this.singletons.add(key);
   }
-
-
 
   private registerTransient<T>(key: string, factory: DependencyFactory<T>): void {
     this.factories.set(key, factory);
