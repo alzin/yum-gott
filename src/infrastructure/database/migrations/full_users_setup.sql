@@ -3,9 +3,9 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Drop existing tables if they exist
-DROP TABLE IF EXISTS restaurant_owners CASCADE;
-DROP TABLE IF EXISTS customers CASCADE;
-DROP TYPE IF EXISTS user_type CASCADE;
+-- DROP TABLE IF EXISTS restaurant_owners CASCADE;
+-- DROP TABLE IF EXISTS customers CASCADE;
+-- DROP TYPE IF EXISTS user_type CASCADE;
 
 -- Create customers table
 CREATE TABLE customers (

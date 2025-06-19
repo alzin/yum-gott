@@ -116,6 +116,7 @@ export class ProductRouter {
             authMiddleware.authenticate,
             authMiddleware.requireRestaurantOwner,
             SanitizationMiddleware.allowedFields(['name']),
+            ProductValidators.productIdParam(),
             ProductOptionValidators.createProductOption(),
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => productOptionController.createProductOption(req, res)
@@ -135,7 +136,7 @@ export class ProductRouter {
             '/:productId/options',
             authMiddleware.authenticate,
             authMiddleware.requireRestaurantOwner,
-            ProductValidators.productId(),
+            ProductValidators.productIdParam(),
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => productOptionController.getProductOptions(req, res)
         );

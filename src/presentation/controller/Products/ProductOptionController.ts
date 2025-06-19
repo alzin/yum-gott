@@ -9,7 +9,7 @@ export class ProductOptionController {
         private getProductOptionsUseCase: GetProductOptionsUseCase,
         private deleteProductOptionUseCase: DeleteProductOptionUseCase,
         private deleteProductOptionValueUseCase: DeleteProductOptionValueUseCase
-    ) {}
+    ) { }
 
     async createProductOption(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -31,7 +31,7 @@ export class ProductOptionController {
             res.status(201).json({
                 success: true,
                 message: 'Product option created successfully',
-                data: option
+                // data: option
             });
         } catch (error) {
             res.status(400).json({
@@ -62,7 +62,7 @@ export class ProductOptionController {
             res.status(201).json({
                 success: true,
                 message: 'Product option value created successfully',
-                data: value
+                // data: value
             });
         } catch (error) {
             res.status(400).json({
@@ -84,10 +84,17 @@ export class ProductOptionController {
             }
 
             const options = await this.getProductOptionsUseCase.execute(req.params.productId, user.userId);
+            const filteredOptions = options.map(option => ({
+                name: option.name,
+                values: option.values.map(value => ({
+                    name: value.name,
+                    additionalPrice: value.additionalPrice
+                }))
+            }));
             res.status(200).json({
                 success: true,
                 message: 'Product options retrieved successfully',
-                data: options
+                data: filteredOptions
             });
         } catch (error) {
             res.status(400).json({
