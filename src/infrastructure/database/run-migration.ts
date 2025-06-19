@@ -13,7 +13,8 @@ async function setupAndMigrateDatabase() {
 
     const migrationPaths = [ 
       path.join(__dirname, 'migrations', 'full_users_setup.sql'),
-      path.join(__dirname, 'migrations', 'create_products_table.sql')
+      path.join(__dirname, 'migrations', 'create_products_table.sql'),
+      path.join(__dirname, 'migrations', 'create_product_options_table.sql')
     ];
 
     for (const filePath of migrationPaths) {

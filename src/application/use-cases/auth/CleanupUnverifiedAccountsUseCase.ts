@@ -1,5 +1,4 @@
-import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { ICustomerRepository , IRestaurantOwnerRepository } from '@/domain/repositories/index';
 
 export class CleanupUnverifiedAccountsUseCase {
     constructor(

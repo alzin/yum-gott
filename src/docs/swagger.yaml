@@ -385,44 +385,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: object
-              required: []
-              properties:
-                category:
-                  type: string
-                  description: The category of the product
-                  example: "Pizza"
-                productName:
-                  type: string
-                  description: The name of the product
-                  example: "Margherita Pizza"
-                description:
-                  type: string
-                  description: A description of the product
-                  example: "Classic pizza with tomato sauce and mozzarella"
-                price:
-                  type: number
-                  format: float
-                  description: The price of the product
-                  example: 12.99
-                discount:
-                  type: number
-                  format: float
-                  description: Optional discount amount
-                  example: 1.50
-                addSize:
-                  type: string
-                  enum: [Small, Medium, Large]
-                  description: Optional size option
-                  example: "Medium"
-                image:
-                  type: string
-                  format: binary
-                  description: |
-                    Product image file
-                    - Max size: 5MB
-                    - Allowed formats: JPEG, PNG, GIF
-                    - Image will be automatically converted to JPG format
+              $ref: '#/components/schemas/CreateProductRequest'
       responses:
         '201':
           description: Product created successfully
@@ -587,6 +550,230 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
+  /api/products/{productId}/options:
+    post:
+      tags:
+        - Products_option
+      summary: Create a product option
+      description: Allows restaurant owners to create a new option for a product (e.g., "Cheese", "Spiciness").
+      operationId: createProductOption
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Product ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Name of the option
+                  example: "Cheese"
+      responses:
+        '201':
+          description: Product option created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option created successfully"
+                  data:
+                    $ref: '#/components/schemas/ProductOption'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    get:
+      tags:
+        - Products_option
+      summary: Get all options for a product
+      description: Retrieves all options and their values for a specific product
+      operationId: getProductOptions
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Product ID
+      responses:
+        '200':
+          description: Product options retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product options retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductOptionWithValues'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+  /api/products/options/{optionId}/values:
+    post:
+      tags:
+        - Products_option
+      summary: Create a product option value
+      description: Allows restaurant owners to add a value to an existing product option (e.g., "1 slice" for "Cheese").
+      operationId: createProductOptionValue
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: optionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Option ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Name of the option value
+                  example: "1 slice"
+                additionalPrice:
+                  type: number
+                  format: float
+                  description: Optional additional price for the option value
+                  example: 1.50
+      responses:
+        '201':
+          description: Product option value created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option value created successfully"
+                  data:
+                    $ref: '#/components/schemas/ProductOptionValue'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+  /api/products/options/{optionId}:
+    delete:
+      tags:
+        - Products_option
+      summary: Delete a product option
+      description: Allows restaurant owners to delete a product option and its associated values
+      operationId: deleteProductOption
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: optionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Option ID
+      responses:
+        '200':
+          description: Product option deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option deleted successfully"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+  /api/products/option-values/{valueId}:
+    delete:
+      tags:
+        - Products_option
+      summary: Delete a product option value
+      description: Allows restaurant owners to delete a specific product option value
+      operationId: deleteProductOptionValue
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: valueId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Option value ID
+      responses:
+        '200':
+          description: Product option value deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option value deleted successfully"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
 components:
   securitySchemes:
     cookieAuth:
@@ -1030,6 +1217,65 @@ components:
           type: string
           format: binary
           description: Product image file (JPEG, PNG, or GIF, max 5MB)
+    ProductOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        productId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          example: "Cheese"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-06-18T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-06-18T12:00:00Z"
+    ProductOptionValue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        optionId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "1 slice"
+        additionalPrice:
+          type: number
+          format: float
+          nullable: true
+          example: 1.50
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-06-18T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-06-18T12:00:00Z"
+    ProductOptionWithValues:
+      allOf:
+        - $ref: '#/components/schemas/ProductOption'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProductOptionValue'
+
 tags:
   - name: Health Check
     description: Server health monitoring endpoints
@@ -1037,5 +1283,5 @@ tags:
     description: User registration, login, and profile management
   - name: Products
     description: Product management for restaurant owners
-security:
-  - cookieAuth: []
+  - name: Products_option
+    description: Product_option management for product

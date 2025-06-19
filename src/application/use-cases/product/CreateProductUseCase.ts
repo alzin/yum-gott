@@ -1,6 +1,5 @@
 import { Product, SizeOption } from "@/domain/entities/Product";
-import { IProductRepository } from "@/domain/repositories";
-import { IRestaurantOwnerRepository } from "@/domain/repositories";
+import { IProductRepository , IRestaurantOwnerRepository} from "@/domain/repositories/index";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
 import { v4 as uuidv4 } from 'uuid';
 

@@ -86,14 +86,19 @@ export class ProductValidators {
                     return true;
                 })
         ];
-
-
-
     }
 
     static productId(): ValidationChain[] {
         return [
             param('id')
+                .isUUID()
+                .withMessage('Invalid product ID format')
+        ];
+    }
+
+    static productIdParam(): ValidationChain[] {
+        return [
+            param('productId')
                 .isUUID()
                 .withMessage('Invalid product ID format')
         ];
