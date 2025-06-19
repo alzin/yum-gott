@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { ProductController } from '../controller/Products/index';
+import { ProductController, ProductOptionController } from '../controller/Products/index';
 import { AuthenticatedRequest, SanitizationMiddleware, ValidationMiddleware } from '../middleware';
 import { ProductValidators } from '../validators/ProductValidators';
+import { ProductOptionValidators } from '../validators/ProductOptionValidators';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 import multer from 'multer';
 
@@ -36,6 +37,14 @@ export class ProductRouter {
             this.diContainer.resolve('getProductsByRestaurantUseCase'),
             this.diContainer.resolve('updateProductUseCase'),
             this.diContainer.resolve('deleteProductUseCase')
+
+        );
+        const productOptionController = new ProductOptionController(
+            this.diContainer.resolve('createProductOptionUseCase'),
+            this.diContainer.resolve('createProductOptionValueUseCase'),
+            this.diContainer.resolve('getProductOptionsUseCase'),
+            this.diContainer.resolve('deleteProductOptionUseCase'),
+            this.diContainer.resolve('deleteProductOptionValueUseCase')
         );
 
         this.router.post(
@@ -99,7 +108,58 @@ export class ProductRouter {
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => controller.deleteProduct(req, res)
         );
+
+
+
+        this.router.post(
+            '/:productId/options',
+            authMiddleware.authenticate,
+            authMiddleware.requireRestaurantOwner,
+            SanitizationMiddleware.allowedFields(['name']),
+            ProductOptionValidators.createProductOption(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: AuthenticatedRequest, res: Response) => productOptionController.createProductOption(req, res)
+        );
+
+        this.router.post(
+            '/options/:optionId/values',
+            authMiddleware.authenticate,
+            authMiddleware.requireRestaurantOwner,
+            SanitizationMiddleware.allowedFields(['name', 'additionalPrice']),
+            ProductOptionValidators.createProductOptionValue(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: AuthenticatedRequest, res: Response) => productOptionController.createProductOptionValue(req, res)
+        );
+
+        this.router.get(
+            '/:productId/options',
+            authMiddleware.authenticate,
+            authMiddleware.requireRestaurantOwner,
+            ProductValidators.productId(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: AuthenticatedRequest, res: Response) => productOptionController.getProductOptions(req, res)
+        );
+
+        this.router.delete(
+            '/options/:optionId',
+            authMiddleware.authenticate,
+            authMiddleware.requireRestaurantOwner,
+            ProductOptionValidators.optionId(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: AuthenticatedRequest, res: Response) => productOptionController.deleteProductOption(req, res)
+        );
+
+        this.router.delete(
+            '/option-values/:valueId',
+            authMiddleware.authenticate,
+            authMiddleware.requireRestaurantOwner,
+            ProductOptionValidators.valueId(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: AuthenticatedRequest, res: Response) => productOptionController.deleteProductOptionValue(req, res)
+        );
     }
+
+
 
     public getRouter(): Router {
         return this.router;
