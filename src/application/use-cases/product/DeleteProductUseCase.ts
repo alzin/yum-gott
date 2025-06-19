@@ -1,7 +1,5 @@
-import { IProductRepository } from "@/domain/repositories";
+import { IProductRepository , IRestaurantOwnerRepository} from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
-import { IRestaurantOwnerRepository } from "@/domain/repositories";
-
 
 export interface DeleteProductRequest {
     productId: string;

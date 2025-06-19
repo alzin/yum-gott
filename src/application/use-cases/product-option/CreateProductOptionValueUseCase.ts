@@ -1,7 +1,6 @@
 import { ProductOptionValue } from '@/domain/entities/ProductOptionValue';
-import { IProductOptionRepository } from '@/domain/repositories/IProductOptionRepository';
-import { IProductOptionValueRepository } from '@/domain/repositories/IProductOptionValueRepository';
-import { IProductRepository } from '@/domain/repositories/IProductRepository';
+import { IProductOptionRepository, IProductRepository, IProductOptionValueRepository } from '@/domain/repositories/index';
+
 // import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,7 +16,7 @@ export class CreateProductOptionValueUseCase {
         private productOptionRepository: IProductOptionRepository,
         private productRepository: IProductRepository,
         // private restaurantOwnerRepository: IRestaurantOwnerRepository
-    ) {}
+    ) { }
 
     async execute(request: CreateProductOptionValueRequest, restaurantOwnerId: string): Promise<ProductOptionValue> {
         const { optionId, name, additionalPrice } = request;

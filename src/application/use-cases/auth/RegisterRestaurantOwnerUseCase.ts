@@ -1,10 +1,8 @@
-import { RestaurantOwner } from '@/domain/entities/User';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { RestaurantOwner , AuthToken } from '@/domain/entities/index';
+import { IRestaurantOwnerRepository , IAuthRepository} from '@/domain/repositories/index';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 import { EmailService } from '@/infrastructure/services/EmailService';
-import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { v4 as uuidv4 } from 'uuid';
-import { AuthToken } from '@/domain/entities/AuthToken';
 
 export interface RegisterRestaurantOwnerRequest {
     restaurantName: string;

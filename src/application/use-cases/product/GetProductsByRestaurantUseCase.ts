@@ -1,6 +1,5 @@
 import { Product } from '@/domain/entities/Product';
-import { IProductRepository } from '@/domain/repositories/IProductRepository';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { IProductRepository , IRestaurantOwnerRepository} from '@/domain/repositories/index';
 
 export class GetProductsByRestaurantUseCase {
     constructor(

@@ -1,7 +1,4 @@
-import { IProductOptionRepository } from '@/domain/repositories/IProductOptionRepository';
-import { IProductOptionValueRepository } from '@/domain/repositories/IProductOptionValueRepository';
-import { IProductRepository } from '@/domain/repositories/IProductRepository';
-import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
+import { IProductOptionRepository ,IRestaurantOwnerRepository ,IProductOptionValueRepository ,IProductRepository} from '@/domain/repositories/index';
 
 export interface DeleteProductOptionRequest {
     optionId: string;

@@ -1,6 +1,5 @@
 import { ProductOption } from '@/domain/entities/ProductOption';
-import { IProductOptionRepository } from '@/domain/repositories/IProductOptionRepository';
-import { IProductRepository } from '@/domain/repositories/IProductRepository';
+import { IProductOptionRepository , IProductRepository } from '@/domain/repositories/index';
 // import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
 import { v4 as uuidv4 } from 'uuid';
 

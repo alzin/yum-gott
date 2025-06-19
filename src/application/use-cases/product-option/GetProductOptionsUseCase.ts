@@ -1,8 +1,5 @@
-import { ProductOption } from "@/domain/entities/ProductOption";
-import { IProductOptionRepository } from "@/domain/repositories/IProductOptionRepository";
-import { ProductOptionValue } from "@/domain/entities/ProductOptionValue";
-import { IProductOptionValueRepository } from "@/domain/repositories/IProductOptionValueRepository";
-import { IProductRepository } from "@/domain/repositories";
+import { ProductOption , ProductOptionValue } from "@/domain/entities/index";
+import { IProductOptionValueRepository , IProductOptionRepository , IProductRepository } from "@/domain/repositories/index";
 // import { IRestaurantOwnerRepository } from "@/domain/repositories";
 
 export interface ProductOptionWithValue extends ProductOption{
