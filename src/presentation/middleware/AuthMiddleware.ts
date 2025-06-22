@@ -5,9 +5,10 @@ import { setAuthCookies } from '@/shared/utils/cookieUtils';
 
 export interface AuthenticatedRequest extends Request {
   user?: JWTpayload;
-}   
+}
+
 export class AuthMiddleware {
-  constructor(private authRepository: IAuthRepository) { }
+  constructor(private authRepository: IAuthRepository) {}
 
   private extractToken(req: Request): string | null {
     if (req.cookies?.accessToken) {
@@ -24,10 +25,11 @@ export class AuthMiddleware {
 
   private async tryRefreshToken(req: Request, res: Response): Promise<JWTpayload | null> {
     const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) return null;
+    const accessToken = this.extractToken(req);
+    if (!refreshToken || !accessToken) return null;
 
     try {
-      const newTokens = await this.authRepository.refreshToken(refreshToken);
+      const newTokens = await this.authRepository.refreshToken(refreshToken, accessToken);
       setAuthCookies(res, newTokens);
       return await this.authRepository.verifyToken(newTokens.accessToken);
     } catch (error) {
@@ -40,7 +42,7 @@ export class AuthMiddleware {
     if (!authReq.user || authReq.user.userType !== 'restaurant_owner') {
       res.status(403).json({
         success: false,
-        message: 'Forbidden: Only restaurant owners can access this endpoint'
+        message: 'Forbidden: Only restaurant owners can access this endpoint',
       });
       return;
     }
@@ -56,10 +58,24 @@ export class AuthMiddleware {
         return;
       }
 
-      const payload = await this.authRepository.verifyToken(token);
+      let payload = await this.authRepository.verifyToken(token);
       req.user = payload;
-      next();
 
+      // Perform token rotation
+      const refreshToken = req.cookies?.refreshToken;
+      if (refreshToken) {
+        try {
+          const newTokens = await this.authRepository.refreshToken(refreshToken, token);
+          setAuthCookies(res, newTokens);
+          payload = await this.authRepository.verifyToken(newTokens.accessToken);
+          req.user = payload;
+        } catch (error) {
+          console.warn('Token rotation failed:', error);
+          // Proceed with the current valid token
+        }
+      }
+
+      next();
     } catch (error) {
       const refreshedPayload = await this.tryRefreshToken(req, res);
       if (refreshedPayload) {

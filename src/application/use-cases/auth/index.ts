@@ -8,3 +8,4 @@ export * from './CleanupUnverifiedAccountsUseCase';
 export * from './UpdateRestaurantLocationUseCase';
 export * from './GetRestaurantOwnerProfileUseCase';
 export * from './LogoutuseCase';
+export * from './RefreshTokenUseCase';
