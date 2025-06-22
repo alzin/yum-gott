@@ -17,6 +17,7 @@ import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase
 // import { IProductOptionRepository, IProductOptionValueRepository, IRestaurantOwnerRepository, IProductRepository } from '@/domain/repositories/index';
 import { ProductOptionRepository, ProductOptionValueRepository } from '@/infrastructure/repositories/index';
 import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
+import { RefreshTokenUseCase } from '@/application/use-cases/auth/RefreshTokenUseCase';
 
 type DependencyFactory<T = any> = () => T;
 
@@ -93,6 +94,12 @@ export class DIContainer {
       DIContainer.instance.registerTransient('logoutUseCase', () => {
         console.log('DIContainer: Registering logoutUseCase');
         return new LogoutUseCase(DIContainer.instance.resolve('authRepository'));
+      });
+
+      // Register refresh token use case
+      DIContainer.instance.registerTransient('refreshTokenUseCase', () => {
+        console.log('DIContainer: Registering refreshTokenUseCase');
+        return new RefreshTokenUseCase(DIContainer.instance.resolve('authRepository'));
       });
     }
     return DIContainer.instance;
