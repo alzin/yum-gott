@@ -29,11 +29,11 @@ export class ProductValidators {
                 .optional()
                 .isFloat({ min: 0, max: 100 })
                 .withMessage('Discount must be between 0 and 100'),
-            body('addSize')
-                .notEmpty()
-                .withMessage("Size is requierd")
-                .isIn(Object.values(SizeOption))
-                .withMessage('Size must be one of: Small, Medium, Large'),
+            // body('addSize')
+            //     .notEmpty()
+            //     .withMessage("Size is requierd")
+            //     .isIn(Object.values(SizeOption))
+            //     .withMessage('Size must be one of: Small, Medium, Large'),
             body('image')
                 .custom((_, { req }) => {
                     if (!req.file) {
