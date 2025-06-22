@@ -18,7 +18,7 @@ export class LogoutUseCase {
 
     async execute(request: LogoutRequest, res: Response): Promise<LogoutResponse> {
         try {
-            await this.authRepository.refreshToken(request.refreshToken);
+            await this.authRepository.invalidateRefreshToken(request.refreshToken);
 
             clearAuthCookies(res);
 
