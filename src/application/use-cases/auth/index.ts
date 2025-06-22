@@ -6,4 +6,5 @@ export * from './UploadProfileImageUseCase';
 export * from './CustomerLoginUseCase';
 export * from './CleanupUnverifiedAccountsUseCase';
 export * from './UpdateRestaurantLocationUseCase';
-export * from './GetRestaurantOwnerProfileUseCase'
+export * from './GetRestaurantOwnerProfileUseCase';
+export * from './LogoutuseCase';

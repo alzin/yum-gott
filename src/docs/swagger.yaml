@@ -13,7 +13,7 @@ paths:
       description: Check if the API server is running and healthy
       operationId: checkHealth
       responses:
-        '200':
+        "200":
           description: Server is healthy
           content:
             application/json:
@@ -43,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterCustomerRequest'
+              $ref: "#/components/schemas/RegisterCustomerRequest"
             examples:
               validCustomer:
                 summary: Valid customer registration
@@ -53,7 +53,7 @@ paths:
                   mobileNumber: "01234567890"
                   password: "SecurePass123"
       responses:
-        '201':
+        "201":
           description: Customer registration initiated successfully
           content:
             application/json:
@@ -66,8 +66,8 @@ paths:
                   message:
                     type: string
                     example: "Customer registration initiated. Please check your email for verification link."
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
   /api/auth/register/restaurant-owner:
     post:
       tags:
@@ -80,7 +80,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterRestaurantOwnerRequest'
+              $ref: "#/components/schemas/RegisterRestaurantOwnerRequest"
             examples:
               validOwner:
                 summary: Valid restaurant owner registration
@@ -91,7 +91,7 @@ paths:
                   mobileNumber: "09876543210"
                   password: "SecurePass123"
       responses:
-        '201':
+        "201":
           description: Restaurant owner registration initiated successfully
           content:
             application/json:
@@ -104,8 +104,8 @@ paths:
                   message:
                     type: string
                     example: "Restaurant owner registration initiated. Please check your email for verification link."
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
   /api/auth/verify:
     get:
       tags:
@@ -123,7 +123,7 @@ paths:
           description: Verification token sent to the user's email
           example: 550e8400-e29b-41d4-a716-446655440000
       responses:
-        '200':
+        "200":
           description: Email verified successfully
           content:
             application/json:
@@ -141,10 +141,10 @@ paths:
                     properties:
                       user:
                         oneOf:
-                          - $ref: '#/components/schemas/CustomerResponse'
-                          - $ref: '#/components/schemas/RestaurantOwnerResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+                          - $ref: "#/components/schemas/CustomerResponse"
+                          - $ref: "#/components/schemas/RestaurantOwnerResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
   /api/auth/login/customer:
     post:
       tags:
@@ -157,7 +157,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
             examples:
               loginWithEmail:
                 summary: Login with email
@@ -165,7 +165,7 @@ paths:
                   email: "ahmed@example.com"
                   password: "SecurePass123"
       responses:
-        '200':
+        "200":
           description: Customer login successful
           content:
             application/json:
@@ -179,18 +179,18 @@ paths:
                     type: string
                     example: "Customer login successful"
                   data:
-                    $ref: '#/components/schemas/LoginResponse'
+                    $ref: "#/components/schemas/LoginResponse"
           headers:
             Set-Cookie:
               schema:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsError"
   /api/auth/login/restaurant-owner:
     post:
       tags:
@@ -203,7 +203,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
             examples:
               loginWithEmail:
                 summary: Login with email
@@ -211,7 +211,7 @@ paths:
                   email: "owner@example.com"
                   password: "SecurePass123"
       responses:
-        '200':
+        "200":
           description: Restaurant owner login successful
           content:
             application/json:
@@ -225,18 +225,18 @@ paths:
                     type: string
                     example: "Restaurant owner login successful"
                   data:
-                    $ref: '#/components/schemas/LoginResponse'
+                    $ref: "#/components/schemas/LoginResponse"
           headers:
             Set-Cookie:
               schema:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsError"
   /api/auth/profile/restaurant-owner:
     get:
       tags:
@@ -247,7 +247,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: Restaurant owner profile retrieved successfully
           content:
             application/json:
@@ -267,10 +267,10 @@ paths:
                         type: string
                         nullable: true
                         example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/123.jpg"
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/auth/profile/image:
     post:
       tags:
@@ -294,7 +294,7 @@ paths:
                   format: binary
                   description: Profile image file (JPEG, PNG, or GIF, max 5MB)
       responses:
-        '200':
+        "200":
           description: Profile image uploaded successfully
           content:
             application/json:
@@ -313,10 +313,10 @@ paths:
                       profileImageUrl:
                         type: string
                         example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000.jpg"
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
   /api/auth/location/restaurant:
     post:
       tags:
@@ -331,7 +331,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateRestaurantLocationRequest'
+              $ref: "#/components/schemas/UpdateRestaurantLocationRequest"
             examples:
               validLocation:
                 summary: Valid location update
@@ -340,7 +340,7 @@ paths:
                   latitude: 40.7128
                   longitude: -74.0060
       responses:
-        '200':
+        "200":
           description: Restaurant location updated successfully
           content:
             application/json:
@@ -365,12 +365,41 @@ paths:
                       longitude:
                         type: number
                         example: -74.0060
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidates the current session by clearing authentication cookies and invalidating refresh token
+      operationId: logout
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Logout successful"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/products:
     post:
       tags:
@@ -385,9 +414,9 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreateProductRequest'
+              $ref: "#/components/schemas/CreateProductRequest"
       responses:
-        '201':
+        "201":
           description: Product created successfully
           content:
             application/json:
@@ -401,13 +430,13 @@ paths:
                     type: string
                     example: "Product created successfully"
                   data:
-                    $ref: '#/components/schemas/Product'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                    $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/products/{id}:
     get:
       tags:
@@ -424,7 +453,7 @@ paths:
           required: true
           description: Product ID
       responses:
-        '200':
+        "200":
           description: Product retrieved successfully
           content:
             application/json:
@@ -435,9 +464,9 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    $ref: '#/components/schemas/Product'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                    $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
     put:
       tags:
         - Products
@@ -459,9 +488,9 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateProductRequest'
+              $ref: "#/components/schemas/UpdateProductRequest"
       responses:
-        '200':
+        "200":
           description: Product updated successfully
           content:
             application/json:
@@ -475,15 +504,15 @@ paths:
                     type: string
                     example: "Product updated successfully"
                   data:
-                    $ref: '#/components/schemas/Product'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                    $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
     delete:
       tags:
         - Products
@@ -501,7 +530,7 @@ paths:
           required: true
           description: Product ID
       responses:
-        '200':
+        "200":
           description: Product deleted successfully
           content:
             application/json:
@@ -514,14 +543,14 @@ paths:
                   message:
                     type: string
                     example: "Product deleted successfully"
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
   /api/products/restaurant:
     get:
       tags:
@@ -532,7 +561,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: Products retrieved successfully
           content:
             application/json:
@@ -545,11 +574,11 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Product'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                      $ref: "#/components/schemas/Product"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/products/{productId}/options:
     post:
       tags:
@@ -581,7 +610,7 @@ paths:
                   description: Name of the option
                   example: "Cheese"
       responses:
-        '201':
+        "201":
           description: Product option created successfully
           content:
             application/json:
@@ -595,13 +624,13 @@ paths:
                     type: string
                     example: "Product option created successfully"
                   data:
-                    $ref: '#/components/schemas/ProductOption'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                    $ref: "#/components/schemas/ProductOption"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
     get:
       tags:
         - Products_option
@@ -619,7 +648,7 @@ paths:
           required: true
           description: Product ID
       responses:
-        '200':
+        "200":
           description: Product options retrieved successfully
           content:
             application/json:
@@ -635,13 +664,13 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ProductOptionWithValues'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                      $ref: "#/components/schemas/ProductOptionWithValues"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/products/options/{optionId}/values:
     post:
       tags:
@@ -678,7 +707,7 @@ paths:
                   description: Optional additional price for the option value
                   example: 1.50
       responses:
-        '201':
+        "201":
           description: Product option value created successfully
           content:
             application/json:
@@ -692,13 +721,13 @@ paths:
                     type: string
                     example: "Product option value created successfully"
                   data:
-                    $ref: '#/components/schemas/ProductOptionValue'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                    $ref: "#/components/schemas/ProductOptionValue"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/products/options/{optionId}:
     delete:
       tags:
@@ -717,7 +746,7 @@ paths:
           required: true
           description: Option ID
       responses:
-        '200':
+        "200":
           description: Product option deleted successfully
           content:
             application/json:
@@ -730,12 +759,12 @@ paths:
                   message:
                     type: string
                     example: "Product option deleted successfully"
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
   /api/products/option-values/{valueId}:
     delete:
       tags:
@@ -754,7 +783,7 @@ paths:
           required: true
           description: Option value ID
       responses:
-        '200':
+        "200":
           description: Product option value deleted successfully
           content:
             application/json:
@@ -767,12 +796,12 @@ paths:
                   message:
                     type: string
                     example: "Product option value deleted successfully"
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
 
 components:
   securitySchemes:
@@ -787,7 +816,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             validationError:
               summary: Validation errors
@@ -808,7 +837,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             unauthorized:
               summary: Unauthorized
@@ -820,7 +849,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             forbidden:
               summary: Forbidden
@@ -832,7 +861,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             notFound:
               summary: Resource not found
@@ -844,7 +873,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             rateLimit:
               summary: Rate limit exceeded
@@ -890,7 +919,7 @@ components:
           example: "ahmed@example.com"
         mobileNumber:
           type: string
-          pattern: '^[0-9]{10,15}$'
+          pattern: "^[0-9]{10,15}$"
           example: "01234567890"
         password:
           type: string
@@ -935,7 +964,7 @@ components:
           example: "ahmed@example.com"
         mobileNumber:
           type: string
-          pattern: '^[0-9]{10,15}$'
+          pattern: "^[0-9]{10,15}$"
           example: "01234567890"
         password:
           type: string
@@ -961,7 +990,7 @@ components:
           type: string
           minLength: 5
           maxLength: 50
-          pattern: '^[A-Z0-9]+$'
+          pattern: "^[A-Z0-9]+$"
           example: "ORG123456"
         email:
           type: string
@@ -970,7 +999,7 @@ components:
           example: "owner@example.com"
         mobileNumber:
           type: string
-          pattern: '^[0-9]{10,15}$'
+          pattern: "^[0-9]{10,15}$"
           example: "09876543210"
         password:
           type: string
@@ -1268,13 +1297,13 @@ components:
           example: "2025-06-18T12:00:00Z"
     ProductOptionWithValues:
       allOf:
-        - $ref: '#/components/schemas/ProductOption'
+        - $ref: "#/components/schemas/ProductOption"
         - type: object
           properties:
             values:
               type: array
               items:
-                $ref: '#/components/schemas/ProductOptionValue'
+                $ref: "#/components/schemas/ProductOptionValue"
 
 tags:
   - name: Health Check

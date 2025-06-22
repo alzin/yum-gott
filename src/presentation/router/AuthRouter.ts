@@ -14,6 +14,7 @@ import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 import multer from 'multer';
+import { AuthController } from '../controller/AuthController';
 
 export class AuthRouter {
   private router: Router;
@@ -120,7 +121,20 @@ export class AuthRouter {
         controller.updateRestaurantLocation(req, res);
       }
     );
+
+
+
+    this.router.post(
+      '/logout',
+      authMiddleware.authenticate,
+      (req: Request, res: Response) => {
+        const controller = new AuthController();
+        controller.logout(req as AuthenticatedRequest, res)
+      }
+    )
+
   }
+
 
   public getRouter(): Router {
     return this.router;

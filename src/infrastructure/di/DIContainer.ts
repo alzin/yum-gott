@@ -8,7 +8,8 @@ import {
   CustomerLoginUseCase,
   RestaurantOwnerLoginUseCase,
   UpdateRestaurantLocationUseCase,
-  GetRestaurantOwnerProfileUseCase
+  GetRestaurantOwnerProfileUseCase,
+  LogoutUseCase
 } from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
@@ -87,6 +88,12 @@ export class DIContainer {
         DIContainer.instance.resolve('productOptionRepository'),
         DIContainer.instance.resolve('IProductRepository')
       ));
+
+      // Register logout use case
+      DIContainer.instance.registerTransient('logoutUseCase', () => {
+        console.log('DIContainer: Registering logoutUseCase');
+        return new LogoutUseCase(DIContainer.instance.resolve('authRepository'));
+      });
     }
     return DIContainer.instance;
   }
@@ -302,5 +309,9 @@ export class DIContainer {
 
   public get authMiddleware(): AuthMiddleware {
     return this.resolve('authMiddleware');
+  }
+
+  public get logoutUseCase(): LogoutUseCase {
+    return this.resolve('logoutUseCase');
   }
 }
