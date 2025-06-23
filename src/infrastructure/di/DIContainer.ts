@@ -14,6 +14,8 @@ import {
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
+import { CategoryRepository } from '../repositories';
+import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/application/use-cases/category';
 // import { IProductOptionRepository, IProductOptionValueRepository, IRestaurantOwnerRepository, IProductRepository } from '@/domain/repositories/index';
 import { ProductOptionRepository, ProductOptionValueRepository } from '@/infrastructure/repositories/index';
 import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
@@ -35,13 +37,13 @@ export class DIContainer {
   public static getInstance(): DIContainer {
     if (!DIContainer.instance) {
       DIContainer.instance = new DIContainer();
-
       // Register product-related dependencies
       DIContainer.instance.registerSingleton('IProductRepository', () => new ProductRepository(DIContainer.instance.databaseConnection));
       DIContainer.instance.registerTransient('createProductUseCase', () => new CreateProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('restaurantOwnerRepository'),
-        DIContainer.instance.resolve('fileStorageService')
+        DIContainer.instance.resolve('fileStorageService'),
+        DIContainer.instance.resolve('ICategoryRepository')
       ));
       DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(
         DIContainer.instance.resolve('IProductRepository')
@@ -58,6 +60,17 @@ export class DIContainer {
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('restaurantOwnerRepository'),
         DIContainer.instance.resolve('fileStorageService')
+      ));
+
+      // Register category-related dependencies
+      DIContainer.instance.registerSingleton('ICategoryRepository', () => new CategoryRepository(DIContainer.instance.databaseConnection));
+      DIContainer.instance.registerTransient('createCategoryUseCase', () => new CreateCategoryUseCase(
+        DIContainer.instance.resolve('ICategoryRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository')
+      ));
+      DIContainer.instance.registerTransient('getCategoriesByRestaurantUseCase', () => new GetCategoriesByRestaurantUseCase(
+        DIContainer.instance.resolve('ICategoryRepository'),
+        DIContainer.instance.resolve('restaurantOwnerRepository')
       ));
 
       // Register product option repositories and use cases

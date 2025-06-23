@@ -17,7 +17,7 @@ export class ProductRepository implements IProductRepository {
         `;
         const values = [
             product.id,
-            product.category,
+            product.categoryId,
             product.productName,
             product.description,
             product.price,
@@ -51,9 +51,9 @@ export class ProductRepository implements IProductRepository {
         const values: any[] = [];
         let paramCount = 1;
 
-        if (product.category) {
+        if (product.categoryId) {
             fields.push(`category = $${paramCount++}`);
-            values.push(product.category);
+            values.push(product.categoryId);
         }
         if (product.productName) {
             fields.push(`product_name = $${paramCount++}`);
@@ -116,7 +116,7 @@ export class ProductRepository implements IProductRepository {
     private mapRowToProduct(row: any): Product {
         return {
             id: row.id,
-            category: row.category,
+            categoryId: row.category,
             productName: row.product_name,
             description: row.description,
             price: row.price,

@@ -4,12 +4,9 @@ import { SizeOption } from '@/domain/entities/Product';
 export class ProductValidators {
     static createProduct(): ValidationChain[] {
         return [
-            body('category')
-                .trim()
-                .notEmpty()
-                .withMessage('Category is required')
-                .isLength({ max: 100 })
-                .withMessage('Category must not exceed 100 characters'),
+            body('categoryId')
+                .isUUID()
+                .withMessage('Invalid category ID format'),
             body('productName')
                 .trim()
                 .notEmpty()
@@ -29,11 +26,10 @@ export class ProductValidators {
                 .optional()
                 .isFloat({ min: 0, max: 100 })
                 .withMessage('Discount must be between 0 and 100'),
-            // body('addSize')
-            //     .notEmpty()
-            //     .withMessage("Size is requierd")
-            //     .isIn(Object.values(SizeOption))
-            //     .withMessage('Size must be one of: Small, Medium, Large'),
+            body('addSize')
+                .optional()
+                .isIn(Object.values(SizeOption))
+                .withMessage('Size must be one of: Small, Medium, Large'),
             body('image')
                 .custom((_, { req }) => {
                     if (!req.file) {
@@ -50,11 +46,10 @@ export class ProductValidators {
 
     static updateProduct(): ValidationChain[] {
         return [
-            body('category')
+            body('categoryId')
                 .optional()
-                .trim()
-                .isLength({ max: 100 })
-                .withMessage('Category must not exceed 100 characters'),
+                .isUUID()
+                .withMessage('Invalid category ID format'),
             body('productName')
                 .optional()
                 .trim()
@@ -72,16 +67,17 @@ export class ProductValidators {
                 .isFloat({ min: 0, max: 100 })
                 .withMessage('Discount must be between 0 and 100'),
             body('addSize')
-                .notEmpty()
-                .withMessage('Size is required')
-                .isIn(['Small', 'Medium', 'Large'])
+                .optional()
+                .isIn(Object.values(SizeOption))
                 .withMessage('Size must be one of: Small, Medium, Large'),
             body('image')
                 .optional()
                 .custom((_, { req }) => {
-                    const allowedTypes = ['image/jpeg', 'image/png'];
-                    if (!allowedTypes.includes(req.file.mimetype)) {
-                        throw new Error('Only JPEG, PNG, and GIF images are allowed');
+                    if (req.file) {
+                        const allowedTypes = ['image/jpeg', 'image/png'];
+                        if (!allowedTypes.includes(req.file.mimetype)) {
+                            throw new Error('Only JPEG, PNG, and GIF images are allowed');
+                        }
                     }
                     return true;
                 })

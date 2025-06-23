@@ -57,9 +57,6 @@ export class AuthRepository implements IAuthRepository {
 
     const { user_id, user_type } = result.rows[0];
 
-    // Invalidate the old access token
-    await this.invalidateAccessToken(oldAccessToken);
-
     // Generate new tokens
     const payload: JWTpayload = {
       userId: user_id,
@@ -69,11 +66,18 @@ export class AuthRepository implements IAuthRepository {
 
     const newTokens = await this.generateToken(payload);
 
-    // Update refresh token in database
-    await this.db.query(
+    // Try to update the refresh token
+    const updateResult = await this.db.query(
       'UPDATE refresh_tokens SET token = $1, expires_at = $2 WHERE token = $3',
       [newTokens.refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), refreshToken]
     );
+    if (updateResult.rowCount === 0) {
+      // If no row was updated, insert a new one (should not normally happen, but for safety)
+      await this.db.query(
+        'INSERT INTO refresh_tokens (token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4)',
+        [newTokens.refreshToken, user_id, user_type, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]
+      );
+    }
 
     return newTokens;
   }

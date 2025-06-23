@@ -9,7 +9,7 @@ import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter } from './presentation/router/AuthRouter';
 import path from "path";
 import { ProductRouter } from './presentation/router/ProductRouter';
-
+import { CategoryRouter } from './presentation/router/CategoryRouter';
 
 export class App {
   private app: Application;
@@ -81,7 +81,8 @@ export class App {
     this.app.use('/api/auth', authRouter.getRouter());
 
 
-
+    const categoryRouter = new CategoryRouter();
+    this.app.use('/api/categories', categoryRouter.getRouter());
     // API Product
 
     const productRouter = new ProductRouter();

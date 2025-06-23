@@ -1,11 +1,12 @@
 export enum SizeOption {
-    SMALL = 'Small',
-    MEDIUM = 'Medium',
-    LARGE = 'Large'
+    Small = 'Small',
+    Medium = 'Medium',
+    Large = 'Large'
 }
+
 export interface Product {
     id?: string;
-    category: string;
+    categoryId: string; 
     productName: string;
     description: string;
     price: number;

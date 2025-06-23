@@ -2,8 +2,18 @@ import { Category } from '@/domain/entities/Category';
 import { ICategoryRepository } from '@/domain/repositories/ICategoryRepository';
 import { DatabaseConnection } from '../database/DataBaseConnection';
 
+function mapDbCategory(row: any): Category {
+    return {
+        id: row.id,
+        name: row.name,
+        restaurantOwnerId: row.restaurant_owner_id,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+    };
+}
+
 export class CategoryRepository implements ICategoryRepository {
-    constructor(private db: DatabaseConnection) {}
+    constructor(private db: DatabaseConnection) { }
 
     async create(category: Category): Promise<Category> {
         const query = `
@@ -19,25 +29,27 @@ export class CategoryRepository implements ICategoryRepository {
             category.updatedAt
         ];
         const result = await this.db.query(query, values);
-        return result.rows[0];
+        return mapDbCategory(result.rows[0]);
     }
 
     async findById(id: string): Promise<Category | null> {
         const query = 'SELECT * FROM categories WHERE id = $1';
         const result = await this.db.query(query, [id]);
-        return result.rows[0] || null;
+        if (!result.rows[0]) return null;
+        return mapDbCategory(result.rows[0]);
     }
 
     async findByNameAndRestaurantOwner(name: string, restaurantOwnerId: string): Promise<Category | null> {
         const query = 'SELECT * FROM categories WHERE name = $1 AND restaurant_owner_id = $2';
         const result = await this.db.query(query, [name, restaurantOwnerId]);
-        return result.rows[0] || null;
+        if (!result.rows[0]) return null;
+        return mapDbCategory(result.rows[0]);
     }
 
     async findByRestaurantOwnerId(restaurantOwnerId: string): Promise<Category[]> {
         const query = 'SELECT * FROM categories WHERE restaurant_owner_id = $1 ORDER BY name ASC';
         const result = await this.db.query(query, [restaurantOwnerId]);
-        return result.rows;
+        return result.rows.map(mapDbCategory);
     }
 
     async update(id: string, category: Partial<Category>): Promise<Category> {
@@ -62,7 +74,7 @@ export class CategoryRepository implements ICategoryRepository {
             RETURNING *
         `;
         const result = await this.db.query(query, values);
-        return result.rows[0];
+        return mapDbCategory(result.rows[0]);
     }
 
     async delete(id: string): Promise<void> {

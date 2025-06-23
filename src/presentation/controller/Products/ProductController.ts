@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../../middleware/index';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
+import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class ProductController {
     constructor(
@@ -12,6 +13,7 @@ export class ProductController {
     ) { }
 
     async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
+        console.log('BODY:', req.body);
         try {
             const user = req.user;
             if (!user || user.userType !== 'restaurant_owner') {
@@ -43,15 +45,22 @@ export class ProductController {
     async getProduct(req: Request, res: Response): Promise<void> {
         try {
             const product = await this.getProductUseCase.execute(req.params.id);
-    
+
             if (!product) throw new Error('Product not found');
-    
-            const { id, restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
-    
+
+            const diContainer = DIContainer.getInstance();
+            const categoryRepository = diContainer.resolve('ICategoryRepository') as import('@/infrastructure/repositories/CategoryRepository').CategoryRepository;
+            const category = await categoryRepository.findById(product.categoryId);
+
+            const { id, restaurantOwnerId, createdAt, updatedAt,categoryId, ...productWithoutId } = product;
+
             res.status(200).json({
                 success: true,
                 message: 'Get Product successfully',
-                data: productWithoutId,
+                data: {
+                    ...productWithoutId,
+                    categoryName: category ? category.name : null
+                },
             });
         } catch (error) {
             res.status(404).json({
@@ -60,7 +69,7 @@ export class ProductController {
             });
         }
     }
-    
+
 
     async getProductsByRestaurant(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -74,11 +83,24 @@ export class ProductController {
             }
 
             const products = await this.getProductsByRestaurantUseCase.execute(user.userId);
-            const productsWithoutId = products.map(({ id, restaurantOwnerId, createdAt, updatedAt, ...rest }) => rest);
+            const diContainer = DIContainer.getInstance();
+            const categoryRepository = diContainer.resolve('ICategoryRepository') as import('@/infrastructure/repositories/CategoryRepository').CategoryRepository;
+
+            const categories = await categoryRepository.findByRestaurantOwnerId(user.userId);
+            const categoryMap = new Map(categories.map(cat => [cat.id, cat.name]));
+
+            const productsWithCategoryName = products.map(product => {
+                const { id, restaurantOwnerId, createdAt, updatedAt,categoryId, ...rest } = product;
+                return {
+                    ...rest,
+                    categoryName: categoryMap.get(product.categoryId) || null
+                };
+            });
+
             res.status(200).json({
                 success: true,
                 message: 'Get All Products successfully',
-                data: productsWithoutId,
+                data: productsWithCategoryName,
             });
         } catch (error) {
             res.status(400).json({

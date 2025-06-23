@@ -12,3 +12,10 @@ CREATE TABLE products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (restaurant_owner_id) REFERENCES restaurant_owners(id)
 );
+ALTER TABLE products
+    DROP COLUMN category,
+    ADD COLUMN category_id UUID NOT NULL,
+    ADD CONSTRAINT fk_category
+        FOREIGN KEY (category_id)
+        REFERENCES categories(id)
+        ON DELETE RESTRICT;

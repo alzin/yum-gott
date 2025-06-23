@@ -58,7 +58,7 @@ export class UpdateProductUseCase {
         }
 
         const updatedProduct: Partial<Product> = {
-            category: request.category,
+            categoryId: request.category,
             productName: request.productName,
             description: request.description,
             price: request.price,
