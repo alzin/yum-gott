@@ -28,7 +28,7 @@ export class AuthController {
         return;
       }
 
-      const result = await this.refreshTokenUseCase.execute({ refreshToken, accessToken });
+      const result = await this.refreshTokenUseCase.execute({ refreshToken });
       this.setAuthCookies(res, result.authToken);
 
       res.status(200).json({

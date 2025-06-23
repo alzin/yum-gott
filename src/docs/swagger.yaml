@@ -386,6 +386,51 @@ paths:
         "403":
           $ref: "#/components/responses/ForbiddenError"
 
+  /api/auth/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: |
+        Refreshes the access token using the refresh token provided in the HTTP-only cookie.
+        This endpoint should be called when the access token is expired or about to expire.
+        The request must include the `refreshToken` and `accessToken` cookies.
+      operationId: refreshToken
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Token refreshed successfully. New tokens are set in HTTP-only cookies.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Token refreshed successfully"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=...; refreshToken=...;
+        "401":
+          description: Unauthorized. The refresh token is invalid, expired, or not provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid or expired refresh token"
+
   /api/auth/logout:
     post:
       tags:

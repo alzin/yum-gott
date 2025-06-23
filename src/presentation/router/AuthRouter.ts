@@ -20,6 +20,7 @@ export class AuthRouter {
   private router: Router;
   private upload: multer.Multer;
   private diContainer: DIContainer;
+  private authController: AuthController;
 
   constructor() {
     const storage = multer.memoryStorage();
@@ -29,6 +30,7 @@ export class AuthRouter {
     });
 
     this.diContainer = DIContainer.getInstance();
+    this.authController = new AuthController();
     this.router = Router();
     this.setupRoutes();
   }
@@ -122,14 +124,16 @@ export class AuthRouter {
       }
     );
 
-
+    this.router.post(
+      '/refresh-token',
+      this.authController.refreshToken
+    );
 
     this.router.post(
       '/logout',
       authMiddleware.authenticate,
       (req: Request, res: Response) => {
-        const controller = new AuthController();
-        controller.logout(req as AuthenticatedRequest, res)
+        this.authController.logout(req as AuthenticatedRequest, res)
       }
     )
 

@@ -44,7 +44,7 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
-  async refreshToken(refreshToken: string, oldAccessToken: string): Promise<AuthToken> {
+  async refreshToken(refreshToken: string): Promise<AuthToken> {
     // Verify refresh token exists and is valid
     const result = await this.db.query(
       'SELECT user_id, user_type FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
@@ -66,18 +66,8 @@ export class AuthRepository implements IAuthRepository {
 
     const newTokens = await this.generateToken(payload);
 
-    // Try to update the refresh token
-    const updateResult = await this.db.query(
-      'UPDATE refresh_tokens SET token = $1, expires_at = $2 WHERE token = $3',
-      [newTokens.refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), refreshToken]
-    );
-    if (updateResult.rowCount === 0) {
-      // If no row was updated, insert a new one (should not normally happen, but for safety)
-      await this.db.query(
-        'INSERT INTO refresh_tokens (token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4)',
-        [newTokens.refreshToken, user_id, user_type, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]
-      );
-    }
+    // Invalidate the old refresh token to prevent reuse.
+    await this.db.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
 
     return newTokens;
   }

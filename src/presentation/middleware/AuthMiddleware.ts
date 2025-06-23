@@ -8,7 +8,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export class AuthMiddleware {
-  constructor(private authRepository: IAuthRepository) {}
+  constructor(private authRepository: IAuthRepository) { }
 
   private extractToken(req: Request): string | null {
     if (req.cookies?.accessToken) {
@@ -29,7 +29,7 @@ export class AuthMiddleware {
     if (!refreshToken || !accessToken) return null;
 
     try {
-      const newTokens = await this.authRepository.refreshToken(refreshToken, accessToken);
+      const newTokens = await this.authRepository.refreshToken(refreshToken);
       setAuthCookies(res, newTokens);
       return await this.authRepository.verifyToken(newTokens.accessToken);
     } catch (error) {
@@ -65,7 +65,7 @@ export class AuthMiddleware {
       const refreshToken = req.cookies?.refreshToken;
       if (refreshToken) {
         try {
-          const newTokens = await this.authRepository.refreshToken(refreshToken, token);
+          const newTokens = await this.authRepository.refreshToken(refreshToken);
           setAuthCookies(res, newTokens);
           payload = await this.authRepository.verifyToken(newTokens.accessToken);
           req.user = payload;

@@ -3,7 +3,6 @@ import { AuthToken } from '@/domain/entities/AuthToken';
 
 export interface RefreshTokenRequest {
     refreshToken: string;
-    accessToken: string;
 }
 
 export interface RefreshTokenResponse {
@@ -14,9 +13,9 @@ export class RefreshTokenUseCase {
     constructor(private authRepository: IAuthRepository) { }
 
     async execute(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
-        const { refreshToken, accessToken } = request;
+        const { refreshToken } = request;
 
-        const newTokens = await this.authRepository.refreshToken(refreshToken, accessToken);
+        const newTokens = await this.authRepository.refreshToken(refreshToken);
 
         return { authToken: newTokens };
     }
