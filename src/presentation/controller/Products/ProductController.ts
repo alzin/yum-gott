@@ -29,6 +29,8 @@ export class ProductController {
                 image: req.file,
                 restaurantOwnerId: user.userId
             };
+            delete request.categoryId;
+            delete request.category;
 
             const product = await this.createProductUseCase.execute(request, user.userId);
             res.status(201).json({
@@ -52,7 +54,7 @@ export class ProductController {
             const categoryRepository = diContainer.resolve('ICategoryRepository') as import('@/infrastructure/repositories/CategoryRepository').CategoryRepository;
             const category = await categoryRepository.findById(product.categoryId);
 
-            const { id, restaurantOwnerId, createdAt, updatedAt,categoryId, ...productWithoutId } = product;
+            const { id, restaurantOwnerId, createdAt, updatedAt, categoryId, ...productWithoutId } = product;
 
             res.status(200).json({
                 success: true,
@@ -90,7 +92,7 @@ export class ProductController {
             const categoryMap = new Map(categories.map(cat => [cat.id, cat.name]));
 
             const productsWithCategoryName = products.map(product => {
-                const { id, restaurantOwnerId, createdAt, updatedAt,categoryId, ...rest } = product;
+                const { id, restaurantOwnerId, createdAt, updatedAt, categoryId, ...rest } = product;
                 return {
                     ...rest,
                     categoryName: categoryMap.get(product.categoryId) || null
@@ -125,8 +127,10 @@ export class ProductController {
                 ...req.body,
                 productId: req.params.id,
                 image: req.file,
-                restaurantOwnerId: user.userId, // Derived from token
+                restaurantOwnerId: user.userId,
             };
+            delete request.categoryId;
+            delete request.category;
 
             const product = await this.updateProductUseCase.execute(request);
             res.status(200).json({

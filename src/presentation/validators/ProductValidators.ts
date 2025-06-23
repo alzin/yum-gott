@@ -4,9 +4,12 @@ import { SizeOption } from '@/domain/entities/Product';
 export class ProductValidators {
     static createProduct(): ValidationChain[] {
         return [
-            body('categoryId')
-                .isUUID()
-                .withMessage('Invalid category ID format'),
+            body('categoryName')
+            .trim()
+            .notEmpty()
+            .withMessage('Category name is required')
+            .isLength({ max: 255 })
+            .withMessage('Category name must not exceed 255 characters'),
             body('productName')
                 .trim()
                 .notEmpty()
@@ -43,13 +46,14 @@ export class ProductValidators {
                 })
         ];
     }
-
+ 
     static updateProduct(): ValidationChain[] {
         return [
-            body('categoryId')
-                .optional()
-                .isUUID()
-                .withMessage('Invalid category ID format'),
+            body('categoryName')
+            .optional()
+            .trim()
+            .isLength({ max: 255 })
+            .withMessage('Category name must not exceed 255 characters'),
             body('productName')
                 .optional()
                 .trim()

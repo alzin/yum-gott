@@ -5,7 +5,7 @@ import { IFileStorageService } from '@/application/interface/IFileStorageService
 
 export interface UpdateProductRequest {
     productId: string;
-    category?: string;
+    categoryName?: string;
     productName?: string;
     description?: string;
     price?: number;
@@ -22,7 +22,7 @@ export class UpdateProductUseCase {
         private fileStorageService: IFileStorageService
     ) { }
     async execute(request: UpdateProductRequest): Promise<Product> {
-        const { productId, restaurantOwnerId, image, addSize } = request;
+        const { productId, restaurantOwnerId, image, addSize, categoryName } = request;
 
         const product = await this.productRepository.findById(productId);
         if (!product) {
@@ -47,18 +47,30 @@ export class UpdateProductUseCase {
                     // Continue with upload even if deletion fails
                 }
             }
-            
+
             // Upload the new image
             imageUrl = await this.fileStorageService.UploadProductImage(
-                image, 
-                productId, 
+                image,
+                productId,
                 'product',
                 product.imageUrl || undefined
             );
         }
 
+        let categoryId = product.categoryId;
+        if (categoryName) {
+            // جلب categoryId من الاسم
+            const diContainer = require('@/infrastructure/di/DIContainer').DIContainer;
+            const categoryRepository = diContainer.getInstance().resolve('ICategoryRepository');
+            const category = await categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
+            if (!category) {
+                throw new Error('Category not found');
+            }
+            categoryId = category.id;
+        }
+
         const updatedProduct: Partial<Product> = {
-            categoryId: request.category,
+            categoryId,
             productName: request.productName,
             description: request.description,
             price: request.price,

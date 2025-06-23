@@ -4,7 +4,7 @@ import { IFileStorageService } from "@/application/interface/IFileStorageService
 import { v4 as uuidv4 } from 'uuid';
 
 export interface CreateProductRequest {
-    categoryId: string; // Changed from category string
+    categoryName: string;
     productName: string;
     description: string;
     price: number;
@@ -19,18 +19,18 @@ export class CreateProductUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService,
         private categoryRepository: ICategoryRepository
-    ) {}
+    ) { }
 
     async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
-        const { image, addSize, categoryId } = request;
+        const { image, addSize, categoryName } = request;
 
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
-        const category = await this.categoryRepository.findById(categoryId);
-        if (!category) {
+        const category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
+        if (!category || !category.id) {
             throw new Error('Category not found');
         }
         if (category.restaurantOwnerId !== restaurantOwnerId) {
@@ -48,7 +48,7 @@ export class CreateProductUseCase {
 
         const product: Product = {
             id: uuidv4(),
-            categoryId, // Store categoryId instead of category string
+            categoryId: category.id!,
             productName: request.productName,
             description: request.description,
             price: request.price,

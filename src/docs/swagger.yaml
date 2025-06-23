@@ -430,10 +430,9 @@ paths:
             schema:
               type: object
               properties:
-                categoryId:
+                categoryName:
                   type: string
-                  format: uuid
-                  example: "550e8400-e29b-41d4-a716-446655440000"
+                  example: "Pizza"
                 productName:
                   type: string
                   example: "Margherita Pizza"
@@ -454,7 +453,7 @@ paths:
                   type: string
                   format: binary
               required:
-                - categoryId
+                - categoryName
                 - productName
                 - description
                 - price
@@ -573,10 +572,9 @@ paths:
             schema:
               type: object
               properties:
-                categoryId:
+                categoryName:
                   type: string
-                  format: uuid
-                  example: "550e8400-e29b-41d4-a716-446655440000"
+                  example: "Pizza"
                 productName:
                   type: string
                   example: "Margherita Pizza"
@@ -1164,10 +1162,9 @@ components:
     ProductResponse:
       type: object
       properties:
-        categoryId:
+        categoryName:
           type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
+          example: "Pizza"
         productName:
           type: string
           example: "Margherita Pizza"

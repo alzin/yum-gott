@@ -53,7 +53,7 @@ export class ProductRouter {
             authMiddleware.requireRestaurantOwner,
             this.upload.single('image'),
             SanitizationMiddleware.allowedFields([
-                'categoryId',
+                'categoryName',
                 'productName',
                 'description',
                 'price',
@@ -86,7 +86,7 @@ export class ProductRouter {
             authMiddleware.requireRestaurantOwner,
             this.upload.single('image'),
             SanitizationMiddleware.allowedFields([
-                'categoryId',
+                'categoryName',
                 'productName',
                 'description',
                 'price',
