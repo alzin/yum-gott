@@ -1,4 +1,4 @@
-import { Product, SizeOption } from "@/domain/entities/Product";
+import { Product, SizeOption, SizeName } from "@/domain/entities/Product";
 import { IProductRepository, IRestaurantOwnerRepository, ICategoryRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
 import { v4 as uuidv4 } from 'uuid';
@@ -9,7 +9,7 @@ export interface CreateProductRequest {
     description: string;
     price: number;
     discount?: number;
-    addSize?: SizeOption;
+    sizeOptions?: SizeOption[] | null; // Updated to array with SizeName
     image?: Express.Multer.File;
 }
 
@@ -22,23 +22,32 @@ export class CreateProductUseCase {
     ) { }
 
     async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
-        const { image, addSize, categoryName } = request;
+        const { image, sizeOptions, categoryName } = request;
 
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
+        // Validate that the category exists for this owner
         const category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
-        if (!category || !category.id) {
+        if (!category) {
             throw new Error('Category not found');
         }
         if (category.restaurantOwnerId !== restaurantOwnerId) {
             throw new Error('Category does not belong to this restaurant owner');
         }
 
-        if (addSize && !Object.values(SizeOption).includes(addSize)) {
-            throw new Error('Invalid size option');
+        // Validate sizeOptions if provided
+        if (sizeOptions) {
+            for (const size of sizeOptions) {
+                if (!Object.values(SizeName).includes(size.name)) {
+                    throw new Error(`Invalid size name: ${size.name}. Must be one of: ${Object.values(SizeName).join(', ')}`);
+                }
+                if (typeof size.additionalPrice !== 'number' || size.additionalPrice < 0) {
+                    throw new Error('Invalid size option: non-negative additionalPrice is required');
+                }
+            }
         }
 
         let imageUrl: string | null = null;
@@ -48,12 +57,12 @@ export class CreateProductUseCase {
 
         const product: Product = {
             id: uuidv4(),
-            categoryId: category.id!,
+            categoryName: category.name,
             productName: request.productName,
             description: request.description,
             price: request.price,
             discount: request.discount,
-            addSize,
+            sizeOptions: sizeOptions || null, // Store as null if not provided
             imageUrl,
             restaurantOwnerId,
             createdAt: new Date(),

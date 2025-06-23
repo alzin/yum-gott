@@ -38,7 +38,7 @@ export class DIContainer {
     if (!DIContainer.instance) {
       DIContainer.instance = new DIContainer();
       // Register product-related dependencies
-      DIContainer.instance.registerSingleton('IProductRepository', () => new ProductRepository(DIContainer.instance.databaseConnection));
+      DIContainer.instance.registerSingleton('IProductRepository', () => new ProductRepository(DIContainer.instance.databaseConnection.getPool()));
       DIContainer.instance.registerTransient('createProductUseCase', () => new CreateProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('restaurantOwnerRepository'),

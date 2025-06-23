@@ -1,7 +1,14 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../../middleware/index';
-import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import {
+    CreateProductUseCase,
+    GetProductUseCase,
+    GetProductsByRestaurantUseCase,
+    UpdateProductUseCase,
+    DeleteProductUseCase
+} from '@/application/use-cases/product';
+import { AuthenticatedRequest } from '@/presentation/middleware';
+import { SizeOption } from '@/domain/entities/Product';
 
 export class ProductController {
     constructor(
@@ -13,7 +20,6 @@ export class ProductController {
     ) { }
 
     async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
-        console.log('BODY:', req.body);
         try {
             const user = req.user;
             if (!user || user.userType !== 'restaurant_owner') {
@@ -24,8 +30,19 @@ export class ProductController {
                 return;
             }
 
+            // Parse sizeOptions if it's a string (e.g., from multipart/form-data)
+            let sizeOptions: SizeOption[] | null = req.body.sizeOptions;
+            if (typeof sizeOptions === 'string') {
+                try {
+                    sizeOptions = JSON.parse(sizeOptions);
+                } catch (error) {
+                    throw new Error('Invalid sizeOptions format: must be a valid JSON array');
+                }
+            }
+
             const request = {
                 ...req.body,
+                sizeOptions,
                 image: req.file,
                 restaurantOwnerId: user.userId
             };
@@ -44,24 +61,20 @@ export class ProductController {
             });
         }
     }
+
     async getProduct(req: Request, res: Response): Promise<void> {
         try {
             const product = await this.getProductUseCase.execute(req.params.id);
 
             if (!product) throw new Error('Product not found');
 
-            const diContainer = DIContainer.getInstance();
-            const categoryRepository = diContainer.resolve('ICategoryRepository') as import('@/infrastructure/repositories/CategoryRepository').CategoryRepository;
-            const category = await categoryRepository.findById(product.categoryId);
-
-            const { id, restaurantOwnerId, createdAt, updatedAt, categoryId, ...productWithoutId } = product;
+            const { id, restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
 
             res.status(200).json({
                 success: true,
                 message: 'Get Product successfully',
                 data: {
-                    ...productWithoutId,
-                    categoryName: category ? category.name : null
+                    ...productWithoutId
                 },
             });
         } catch (error) {
@@ -71,7 +84,6 @@ export class ProductController {
             });
         }
     }
-
 
     async getProductsByRestaurant(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -85,17 +97,10 @@ export class ProductController {
             }
 
             const products = await this.getProductsByRestaurantUseCase.execute(user.userId);
-            const diContainer = DIContainer.getInstance();
-            const categoryRepository = diContainer.resolve('ICategoryRepository') as import('@/infrastructure/repositories/CategoryRepository').CategoryRepository;
-
-            const categories = await categoryRepository.findByRestaurantOwnerId(user.userId);
-            const categoryMap = new Map(categories.map(cat => [cat.id, cat.name]));
-
             const productsWithCategoryName = products.map(product => {
-                const { id, restaurantOwnerId, createdAt, updatedAt, categoryId, ...rest } = product;
+                const { id, restaurantOwnerId, createdAt, updatedAt, ...rest } = product;
                 return {
-                    ...rest,
-                    categoryName: categoryMap.get(product.categoryId) || null
+                    ...rest
                 };
             });
 
@@ -123,9 +128,20 @@ export class ProductController {
                 return;
             }
 
+            // Parse sizeOptions if it's a string (e.g., from multipart/form-data)
+            let sizeOptions: SizeOption[] | null = req.body.sizeOptions;
+            if (typeof sizeOptions === 'string') {
+                try {
+                    sizeOptions = JSON.parse(sizeOptions);
+                } catch (error) {
+                    throw new Error('Invalid sizeOptions format: must be a valid JSON array');
+                }
+            }
+
             const request = {
                 ...req.body,
                 productId: req.params.id,
+                sizeOptions,
                 image: req.file,
                 restaurantOwnerId: user.userId,
             };
@@ -158,7 +174,7 @@ export class ProductController {
 
             const request = {
                 productId: req.params.id,
-                restaurantOwnerId: user.userId, // Derived from token
+                restaurantOwnerId: user.userId,
             };
 
             await this.deleteProductUseCase.execute(request);

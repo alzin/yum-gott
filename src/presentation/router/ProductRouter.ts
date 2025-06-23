@@ -58,7 +58,7 @@ export class ProductRouter {
                 'description',
                 'price',
                 'discount',
-                'addSize',
+                'sizeOptions',
                 'image'
             ]),
             ProductValidators.createProduct(),
@@ -91,7 +91,7 @@ export class ProductRouter {
                 'description',
                 'price',
                 'discount',
-                'addSize',
+                'sizeOptions',
                 'image'
             ]),
             ProductValidators.updateProduct(),

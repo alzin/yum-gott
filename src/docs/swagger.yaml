@@ -464,7 +464,7 @@ paths:
       tags:
         - Products
       summary: Create a new product
-      description: Allows authenticated restaurant owners to create a new product with an image.
+      description: Creates a new product for a restaurant owner.
       operationId: createProduct
       security:
         - cookieAuth: []
@@ -477,26 +477,32 @@ paths:
               properties:
                 categoryName:
                   type: string
-                  example: "Pizza"
+                  description: Name of the category
+                  example: "Main Course"
                 productName:
                   type: string
+                  description: Name of the product
                   example: "Margherita Pizza"
                 description:
                   type: string
+                  description: Product description
                   example: "Classic pizza with tomato sauce and mozzarella"
                 price:
                   type: number
-                  example: 12.99
+                  description: Base price of the product
+                  example: 100
                 discount:
                   type: number
+                  description: Discount percentage
                   example: 10
-                addSize:
-                  type: string
-                  enum: [Small, Medium, Large]
-                  example: "Medium"
+                sizeOptions:
+                  type: object
+                  description: Optional array of size options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]').
+                  example: '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]'
                 image:
                   type: string
                   format: binary
+                  description: Product image file (JPEG or PNG)
               required:
                 - categoryName
                 - productName
@@ -518,11 +524,18 @@ paths:
                     type: string
                     example: "Product created successfully"
         "400":
-          $ref: "#/components/responses/BadRequestError"
-        "401":
-          $ref: "#/components/responses/UnauthorizedError"
-        "403":
-          $ref: "#/components/responses/ForbiddenError"
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid input"
 
   /api/products/restaurant:
     get:
@@ -597,21 +610,18 @@ paths:
       tags:
         - Products
       summary: Update a product
-      description: Allows authenticated restaurant owners to update an existing product.
+      description: Updates an existing product for a restaurant owner.
       operationId: updateProduct
       security:
         - cookieAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
             format: uuid
-          required: true
-          description: The ID of the product to update
-          example: "550e8400-e29b-41d4-a716-446655440000"
       requestBody:
-        required: true
         content:
           multipart/form-data:
             schema:
@@ -619,26 +629,32 @@ paths:
               properties:
                 categoryName:
                   type: string
-                  example: "Pizza"
+                  description: Name of the category
+                  example: "Main Course"
                 productName:
                   type: string
+                  description: Name of the product
                   example: "Margherita Pizza"
                 description:
                   type: string
-                  example: "Updated classic pizza with tomato sauce and mozzarella"
+                  description: Product description
+                  example: "Classic pizza with tomato sauce and mozzarella"
                 price:
                   type: number
-                  example: 13.99
+                  description: Base price of the product
+                  example: 100
                 discount:
                   type: number
-                  example: 15
-                addSize:
-                  type: string
-                  enum: [Small, Medium, Large]
-                  example: "Large"
+                  description: Discount percentage
+                  example: 10
+                sizeOptions:
+                  type: object
+                  description: Optional array of size options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]').
+                  example: '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]'
                 image:
                   type: string
                   format: binary
+                  description: Product image file (JPEG or PNG)
       responses:
         "200":
           description: Product updated successfully
@@ -654,13 +670,18 @@ paths:
                     type: string
                     example: "Product updated successfully"
         "400":
-          $ref: "#/components/responses/BadRequestError"
-        "401":
-          $ref: "#/components/responses/UnauthorizedError"
-        "403":
-          $ref: "#/components/responses/ForbiddenError"
-        "404":
-          $ref: "#/components/responses/NotFoundError"
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid input"
 
     delete:
       tags:

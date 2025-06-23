@@ -47,6 +47,7 @@ export class AuthController {
     try {
       const user = req.user;
       const refreshToken = req.cookies.refreshToken;
+      const accessToken = req.cookies.accessToken;
 
       if (!user || !refreshToken) {
         res.status(400).json({
@@ -56,10 +57,11 @@ export class AuthController {
         return;
       }
 
-      const request = {
+      const request = {  
         refreshToken,
         userId: user.userId,
         userType: user.userType,
+        accessToken
       };
 
       const result = await this.logoutUseCase.execute(request, res);

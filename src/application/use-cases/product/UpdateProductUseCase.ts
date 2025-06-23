@@ -1,7 +1,6 @@
-import { Product, SizeOption } from '@/domain/entities/Product';
+import { Product, SizeOption, SizeName } from '@/domain/entities/Product';
 import { IProductRepository } from '@/domain/repositories/IProductRepository';
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
-
 
 export interface UpdateProductRequest {
     productId: string;
@@ -10,7 +9,7 @@ export interface UpdateProductRequest {
     description?: string;
     price?: number;
     discount?: number;
-    addSize?: SizeOption;
+    sizeOptions?: SizeOption[] | null; // Updated to array with SizeName
     image?: Express.Multer.File;
     restaurantOwnerId: string;
 }
@@ -18,11 +17,10 @@ export interface UpdateProductRequest {
 export class UpdateProductUseCase {
     constructor(
         private productRepository: IProductRepository,
-        // private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
     async execute(request: UpdateProductRequest): Promise<Product> {
-        const { productId, restaurantOwnerId, image, addSize, categoryName } = request;
+        const { productId, restaurantOwnerId, image, sizeOptions, categoryName } = request;
 
         const product = await this.productRepository.findById(productId);
         if (!product) {
@@ -32,23 +30,27 @@ export class UpdateProductUseCase {
             throw new Error('Unauthorized: Product does not belong to this restaurant owner');
         }
 
-        if (addSize && !Object.values(SizeOption).includes(addSize)) {
-            throw new Error('Invalid size option');
+        // Validate sizeOptions if provided
+        if (sizeOptions) {
+            for (const size of sizeOptions) {
+                if (!Object.values(SizeName).includes(size.name)) {
+                    throw new Error(`Invalid size name: ${size.name}. Must be one of: ${Object.values(SizeName).join(', ')}`);
+                }
+                if (typeof size.additionalPrice !== 'number' || size.additionalPrice < 0) {
+                    throw new Error('Invalid size option: non-negative additionalPrice is required');
+                }
+            }
         }
 
         let imageUrl = product.imageUrl;
         if (image) {
-            // If there's an existing image, delete it first
             if (product.imageUrl) {
                 try {
                     await this.fileStorageService.DeleteOldImage(product.imageUrl);
                 } catch (error) {
                     console.error('Failed to delete old image:', error);
-                    // Continue with upload even if deletion fails
                 }
             }
-
-            // Upload the new image
             imageUrl = await this.fileStorageService.UploadProductImage(
                 image,
                 productId,
@@ -57,29 +59,28 @@ export class UpdateProductUseCase {
             );
         }
 
-        let categoryId = product.categoryId;
+        let categoryNameToUse = product.categoryName;
         if (categoryName) {
-            // جلب categoryId من الاسم
             const diContainer = require('@/infrastructure/di/DIContainer').DIContainer;
             const categoryRepository = diContainer.getInstance().resolve('ICategoryRepository');
             const category = await categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
             if (!category) {
                 throw new Error('Category not found');
             }
-            categoryId = category.id;
+            categoryNameToUse = category.name;
         }
 
         const updatedProduct: Partial<Product> = {
-            categoryId,
+            categoryName: categoryNameToUse,
             productName: request.productName,
             description: request.description,
             price: request.price,
             discount: request.discount,
-            addSize,
+            sizeOptions: sizeOptions !== undefined ? sizeOptions : product.sizeOptions,
             imageUrl,
             updatedAt: new Date()
         };
 
         return await this.productRepository.update(productId, updatedProduct);
     }
-} 
+}
