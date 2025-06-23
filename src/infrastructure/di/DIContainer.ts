@@ -95,7 +95,7 @@ export class DIContainer {
         DIContainer.instance.resolve('productOptionRepository'),
         DIContainer.instance.resolve('productOptionValueRepository'),
         DIContainer.instance.resolve('IProductRepository'),
-        DIContainer.instance.resolve('restaurantOwnerRepository')
+        // DIContainer.instance.resolve('restaurantOwnerRepository')
       ));
       DIContainer.instance.registerTransient('deleteProductOptionValueUseCase', () => new DeleteProductOptionValueUseCase(
         DIContainer.instance.resolve('productOptionValueRepository'),
@@ -114,6 +114,11 @@ export class DIContainer {
         console.log('DIContainer: Registering refreshTokenUseCase');
         return new RefreshTokenUseCase(DIContainer.instance.resolve('authRepository'));
       });
+
+      DIContainer.instance.registerSingleton(
+        'IProductOptionRepository',
+        () => new ProductOptionRepository(DIContainer.instance.databaseConnection)
+      );
     }
     return DIContainer.instance;
   }

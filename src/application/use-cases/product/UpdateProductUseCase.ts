@@ -9,7 +9,7 @@ export interface UpdateProductRequest {
     description?: string;
     price?: number;
     discount?: number;
-    sizeOptions?: SizeOption[] | null; // Updated to array with SizeName
+    sizeOptions?: SizeOption[] | null; 
     image?: Express.Multer.File;
     restaurantOwnerId: string;
 }
@@ -30,7 +30,6 @@ export class UpdateProductUseCase {
             throw new Error('Unauthorized: Product does not belong to this restaurant owner');
         }
 
-        // Validate sizeOptions if provided
         if (sizeOptions) {
             for (const size of sizeOptions) {
                 if (!Object.values(SizeName).includes(size.name)) {

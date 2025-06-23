@@ -15,7 +15,7 @@ export class RefreshTokenUseCase {
     async execute(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
         const { refreshToken } = request;
 
-        const newTokens = await this.authRepository.refreshToken(refreshToken);
+        const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
 
         return { authToken: newTokens };
     }

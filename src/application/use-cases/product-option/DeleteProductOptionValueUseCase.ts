@@ -1,5 +1,4 @@
 import { IProductOptionRepository, IProductRepository, IProductOptionValueRepository } from '@/domain/repositories/index';
-// import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
 
 export interface DeleteProductOptionValueRequest {
     valueId: string;
@@ -9,7 +8,6 @@ export class DeleteProductOptionValueUseCase {
         private productOptionValueRepository: IProductOptionValueRepository,
         private productOptionRepository: IProductOptionRepository,
         private productRepository: IProductRepository,
-        // private restaurantOwnerRepository: IRestaurantOwnerRepository
     ) { }
 
     async execute(request: DeleteProductOptionValueRequest, restaurantOwnerId: string): Promise<void> {

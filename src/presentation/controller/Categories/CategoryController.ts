@@ -25,7 +25,7 @@ export class CategoryController {
             res.status(201).json({
                 success: true,
                 message: 'Category created successfully',
-                data: { id: category.id, name: category.name }
+                data: { name: category.name }
             });
         } catch (error) {
             res.status(400).json({
@@ -47,7 +47,7 @@ export class CategoryController {
             }
 
             const categories = await this.getCategoriesByRestaurantUseCase.execute(user.userId);
-            const filteredCategories = categories.map(({ id, name }) => ({ id, name }));
+            const filteredCategories = categories.map(({  name }) => ({  name }));
 
             res.status(200).json({
                 success: true,

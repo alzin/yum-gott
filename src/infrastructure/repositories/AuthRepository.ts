@@ -22,7 +22,6 @@ export class AuthRepository implements IAuthRepository {
     const refreshToken = uuidv4();
     const expiresIn = 15 * 60; // 15 minutes in seconds
 
-    // Store refresh token in database
     await this.db.query(
       'INSERT INTO refresh_tokens (token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4)',
       [refreshToken, payload.userId, payload.userType, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]
@@ -44,8 +43,7 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
-  async refreshToken(refreshToken: string): Promise<AuthToken> {
-    // Verify refresh token exists and is valid
+  async rotateRefreshToken(refreshToken: string): Promise<AuthToken> {
     const result = await this.db.query(
       'SELECT user_id, user_type FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
       [refreshToken]
@@ -55,18 +53,16 @@ export class AuthRepository implements IAuthRepository {
       throw new Error('Invalid or expired refresh token');
     }
 
-    const { user_id, user_type } = result.rows[0];
+    const { user_id, user_type , email} = result.rows[0];
 
-    // Generate new tokens
     const payload: JWTpayload = {
       userId: user_id,
       userType: user_type,
-      email: '', // Fetch email if needed
+      email: email, 
     };
 
     const newTokens = await this.generateToken(payload);
 
-    // Invalidate the old refresh token to prevent reuse.
     await this.db.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
 
     return newTokens;

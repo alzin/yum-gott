@@ -33,8 +33,6 @@ export class ProductValidators {
                 .optional()
                 .custom((value) => {
                     if (!value) return true;
-
-                    // Parse stringified JSON if necessary
                     let parsedValue = value;
                     if (typeof value === 'string') {
                         try {
@@ -43,13 +41,9 @@ export class ProductValidators {
                             throw new Error('Invalid sizeOptions format: must be a valid JSON array');
                         }
                     }
-
-                    // Ensure parsed value is an array
                     if (!Array.isArray(parsedValue)) {
                         throw new Error('Size options must be an array');
                     }
-
-                    // Validate each size option
                     for (const size of parsedValue) {
                         if (!Object.values(SizeName).includes(size.name)) {
                             throw new Error(`Size name must be one of: ${Object.values(SizeName).join(', ')}`);
@@ -101,8 +95,6 @@ export class ProductValidators {
                 .optional()
                 .custom((value) => {
                     if (!value) return true;
-
-                    // Parse stringified JSON if necessary
                     let parsedValue = value;
                     if (typeof value === 'string') {
                         try {
@@ -111,13 +103,9 @@ export class ProductValidators {
                             throw new Error('Invalid sizeOptions format: must be a valid JSON array');
                         }
                     }
-
-                    // Ensure parsed value is an array
                     if (!Array.isArray(parsedValue)) {
                         throw new Error('Size options must be an array');
                     }
-
-                    // Validate each size option
                     for (const size of parsedValue) {
                         if (!Object.values(SizeName).includes(size.name)) {
                             throw new Error(`Size name must be one of: ${Object.values(SizeName).join(', ')}`);

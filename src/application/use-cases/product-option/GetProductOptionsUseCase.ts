@@ -1,6 +1,5 @@
 import { ProductOption , ProductOptionValue } from "@/domain/entities/index";
 import { IProductOptionValueRepository , IProductOptionRepository , IProductRepository } from "@/domain/repositories/index";
-// import { IRestaurantOwnerRepository } from "@/domain/repositories";
 
 export interface ProductOptionWithValue extends ProductOption{
     values: ProductOptionValue[];
@@ -12,11 +11,9 @@ export class GetProductOptionsUseCase {
         private productOptionRepository: IProductOptionRepository,
         private productOptionValueRepository: IProductOptionValueRepository,
         private productRepository: IProductRepository,
-        // private restaurantOwnerRepository: IRestaurantOwnerRepository
     ) {}
 
     async execute(productId: string, restaurantOwnerId: string): Promise<ProductOptionWithValue[]> {
-        // Validate product exists and belongs to restaurant owner
         const product = await this.productRepository.findById(productId);
         if (!product) {
             throw new Error('Product not found');

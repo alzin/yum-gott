@@ -4,7 +4,7 @@ import { DatabaseConnection } from "../database/DataBaseConnection";
 
 export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
     constructor(private db: DatabaseConnection) {}
- 
+
     async create(restaurantOwner: RestaurantOwner): Promise<RestaurantOwner> {
         const query = `
             INSERT INTO restaurant_owners (

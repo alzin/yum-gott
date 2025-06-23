@@ -29,7 +29,6 @@ export class CreateProductUseCase {
             throw new Error('Restaurant owner not found');
         }
 
-        // Validate that the category exists for this owner
         const category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
         if (!category) {
             throw new Error('Category not found');
@@ -38,7 +37,6 @@ export class CreateProductUseCase {
             throw new Error('Category does not belong to this restaurant owner');
         }
 
-        // Validate sizeOptions if provided
         if (sizeOptions) {
             for (const size of sizeOptions) {
                 if (!Object.values(SizeName).includes(size.name)) {
@@ -62,7 +60,7 @@ export class CreateProductUseCase {
             description: request.description,
             price: request.price,
             discount: request.discount,
-            sizeOptions: sizeOptions || null, // Store as null if not provided
+            sizeOptions: sizeOptions || null,
             imageUrl,
             restaurantOwnerId,
             createdAt: new Date(),

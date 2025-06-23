@@ -29,7 +29,7 @@ export class AuthMiddleware {
     if (!refreshToken || !accessToken) return null;
 
     try {
-      const newTokens = await this.authRepository.refreshToken(refreshToken);
+      const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
       setAuthCookies(res, newTokens);
       return await this.authRepository.verifyToken(newTokens.accessToken);
     } catch (error) {
@@ -61,17 +61,15 @@ export class AuthMiddleware {
       let payload = await this.authRepository.verifyToken(token);
       req.user = payload;
 
-      // Perform token rotation
       const refreshToken = req.cookies?.refreshToken;
       if (refreshToken) {
         try {
-          const newTokens = await this.authRepository.refreshToken(refreshToken);
+          const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
           setAuthCookies(res, newTokens);
           payload = await this.authRepository.verifyToken(newTokens.accessToken);
           req.user = payload;
         } catch (error) {
           console.warn('Token rotation failed:', error);
-          // Proceed with the current valid token
         }
       }
 

@@ -54,6 +54,6 @@ export class RegisterCustomerUseCase {
         const emailExists = await this.customerRepository.existsByEmail(email);
         if (emailExists) {
             throw new Error('User already exists with this email');
-        }
+        } 
     }
 }

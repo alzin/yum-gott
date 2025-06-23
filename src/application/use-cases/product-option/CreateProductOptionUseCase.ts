@@ -1,6 +1,5 @@
 import { ProductOption } from '@/domain/entities/ProductOption';
 import { IProductOptionRepository , IProductRepository } from '@/domain/repositories/index';
-// import { IRestaurantOwnerRepository } from '@/domain/repositories/IRestaurantOwnerRepository';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface CreateProductOptionRequest {
@@ -12,7 +11,6 @@ export class CreateProductOptionUseCase {
     constructor(
         private productOptionRepository: IProductOptionRepository,
         private productRepository: IProductRepository,
-        // private restaurantOwnerRepository: IRestaurantOwnerRepository
     ) {}
 
     async execute(request: CreateProductOptionRequest, restaurantOwnerId: string): Promise<ProductOption> {

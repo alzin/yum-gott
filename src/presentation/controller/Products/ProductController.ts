@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { DIContainer } from '@/infrastructure/di/DIContainer';
 import {
     CreateProductUseCase,
     GetProductUseCase,
@@ -30,7 +29,6 @@ export class ProductController {
                 return;
             }
 
-            // Parse sizeOptions if it's a string (e.g., from multipart/form-data)
             let sizeOptions: SizeOption[] | null = req.body.sizeOptions;
             if (typeof sizeOptions === 'string') {
                 try {
