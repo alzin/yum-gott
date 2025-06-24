@@ -31,7 +31,7 @@ export class ProductOptionController {
             res.status(201).json({
                 success: true,
                 message: 'Product option created successfully',
-                // data: option
+                data: option
             });
         } catch (error) {
             res.status(400).json({
@@ -62,7 +62,7 @@ export class ProductOptionController {
             res.status(201).json({
                 success: true,
                 message: 'Product option value created successfully',
-                // data: value
+                data: value
             });
         } catch (error) {
             res.status(400).json({

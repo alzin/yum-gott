@@ -51,6 +51,7 @@ export class ProductController {
             res.status(201).json({
                 success: true,
                 message: 'Product created successfully',
+                data: product
             });
         } catch (error) {
             res.status(400).json({
@@ -66,7 +67,7 @@ export class ProductController {
 
             if (!product) throw new Error('Product not found');
 
-            const { id, restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
+            const {  restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
 
             res.status(200).json({
                 success: true,
@@ -96,7 +97,7 @@ export class ProductController {
 
             const products = await this.getProductsByRestaurantUseCase.execute(user.userId);
             const productsWithCategoryName = products.map(product => {
-                const { id, restaurantOwnerId, createdAt, updatedAt, ...rest } = product;
+                const {  restaurantOwnerId, createdAt, updatedAt, ...rest } = product;
                 return {
                     ...rest
                 };
@@ -150,6 +151,7 @@ export class ProductController {
             res.status(200).json({
                 success: true,
                 message: 'Product updated successfully',
+                data: product
             });
         } catch (error) {
             res.status(400).json({
