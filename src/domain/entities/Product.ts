@@ -1,16 +1,22 @@
-export enum SizeOption {
-    SMALL = 'Small',
-    MEDIUM = 'Medium',
-    LARGE = 'Large'
+export enum SizeName {
+    Small = 'Small',
+    Medium = 'Medium',
+    Large = 'Large'
 }
+
+export interface SizeOption {
+    name: SizeName;
+    additionalPrice: number;
+}
+
 export interface Product {
     id?: string;
-    category: string;
+    categoryName: string;
     productName: string;
     description: string;
     price: number;
     discount?: number;
-    addSize?: SizeOption;
+    sizeOptions?: SizeOption[] | null;
     imageUrl?: string | null;
     restaurantOwnerId: string;
     createdAt?: Date;

@@ -1,8 +1,14 @@
 openapi: 3.0.3
 info:
   title: Yum-Gott Platform API
-  description: API for the Yum-Gott platform, supporting customer and restaurant owner authentication, profile management, and product management.
+  description: API for the Yum-Gott platform, supporting customer and restaurant owner authentication, profile management, product management, and category management.
   version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://api.yum-gott.com
+    description: Production server
 
 paths:
   /health:
@@ -13,7 +19,7 @@ paths:
       description: Check if the API server is running and healthy
       operationId: checkHealth
       responses:
-        '200':
+        "200":
           description: Server is healthy
           content:
             application/json:
@@ -26,24 +32,25 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
-                    example: "2025-06-16T14:36:00Z"
+                    example: "2025-06-22T18:46:00Z"
                   uptime:
                     type: number
                     description: Server uptime in seconds
                     example: 3600.5
+
   /api/auth/register/customer:
     post:
       tags:
         - Authentication
       summary: Register a new customer
-      description: Initiates customer registration by storing details in pending_users and sending a verification email.
+      description: Initiates customer registration by storing details and sending a verification email.
       operationId: registerCustomer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterCustomerRequest'
+              $ref: "#/components/schemas/RegisterCustomerRequest"
             examples:
               validCustomer:
                 summary: Valid customer registration
@@ -53,7 +60,7 @@ paths:
                   mobileNumber: "01234567890"
                   password: "SecurePass123"
       responses:
-        '201':
+        "201":
           description: Customer registration initiated successfully
           content:
             application/json:
@@ -65,22 +72,28 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Customer registration initiated. Please check your email for verification link."
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+                    example: "Registration successful. Please check your email for verification link."
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+
   /api/auth/register/restaurant-owner:
     post:
       tags:
         - Authentication
       summary: Register a new restaurant owner
-      description: Initiates restaurant owner registration by storing details in pending_users and sending a verification email.
+      description: Initiates restaurant owner registration by storing details and sending a verification email.
       operationId: registerRestaurantOwner
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterRestaurantOwnerRequest'
+              $ref: "#/components/schemas/RegisterRestaurantOwnerRequest"
             examples:
               validOwner:
                 summary: Valid restaurant owner registration
@@ -91,7 +104,7 @@ paths:
                   mobileNumber: "09876543210"
                   password: "SecurePass123"
       responses:
-        '201':
+        "201":
           description: Restaurant owner registration initiated successfully
           content:
             application/json:
@@ -103,15 +116,21 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Restaurant owner registration initiated. Please check your email for verification link."
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+                    example: "Restaurant owner registration successful. Please check your email for verification link."
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+
   /api/auth/verify:
     get:
       tags:
         - Authentication
       summary: Verify email address
-      description: Verifies a user's email using a token sent in the verification email, moving the user from pending_users to the customers or restaurant_owners table.
+      description: Verifies a user's email using a token sent in the verification email.
       operationId: verifyEmail
       parameters:
         - in: query
@@ -123,7 +142,7 @@ paths:
           description: Verification token sent to the user's email
           example: 550e8400-e29b-41d4-a716-446655440000
       responses:
-        '200':
+        "200":
           description: Email verified successfully
           content:
             application/json:
@@ -141,23 +160,24 @@ paths:
                     properties:
                       user:
                         oneOf:
-                          - $ref: '#/components/schemas/CustomerResponse'
-                          - $ref: '#/components/schemas/RestaurantOwnerResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+                          - $ref: "#/components/schemas/CustomerResponse"
+                          - $ref: "#/components/schemas/RestaurantOwnerResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+
   /api/auth/login/customer:
     post:
       tags:
         - Authentication
       summary: Customer login
-      description: Authenticate a customer using email or mobile number and password. Returns JWT tokens as HTTP-only cookies.
+      description: Authenticate a customer using email and password. Returns JWT tokens as HTTP-only cookies.
       operationId: loginCustomer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
             examples:
               loginWithEmail:
                 summary: Login with email
@@ -165,7 +185,7 @@ paths:
                   email: "ahmed@example.com"
                   password: "SecurePass123"
       responses:
-        '200':
+        "200":
           description: Customer login successful
           content:
             application/json:
@@ -178,32 +198,31 @@ paths:
                   message:
                     type: string
                     example: "Customer login successful"
-                  data:
-                    $ref: '#/components/schemas/LoginResponse'
           headers:
             Set-Cookie:
               schema:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsError"
+
   /api/auth/login/restaurant-owner:
     post:
       tags:
         - Authentication
       summary: Restaurant owner login
-      description: Authenticate a restaurant owner using email or mobile number and password. Returns JWT tokens as HTTP-only cookies.
+      description: Authenticate a restaurant owner using email and password. Returns JWT tokens as HTTP-only cookies.
       operationId: loginRestaurantOwner
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
             examples:
               loginWithEmail:
                 summary: Login with email
@@ -211,7 +230,7 @@ paths:
                   email: "owner@example.com"
                   password: "SecurePass123"
       responses:
-        '200':
+        "200":
           description: Restaurant owner login successful
           content:
             application/json:
@@ -224,19 +243,18 @@ paths:
                   message:
                     type: string
                     example: "Restaurant owner login successful"
-                  data:
-                    $ref: '#/components/schemas/LoginResponse'
           headers:
             Set-Cookie:
               schema:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsError"
+
   /api/auth/profile/restaurant-owner:
     get:
       tags:
@@ -247,7 +265,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: Restaurant owner profile retrieved successfully
           content:
             application/json:
@@ -267,10 +285,11 @@ paths:
                         type: string
                         nullable: true
                         example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/123.jpg"
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/auth/profile/image:
     post:
       tags:
@@ -286,15 +305,14 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required:
-                - profileImage
               properties:
                 profileImage:
                   type: string
                   format: binary
-                  description: Profile image file (JPEG, PNG, or GIF, max 5MB)
+              required:
+                - profileImage
       responses:
-        '200':
+        "200":
           description: Profile image uploaded successfully
           content:
             application/json:
@@ -312,17 +330,20 @@ paths:
                     properties:
                       profileImageUrl:
                         type: string
-                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000.jpg"
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
+                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/auth/location/restaurant:
     post:
       tags:
         - Authentication
       summary: Update restaurant location
-      description: Updates the restaurant's address and GPS coordinates for an authenticated restaurant owner.
+      description: Allows authenticated restaurant owners to update their restaurant's address and coordinates.
       operationId: updateRestaurantLocation
       security:
         - cookieAuth: []
@@ -331,16 +352,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateRestaurantLocationRequest'
-            examples:
-              validLocation:
-                summary: Valid location update
-                value:
-                  address: "123 Main St, City"
-                  latitude: 40.7128
-                  longitude: -74.0060
+              $ref: "#/components/schemas/UpdateRestaurantLocationRequest"
       responses:
-        '200':
+        "200":
           description: Restaurant location updated successfully
           content:
             application/json:
@@ -358,25 +372,99 @@ paths:
                     properties:
                       address:
                         type: string
-                        example: "123 Main St, City"
+                        example: "123 Food Street, City"
                       latitude:
                         type: number
                         example: 40.7128
                       longitude:
                         type: number
                         example: -74.0060
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/auth/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: |
+        Refreshes the access token using the refresh token provided in the HTTP-only cookie.
+        This endpoint should be called when the access token is expired or about to expire.
+        The request must include the `refreshToken` and `accessToken` cookies.
+      operationId: refreshToken
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Token refreshed successfully. New tokens are set in HTTP-only cookies.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Token refreshed successfully"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=...; refreshToken=...;
+        "401":
+          description: Unauthorized. The refresh token is invalid, expired, or not provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid or expired refresh token"
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidates the refresh token and clears authentication cookies.
+      operationId: logout
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Logout successful"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
   /api/products:
     post:
       tags:
         - Products
       summary: Create a new product
-      description: Allows restaurant owners to create a new product with an image upload. The restaurant owner ID is derived from the authenticated user's access token.
+      description: Creates a new product for a restaurant owner.
       operationId: createProduct
       security:
         - cookieAuth: []
@@ -386,45 +474,43 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: []
               properties:
-                category:
+                categoryName:
                   type: string
-                  description: The category of the product
-                  example: "Pizza"
+                  description: Name of the category
+                  example: "Main Course"
                 productName:
                   type: string
-                  description: The name of the product
+                  description: Name of the product
                   example: "Margherita Pizza"
                 description:
                   type: string
-                  description: A description of the product
+                  description: Product description
                   example: "Classic pizza with tomato sauce and mozzarella"
                 price:
                   type: number
-                  format: float
-                  description: The price of the product
-                  example: 12.99
+                  description: Base price of the product
+                  example: 100
                 discount:
                   type: number
-                  format: float
-                  description: Optional discount amount
-                  example: 1.50
-                addSize:
-                  type: string
-                  enum: [Small, Medium, Large]
-                  description: Optional size option
-                  example: "Medium"
+                  description: Discount percentage
+                  example: 10
+                sizeOptions:
+                  type: object
+                  description: Optional array of size options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]').
+                  example: '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]'
                 image:
                   type: string
                   format: binary
-                  description: |
-                    Product image file
-                    - Max size: 5MB
-                    - Allowed formats: JPEG, PNG, GIF
-                    - Image will be automatically converted to JPG format
+                  description: Product image file (JPEG or PNG)
+              required:
+                - categoryName
+                - productName
+                - description
+                - price
+                - image
       responses:
-        '201':
+        "201":
           description: Product created successfully
           content:
             application/json:
@@ -437,20 +523,60 @@ paths:
                   message:
                     type: string
                     example: "Product created successfully"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid input"
+
+  /api/products/restaurant:
+    get:
+      tags:
+        - Products
+      summary: Get all products for a restaurant
+      description: Retrieves all products belonging to the authenticated restaurant owner.
+      operationId: getProductsByRestaurant
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Get All Products successfully"
                   data:
-                    $ref: '#/components/schemas/Product'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProductResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/products/{id}:
     get:
       tags:
         - Products
       summary: Get a product by ID
-      description: Retrieves a product by its ID
+      description: Retrieves a specific product by its ID.
       operationId: getProduct
       parameters:
         - in: path
@@ -459,9 +585,10 @@ paths:
             type: string
             format: uuid
           required: true
-          description: Product ID
+          description: The ID of the product to retrieve
+          example: "550e8400-e29b-41d4-a716-446655440000"
       responses:
-        '200':
+        "200":
           description: Product retrieved successfully
           content:
             application/json:
@@ -471,34 +598,65 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  message:
+                    type: string
+                    example: "Get Product successfully"
                   data:
-                    $ref: '#/components/schemas/Product'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                    $ref: "#/components/schemas/ProductResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
     put:
       tags:
         - Products
       summary: Update a product
-      description: Allows restaurant owners to update an existing product
+      description: Updates an existing product for a restaurant owner.
       operationId: updateProduct
       security:
         - cookieAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
             format: uuid
-          required: true
-          description: Product ID
       requestBody:
-        required: true
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateProductRequest'
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  description: Name of the category
+                  example: "Main Course"
+                productName:
+                  type: string
+                  description: Name of the product
+                  example: "Margherita Pizza"
+                description:
+                  type: string
+                  description: Product description
+                  example: "Classic pizza with tomato sauce and mozzarella"
+                price:
+                  type: number
+                  description: Base price of the product
+                  example: 100
+                discount:
+                  type: number
+                  description: Discount percentage
+                  example: 10
+                sizeOptions:
+                  type: object
+                  description: Optional array of size options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]').
+                  example: '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]'
+                image:
+                  type: string
+                  format: binary
+                  description: Product image file (JPEG or PNG)
       responses:
-        '200':
+        "200":
           description: Product updated successfully
           content:
             application/json:
@@ -511,21 +669,25 @@ paths:
                   message:
                     type: string
                     example: "Product updated successfully"
-                  data:
-                    $ref: '#/components/schemas/Product'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid input"
+
     delete:
       tags:
         - Products
       summary: Delete a product
-      description: Allows restaurant owners to delete a product
+      description: Allows authenticated restaurant owners to delete a product.
       operationId: deleteProduct
       security:
         - cookieAuth: []
@@ -536,9 +698,10 @@ paths:
             type: string
             format: uuid
           required: true
-          description: Product ID
+          description: The ID of the product to delete
+          example: "550e8400-e29b-41d4-a716-446655440000"
       responses:
-        '200':
+        "200":
           description: Product deleted successfully
           content:
             application/json:
@@ -551,26 +714,48 @@ paths:
                   message:
                     type: string
                     example: "Product deleted successfully"
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-  /api/products/restaurant:
-    get:
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/products/{productId}/options:
+    post:
       tags:
-        - Products
-      summary: Get all products for a restaurant
-      description: Retrieves all products for the authenticated restaurant owner
-      operationId: getProductsByRestaurant
+        - Product Options
+      summary: Create a product option
+      description: Allows authenticated restaurant owners to create a new option for a product.
+      operationId: createProductOption
       security:
         - cookieAuth: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the product to add an option to
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Toppings"
+              required:
+                - name
       responses:
-        '200':
-          description: Products retrieved successfully
+        "201":
+          description: Product option created successfully
           content:
             application/json:
               schema:
@@ -579,282 +764,414 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  message:
+                    type: string
+                    example: "Product option created successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+    get:
+      tags:
+        - Product Options
+      summary: Get product options
+      description: Retrieves all options and their values for a specific product.
+      operationId: getProductOptions
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the product to retrieve options for
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product options retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product options retrieved successfully"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Product'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "Toppings"
+                        values:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: "Extra Cheese"
+                              additionalPrice:
+                                type: number
+                                example: 2.50
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/products/options/{optionId}/values:
+    post:
+      tags:
+        - Product Options
+      summary: Create a product option value
+      description: Allows authenticated restaurant owners to create a new value for a product option.
+      operationId: createProductOptionValue
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: optionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the option to add a value to
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Extra Cheese"
+                additionalPrice:
+                  type: number
+                  example: 2.50
+              required:
+                - name
+      responses:
+        "201":
+          description: Product option value created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option value created successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/products/options/{optionId}:
+    delete:
+      tags:
+        - Product Options
+      summary: Delete a product option
+      description: Allows authenticated restaurant owners to delete a product option and its associated values.
+      operationId: deleteProductOption
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: optionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the option to delete
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product option deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option deleted successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/products/option-values/{valueId}:
+    delete:
+      tags:
+        - Product Options
+      summary: Delete a product option value
+      description: Allows authenticated restaurant owners to delete a product option value.
+      operationId: deleteProductOptionValue
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: valueId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the option value to delete
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product option value deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option value deleted successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/categories:
+    post:
+      tags:
+        - Categories
+      summary: Create a new category
+      description: Allows restaurant owners to create a new category for their products.
+      operationId: createCategory
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                  example: "Main Course"
+      responses:
+        "201":
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Category created successfully"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: "550e8400-e29b-41d4-a716-446655440000"
+                      name:
+                        type: string
+                        example: "Main Course"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/categories/restaurant:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories for a restaurant
+      description: Retrieves all categories belonging to the authenticated restaurant owner.
+      operationId: getCategoriesByRestaurant
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Categories retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
+                        name:
+                          type: string
+                          example: "Main Course"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
 components:
-  securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: accessToken
-      description: JWT access token stored in an HTTP-only cookie
-  responses:
-    BadRequestError:
-      description: Bad request - Validation errors or invalid input
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            validationError:
-              summary: Validation errors
-              value:
-                success: false
-                message: "Validation failed"
-                errors:
-                  - field: "email"
-                    message: "Invalid email format"
-                    value: "invalid-email"
-            invalidFileType:
-              summary: Invalid file type
-              value:
-                success: false
-                message: "Only JPEG, PNG, and GIF images are allowed"
-    UnauthorizedError:
-      description: Unauthorized - Authentication credentials are missing or invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            unauthorized:
-              summary: Unauthorized
-              value:
-                success: false
-                message: "Unauthorized: Please log in"
-    ForbiddenError:
-      description: Forbidden - User does not have sufficient permissions
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            forbidden:
-              summary: Forbidden
-              value:
-                success: false
-                message: "Forbidden: Only restaurant owners can access this endpoint"
-    NotFoundError:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            notFound:
-              summary: Resource not found
-              value:
-                success: false
-                message: "Product not found"
-    TooManyRequestsError:
-      description: Too many requests
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            rateLimit:
-              summary: Rate limit exceeded
-              value:
-                success: false
-                message: "Too many login attempts. Please try again later."
   schemas:
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          example: "An error occurred"
-        errors:
-          type: array
-          nullable: true
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-                example: "email"
-              message:
-                type: string
-                example: "Invalid email format"
-              value:
-                type: string
-                example: "invalid-email"
-    LoginRequest:
-      type: object
-      required:
-        - password
-      oneOf:
-        - required: [email]
-        - required: [mobileNumber]
-      properties:
-        email:
-          type: string
-          format: email
-          example: "ahmed@example.com"
-        mobileNumber:
-          type: string
-          pattern: '^[0-9]{10,15}$'
-          example: "01234567890"
-        password:
-          type: string
-          minLength: 6
-          example: "SecurePass123"
-    LoginResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        email:
-          type: string
-          format: email
-          example: "ahmed@example.com"
-        mobileNumber:
-          type: string
-          example: "01234567890"
-        userType:
-          type: string
-          enum: ["customer", "restaurant_owner"]
-          example: "customer"
     RegisterCustomerRequest:
       type: object
+      properties:
+        name:
+          type: string
+          example: "Ahmed Mohamed"
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          example: "ahmed@example.com"
+          maxLength: 255
+        mobileNumber:
+          type: string
+          example: "01234567890"
+          pattern: '^[0-9]{10,15}$'
+        password:
+          type: string
+          example: "SecurePass123"
+          minLength: 6
+          maxLength: 100
       required:
         - name
         - email
         - mobileNumber
         - password
+
+    RegisterRestaurantOwnerRequest:
+      type: object
       properties:
-        name:
+        restaurantName:
           type: string
-          minLength: 2
-          maxLength: 100
-          pattern: '^[a-zA-Z\s]+$'
-          example: "Ahmed Mohamed"
+          example: "Tasty Bites"
+          maxLength: 255
+        organizationNumber:
+          type: string
+          example: "ORG123456"
+          pattern: '^[A-Z0-9]+$'
+          minLength: 5
+          maxLength: 50
         email:
           type: string
           format: email
+          example: "owner@example.com"
           maxLength: 255
-          example: "ahmed@example.com"
         mobileNumber:
           type: string
+          example: "09876543210"
           pattern: '^[0-9]{10,15}$'
-          example: "01234567890"
         password:
           type: string
+          example: "SecurePass123"
           minLength: 6
           maxLength: 100
-          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
-          example: "SecurePass123"
-    RegisterRestaurantOwnerRequest:
-      type: object
       required:
         - restaurantName
         - organizationNumber
         - email
         - mobileNumber
         - password
+
+    LoginRequest:
+      type: object
       properties:
-        restaurantName:
-          type: string
-          minLength: 2
-          maxLength: 255
-          example: "Tasty Bites"
-        organizationNumber:
-          type: string
-          minLength: 5
-          maxLength: 50
-          pattern: '^[A-Z0-9]+$'
-          example: "ORG123456"
         email:
           type: string
           format: email
+          example: "user@example.com"
           maxLength: 255
-          example: "owner@example.com"
-        mobileNumber:
-          type: string
-          pattern: '^[0-9]{10,15}$'
-          example: "09876543210"
         password:
           type: string
-          minLength: 6
-          maxLength: 100
-          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
           example: "SecurePass123"
-    UpdateRestaurantLocationRequest:
-      type: object
+          minLength: 6
       required:
-        - address
-        - latitude
-        - longitude
-      properties:
-        address:
-          type: string
-          maxLength: 255
-          example: "123 Main St, City"
-        latitude:
-          type: number
-          minimum: -90
-          maximum: 90
-          example: 40.7128
-        longitude:
-          type: number
-          minimum: -180
-          maximum: 180
-          example: -74.0060
+        - password
+      oneOf:
+        - required: [email]
+
     CustomerResponse:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: "550e8400-e29b-41d4-a716-446655440000"
         name:
           type: string
           example: "Ahmed Mohamed"
         email:
           type: string
-          format: email
           example: "ahmed@example.com"
         mobileNumber:
           type: string
           example: "01234567890"
-        userType:
-          type: string
-          enum: ["customer"]
-          example: "customer"
         isActive:
           type: boolean
           example: true
-        createdAt:
-          type: string
-          format: date-time
-          example: "2025-06-16T14:36:00Z"
-        updatedAt:
-          type: string
-          format: date-time
-          example: "2025-06-16T14:36:00Z"
+        isEmailVerified:
+          type: boolean
+          example: true
         profileImageUrl:
           type: string
           nullable: true
-          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123e4567-e89b-12d3-a456-426614174000.jpg"
+          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg"
+
     RestaurantOwnerResponse:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          example: "7db9be8e-72d8-49dd-95e4-bb5419667984"
+          example: "550e8400-e29b-41d4-a716-446655440000"
         restaurantName:
           type: string
           example: "Tasty Bites"
@@ -863,34 +1180,24 @@ components:
           example: "ORG123456"
         email:
           type: string
-          format: email
           example: "owner@example.com"
         mobileNumber:
           type: string
           example: "09876543210"
-        userType:
-          type: string
-          enum: ["restaurant_owner"]
-          example: "restaurant_owner"
         isActive:
           type: boolean
           example: true
-        createdAt:
-          type: string
-          format: date-time
-          example: "2025-06-16T14:36:00Z"
-        updatedAt:
-          type: string
-          format: date-time
-          example: "2025-06-16T14:36:00Z"
+        isEmailVerified:
+          type: boolean
+          example: true
         profileImageUrl:
           type: string
           nullable: true
-          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/7db9be8e-72d8-49dd-a456-426614174000.jpg"
+          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/123.jpg"
         address:
           type: string
           nullable: true
-          example: "123 Main St, City"
+          example: "123 Food Street, City"
         latitude:
           type: number
           nullable: true
@@ -899,143 +1206,140 @@ components:
           type: number
           nullable: true
           example: -74.0060
-    Product:
+
+    UpdateRestaurantLocationRequest:
       type: object
       properties:
-        id:
+        address:
           type: string
-          format: uuid
-          example: "123e4567-e89b-1234-a456-426614174000"
-        category:
+          example: "123 Food Street, City"
+          maxLength: 255
+        latitude:
+          type: number
+          example: 40.7128
+        longitude:
+          type: number
+          example: -74.0060
+      required:
+        - address
+        - latitude
+        - longitude
+
+    ProductResponse:
+      type: object
+      properties:
+        categoryName:
           type: string
-          example: "Main Course"
+          example: "Pizza"
         productName:
           type: string
-          example: "Chicken Alfredo"
+          example: "Margherita Pizza"
         description:
           type: string
-          example: "Creamy pasta with grilled chicken"
+          example: "Classic pizza with tomato sauce and mozzarella"
         price:
           type: number
-          format: float
-          example: 15.99
+          example: 12.99
         discount:
           type: number
-          format: float
-          nullable: true
           example: 10
         addSize:
           type: string
-          enum:
-            - Small
-            - Medium
-            - Large
-          nullable: true
+          enum: [Small, Medium, Large]
           example: "Medium"
         imageUrl:
           type: string
           nullable: true
-          example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/product/123e4567-e89b-1234-a456-426614174000.jpg"
-        restaurantOwnerId:
-          type: string
-          format: uuid
-          example: "7db9be8e-72d8-1234-a456-426614174000"
-        createdAt:
-          type: string
-          format: date-time
-          example: "2025-06-16T14:36:00Z"
-        updatedAt:
-          type: string
-          format: date-time
-          example: "2025-06-16T14:36:00Z"
-    CreateProductRequest:
-      type: object
-      required:
-        - category
-        - productName
-        - description
-        - price
-        - image
-      properties:
-        category:
-          type: string
-          description: The category of the product
-          example: "Pizza"
-        productName:
-          type: string
-          description: The name of the product
-          example: "Margherita Pizza"
-        description:
-          type: string
-          description: A description of the product
-          example: "Classic pizza with tomato sauce and mozzarella"
-        price:
-          type: number
-          format: float
-          description: The price of the product
-          example: 12.99
-        discount:
-          type: number
-          format: float
-          description: Optional discount amount
-          example: 1.50
-        addSize:
-          type: string
-          enum: [Small, Medium, Large]
-          description: Optional size option
-          example: "Medium"
-        image:
-          type: string
-          format: binary
-          description: |
-            Product image file (required)
-            - Max size: 5MB
-            - Allowed formats: JPEG, PNG, GIF
-            - Image will be automatically converted to JPG format
-    UpdateProductRequest:
-      type: object
-      properties:
-        category:
-          type: string
-          maxLength: 100
-          example: "Main Course"
-        productName:
-          type: string
-          maxLength: 255
-          example: "Chicken Alfredo"
-        description:
-          type: string
-          example: "Creamy pasta with grilled chicken"
-        price:
-          type: number
-          format: float
-          minimum: 0
-          example: 15.99
-        discount:
-          type: number
-          format: float
-          minimum: 0
-          maximum: 100
-          nullable: true
-          example: 10
-        addSize:
-          type: string
-          enum:
-            - Small
-            - Medium
-            - Large
-          nullable: true
-          example: "Medium"
-        image:
-          type: string
-          format: binary
-          description: Product image file (JPEG, PNG, or GIF, max 5MB)
-tags:
-  - name: Health Check
-    description: Server health monitoring endpoints
-  - name: Authentication
-    description: User registration, login, and profile management
-  - name: Products
-    description: Product management for restaurant owners
-security:
-  - cookieAuth: []
+          example: "https://yum-gott-product-images.s3.us-east-1.amazonaws.com/product/123.jpg"
+
+  responses:
+    BadRequestError:
+      description: Bad request due to invalid input
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Validation failed"
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: "email"
+                    message:
+                      type: string
+                      example: "Invalid email format"
+                    value:
+                      type: string
+                      nullable: true
+                      example: "invalid.email"
+
+    UnauthorizedError:
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Invalid or expired token"
+
+    ForbiddenError:
+      description: Forbidden access
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Forbidden: Only restaurant owners can access this endpoint"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Product not found"
+
+    TooManyRequestsError:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Too many login attempts, please try again later"
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken

@@ -7,7 +7,7 @@ export class DatabaseConnection {
   private constructor() {
     const connectionString = process.env.DATABASE_URL;
 
-   
+
 
     this.pool = new Pool({
       connectionString,
@@ -66,5 +66,9 @@ export class DatabaseConnection {
       console.error('Error closing database connection:', error);
       throw error;
     }
+  }
+
+  public getPool(): Pool {
+    return this.pool;
   }
 }

@@ -1,6 +1,5 @@
-import { Customer, RestaurantOwner } from "@/domain/entities/User";
 import { IPasswordHasher } from "@/application/interface/IPasswordHasher";
-import { AuthToken, JWTpayload } from "@/domain/entities/AuthToken";
+import { AuthToken, JWTpayload , Customer, RestaurantOwner} from "@/domain/entities/index";
 import { IAuthRepository , IRestaurantOwnerRepository ,  ICustomerRepository} from "@/domain/repositories/index";
 export interface LoginRequest {
     email: string;

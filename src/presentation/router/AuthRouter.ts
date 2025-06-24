@@ -14,11 +14,13 @@ import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 import multer from 'multer';
+import { AuthController } from '../controller/AuthController';
 
 export class AuthRouter {
   private router: Router;
   private upload: multer.Multer;
   private diContainer: DIContainer;
+  private authController: AuthController;
 
   constructor() {
     const storage = multer.memoryStorage();
@@ -28,6 +30,7 @@ export class AuthRouter {
     });
 
     this.diContainer = DIContainer.getInstance();
+    this.authController = new AuthController();
     this.router = Router();
     this.setupRoutes();
   }
@@ -120,7 +123,22 @@ export class AuthRouter {
         controller.updateRestaurantLocation(req, res);
       }
     );
+
+    this.router.post(
+      '/refresh-token',
+      this.authController.refreshToken
+    );
+
+    this.router.post(
+      '/logout',
+      authMiddleware.authenticate,
+      (req: Request, res: Response) => {
+        this.authController.logout(req as AuthenticatedRequest, res)
+      }
+    )
+
   }
+
 
   public getRouter(): Router {
     return this.router;
