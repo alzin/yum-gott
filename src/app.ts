@@ -10,6 +10,7 @@ import { AuthRouter } from './presentation/router/AuthRouter';
 import path from "path";
 import { ProductRouter } from './presentation/router/ProductRouter';
 import { CategoryRouter } from './presentation/router/CategoryRouter';
+import { CleanupUnverifiedAccounts } from './infrastructure/services/CleanupUnverifiedAccounts';
 
 export class App {
   private app: Application;
@@ -60,6 +61,8 @@ export class App {
 
 
     this.diContainer = DIContainer.getInstance();
+    const cleanupService = new CleanupUnverifiedAccounts(this.diContainer.cleanupUnverifiedAccountsUseCase);
+    cleanupService.startScheduledJobs();
     this.setupMiddleware();
     this.setupRoutes();
     this.setupErrorHandling();

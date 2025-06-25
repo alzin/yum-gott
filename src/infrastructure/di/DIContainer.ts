@@ -9,7 +9,8 @@ import {
   RestaurantOwnerLoginUseCase,
   UpdateRestaurantLocationUseCase,
   GetRestaurantOwnerProfileUseCase,
-  LogoutUseCase
+  LogoutUseCase,
+  CleanupUnverifiedAccountsUseCase
 } from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
@@ -122,6 +123,14 @@ export class DIContainer {
         'IProductOptionRepository',
         () => new ProductOptionRepository(DIContainer.instance.databaseConnection)
       );
+
+      // Register cleanup unverified accounts use case
+      DIContainer.instance.registerSingleton('cleanupUnverifiedAccountsUseCase', () => {
+        return new CleanupUnverifiedAccountsUseCase(
+          DIContainer.instance.resolve('customerRepository'),
+          DIContainer.instance.resolve('restaurantOwnerRepository')
+        );
+      });
     }
     return DIContainer.instance;
   }
@@ -341,5 +350,9 @@ export class DIContainer {
 
   public get logoutUseCase(): LogoutUseCase {
     return this.resolve('logoutUseCase');
+  }
+
+  public get cleanupUnverifiedAccountsUseCase(): CleanupUnverifiedAccountsUseCase {
+    return this.resolve('cleanupUnverifiedAccountsUseCase');
   }
 }
