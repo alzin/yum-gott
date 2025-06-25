@@ -2,6 +2,7 @@ import { Product, SizeOption, SizeName } from "@/domain/entities/Product";
 import { IProductRepository, IRestaurantOwnerRepository, ICategoryRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
 import { v4 as uuidv4 } from 'uuid';
+import { CreateCategoryUseCase } from "@/application/use-cases/category/CreateCategoryUseCase";
 
 export interface CreateProductRequest {
     categoryName: string;
@@ -18,20 +19,26 @@ export class CreateProductUseCase {
         private productRepository: IProductRepository,
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService,
-        private categoryRepository: ICategoryRepository
+        private categoryRepository: ICategoryRepository,
+        private createCategoryUseCase: CreateCategoryUseCase
     ) { }
 
-    async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
-        const { image, sizeOptions, categoryName } = request;
+    async execute(request: CreateProductRequest & { newCategoryName?: string }, restaurantOwnerId: string): Promise<Product> {
+        const { image, sizeOptions, categoryName, newCategoryName } = request;
 
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
-        const category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
-        if (!category) {
-            throw new Error('Category not found');
+        let category;
+        if (newCategoryName) {
+            category = await this.createCategoryUseCase.execute({ name: newCategoryName }, restaurantOwnerId);
+        } else {
+            category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
+            if (!category) {
+                throw new Error('Category not found');
+            }
         }
         if (category.restaurantOwnerId !== restaurantOwnerId) {
             throw new Error('Category does not belong to this restaurant owner');

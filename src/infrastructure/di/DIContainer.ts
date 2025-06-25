@@ -43,7 +43,8 @@ export class DIContainer {
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('restaurantOwnerRepository'),
         DIContainer.instance.resolve('fileStorageService'),
-        DIContainer.instance.resolve('ICategoryRepository')
+        DIContainer.instance.resolve('ICategoryRepository'),
+        DIContainer.instance.resolve('createCategoryUseCase')
       ));
       DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(
         DIContainer.instance.resolve('IProductRepository')
@@ -54,7 +55,9 @@ export class DIContainer {
       ));
       DIContainer.instance.registerTransient('updateProductUseCase', () => new UpdateProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
-        DIContainer.instance.resolve('fileStorageService')
+        DIContainer.instance.resolve('fileStorageService'),
+        DIContainer.instance.resolve('ICategoryRepository'),
+        DIContainer.instance.resolve('createCategoryUseCase')
       ));
       DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
