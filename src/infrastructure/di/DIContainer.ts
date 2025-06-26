@@ -21,6 +21,7 @@ import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/appli
 import { ProductOptionRepository, ProductOptionValueRepository } from '@/infrastructure/repositories/index';
 import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
 import { RefreshTokenUseCase } from '@/application/use-cases/auth/RefreshTokenUseCase';
+import { RedisTokenStore } from '../services/RedisTokenStore';
 
 type DependencyFactory<T = any> = () => T;
 
@@ -130,6 +131,12 @@ export class DIContainer {
           DIContainer.instance.resolve('customerRepository'),
           DIContainer.instance.resolve('restaurantOwnerRepository')
         );
+      });
+
+      // Register token store
+      DIContainer.instance.registerSingleton('tokenStore', () => {
+        console.log('DIContainer: Registering tokenStore (RedisTokenStore)');
+        return new RedisTokenStore();
       });
     }
     return DIContainer.instance;
@@ -354,5 +361,9 @@ export class DIContainer {
 
   public get cleanupUnverifiedAccountsUseCase(): CleanupUnverifiedAccountsUseCase {
     return this.resolve('cleanupUnverifiedAccountsUseCase');
+  }
+
+  public get tokenStore(): RedisTokenStore {
+    return this.resolve('tokenStore');
   }
 }

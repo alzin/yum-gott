@@ -29,10 +29,13 @@ export class AuthController {
       }
 
       const result = await this.refreshTokenUseCase.execute({ refreshToken });
+      // Log the new tokens for debugging
+      console.log('New Access Token:', result.authToken.accessToken);
+      console.log('New Refresh Token:', result.authToken.refreshToken);
       this.setAuthCookies(res, result.authToken);
 
       res.status(200).json({
-        success: true,
+        success: true, 
         message: 'Token refreshed successfully',
       });
     } catch (error) {
@@ -57,7 +60,7 @@ export class AuthController {
         return;
       }
 
-      const request = {  
+      const request = {
         refreshToken,
         userId: user.userId,
         userType: user.userType,
