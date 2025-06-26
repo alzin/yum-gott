@@ -1,6 +1,8 @@
 import { Product, SizeOption, SizeName } from '@/domain/entities/Product';
 import { IProductRepository } from '@/domain/repositories/IProductRepository';
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
+import { ICategoryRepository } from '@/domain/repositories/ICategoryRepository';
+import { CreateCategoryUseCase } from '@/application/use-cases/category/CreateCategoryUseCase';
 
 export interface UpdateProductRequest {
     productId: string;
@@ -9,7 +11,7 @@ export interface UpdateProductRequest {
     description?: string;
     price?: number;
     discount?: number;
-    sizeOptions?: SizeOption[] | null; 
+    sizeOptions?: SizeOption[] | null;
     image?: Express.Multer.File;
     restaurantOwnerId: string;
 }
@@ -17,10 +19,12 @@ export interface UpdateProductRequest {
 export class UpdateProductUseCase {
     constructor(
         private productRepository: IProductRepository,
-        private fileStorageService: IFileStorageService
+        private fileStorageService: IFileStorageService,
+        private categoryRepository: ICategoryRepository,
+        private createCategoryUseCase: CreateCategoryUseCase
     ) { }
-    async execute(request: UpdateProductRequest): Promise<Product> {
-        const { productId, restaurantOwnerId, image, sizeOptions, categoryName } = request;
+    async execute(request: UpdateProductRequest & { newCategoryName?: string }): Promise<Product> {
+        const { productId, restaurantOwnerId, image, sizeOptions, categoryName, newCategoryName } = request;
 
         const product = await this.productRepository.findById(productId);
         if (!product) {
@@ -59,10 +63,11 @@ export class UpdateProductUseCase {
         }
 
         let categoryNameToUse = product.categoryName;
-        if (categoryName) {
-            const diContainer = require('@/infrastructure/di/DIContainer').DIContainer;
-            const categoryRepository = diContainer.getInstance().resolve('ICategoryRepository');
-            const category = await categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
+        if (newCategoryName) {
+            const category = await this.createCategoryUseCase.execute({ name: newCategoryName }, restaurantOwnerId);
+            categoryNameToUse = category.name;
+        } else if (categoryName) {
+            let category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
             if (!category) {
                 throw new Error('Category not found');
             }

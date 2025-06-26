@@ -10,5 +10,5 @@ CREATE TABLE products (
     restaurant_owner_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (restaurant_owner_id) REFERENCES restaurant_owners(id)
+    FOREIGN KEY (restaurant_owner_id) REFERENCES restaurant_owners(id) ON DELETE CASCADE
 );

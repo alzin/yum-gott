@@ -9,7 +9,8 @@ import {
   RestaurantOwnerLoginUseCase,
   UpdateRestaurantLocationUseCase,
   GetRestaurantOwnerProfileUseCase,
-  LogoutUseCase
+  LogoutUseCase,
+  CleanupUnverifiedAccountsUseCase
 } from '@/application/use-cases/auth/index';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
@@ -43,7 +44,8 @@ export class DIContainer {
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('restaurantOwnerRepository'),
         DIContainer.instance.resolve('fileStorageService'),
-        DIContainer.instance.resolve('ICategoryRepository')
+        DIContainer.instance.resolve('ICategoryRepository'),
+        DIContainer.instance.resolve('createCategoryUseCase')
       ));
       DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(
         DIContainer.instance.resolve('IProductRepository')
@@ -54,7 +56,9 @@ export class DIContainer {
       ));
       DIContainer.instance.registerTransient('updateProductUseCase', () => new UpdateProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
-        DIContainer.instance.resolve('fileStorageService')
+        DIContainer.instance.resolve('fileStorageService'),
+        DIContainer.instance.resolve('ICategoryRepository'),
+        DIContainer.instance.resolve('createCategoryUseCase')
       ));
       DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
@@ -119,6 +123,14 @@ export class DIContainer {
         'IProductOptionRepository',
         () => new ProductOptionRepository(DIContainer.instance.databaseConnection)
       );
+
+      // Register cleanup unverified accounts use case
+      DIContainer.instance.registerSingleton('cleanupUnverifiedAccountsUseCase', () => {
+        return new CleanupUnverifiedAccountsUseCase(
+          DIContainer.instance.resolve('customerRepository'),
+          DIContainer.instance.resolve('restaurantOwnerRepository')
+        );
+      });
     }
     return DIContainer.instance;
   }
@@ -338,5 +350,9 @@ export class DIContainer {
 
   public get logoutUseCase(): LogoutUseCase {
     return this.resolve('logoutUseCase');
+  }
+
+  public get cleanupUnverifiedAccountsUseCase(): CleanupUnverifiedAccountsUseCase {
+    return this.resolve('cleanupUnverifiedAccountsUseCase');
   }
 }

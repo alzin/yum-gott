@@ -24,7 +24,7 @@ export class AuthRepository implements IAuthRepository {
 
     await this.db.query(
       'INSERT INTO refresh_tokens (token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4)',
-      [refreshToken, payload.userId, payload.userType, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]
+      [refreshToken, payload.userId, payload.userType, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)]
     );
 
     return { accessToken, refreshToken, expiresIn };
@@ -53,12 +53,12 @@ export class AuthRepository implements IAuthRepository {
       throw new Error('Invalid or expired refresh token');
     }
 
-    const { user_id, user_type , email} = result.rows[0];
+    const { user_id, user_type, email } = result.rows[0];
 
     const payload: JWTpayload = {
       userId: user_id,
       userType: user_type,
-      email: email, 
+      email: email,
     };
 
     const newTokens = await this.generateToken(payload);

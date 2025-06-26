@@ -23,26 +23,30 @@ export class EmailService {
       to: email,
       subject: '✅ Verify your Yum-Gott account',
       html: `
-        <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
-          <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <h2 style="color: #4CAF50; text-align: center;">Welcome to Yum-Gott! 🎉</h2>
-            <p style="font-size: 16px; color: #333;">
-              Thank you for signing up! To activate your account, please confirm your email address by clicking the button below:
-            </p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold;">
-                ✅ Verify My Email
-              </a>
-            </div>
-            <p style="font-size: 14px; color: #555;">
-              This link will expire in <strong>24 hours</strong>. If you did not create this account, please ignore this email.
-            </p>
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-            <p style="font-size: 12px; color: #999; text-align: center;">
-              &copy; ${new Date().getFullYear()} Yum-Gott. All rights reserved.
-            </p>
-          </div>
-        </div>
+     <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
+  <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 style="color: #4CAF50; text-align: center;">Welcome to Yum-Gott! 🎉</h2>
+    <p style="font-size: 16px; color: #333;">
+      Thank you for signing up! To activate your account, please confirm your email address by clicking the button below:
+    </p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+        ✅ Verify My Email
+      </a>
+    </div>
+    <p style="font-size: 14px; color: #555;">
+      This link will expire in <strong>24 hours</strong>. If you did not create this account, please ignore this email.
+    </p>
+    <p style="font-size: 14px; color: #555; margin-top: 10px;">
+      <strong>Note:</strong> If you don't verify your email within 24 hours, your account will be automatically deleted.
+    </p>
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      &copy; ${new Date().getFullYear()} Yum-Gott. All rights reserved.
+    </p>
+  </div>
+</div>
+
       `
     };
 

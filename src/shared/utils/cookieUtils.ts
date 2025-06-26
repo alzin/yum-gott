@@ -21,7 +21,7 @@ export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
     httpOnly: true,
     secure: isProduction,
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days 
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days 
     path: '/'
   });
 };
