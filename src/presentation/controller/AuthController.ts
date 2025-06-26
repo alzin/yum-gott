@@ -35,7 +35,7 @@ export class AuthController {
       this.setAuthCookies(res, result.authToken);
 
       res.status(200).json({
-        success: true, 
+        success: true,
         message: 'Token refreshed successfully',
       });
     } catch (error) {
