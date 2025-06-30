@@ -12,7 +12,7 @@ export interface LogoutRequest {
 export interface LogoutResponse {
     success: boolean;
     message: string;
-}
+} 
 
 export class LogoutUseCase {
     constructor(private authRepository: IAuthRepository) { }
@@ -20,6 +20,9 @@ export class LogoutUseCase {
     async execute(request: LogoutRequest, res: Response): Promise<LogoutResponse> {
         try {
             await this.authRepository.invalidateRefreshToken(request.refreshToken);
+            if (request.accessToken) {
+                await this.authRepository.invalidateAccessToken(request.accessToken);
+            }
             clearAuthCookies(res);
 
             return {

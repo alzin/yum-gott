@@ -15,6 +15,8 @@ async function setupAndMigrateDatabase() {
       path.join(__dirname, 'migrations', 'full_users_setup.sql'),
       path.join(__dirname, 'migrations', 'create_products_table.sql'),
       path.join(__dirname, 'migrations', 'create_product_options_table.sql'),
+      path.join(__dirname, 'migrations', 'create_invalidated_tokens_table.sql'),
+      path.join(__dirname, 'migrations', 'create_refresh_tokens_table.sql'),
       path.join(__dirname, 'migrations', 'create_categories_table.sql'),
 
     ];
