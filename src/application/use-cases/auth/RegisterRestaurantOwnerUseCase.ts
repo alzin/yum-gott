@@ -22,7 +22,6 @@ export class RegisterRestaurantOwnerUseCase {
 
     async execute(request: RegisterRestaurantOwnerRequest): Promise<AuthToken> {
         await this.checkExistingByEmail(request);
-        await this.checkExistingByOrganizationNumber(request);
 
         const hashedPassword = await this.passwordHasher.hash(request.password);
 
@@ -54,20 +53,13 @@ export class RegisterRestaurantOwnerUseCase {
             email: createdOwner.email
         });
         
-        return tokens; 
+        return tokens;
     }
 
     private async checkExistingByEmail(request: RegisterRestaurantOwnerRequest): Promise<void> {
         const emailExists = await this.restaurantOwnerRepository.existsByEmail(request.email);
         if (emailExists) {
             throw new Error('User already exists with this email');
-        }
-
-    }
-    private async checkExistingByOrganizationNumber(request: RegisterRestaurantOwnerRequest): Promise<void> {
-        const OrganizationNumberExists = await this.restaurantOwnerRepository.existsByOrganizationNumber(request.organizationNumber);
-        if (OrganizationNumberExists) {
-            throw new Error('User already exists with this OrganizationNumber');
         }
 
     }

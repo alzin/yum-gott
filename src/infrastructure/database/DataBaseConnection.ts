@@ -1,7 +1,7 @@
 import { Pool, PoolClient } from 'pg';
 
 export class DatabaseConnection {
-  private static instance: DatabaseConnection; 
+  private static instance: DatabaseConnection;
   private pool: Pool;
 
   private constructor() {

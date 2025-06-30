@@ -1,14 +1,13 @@
 import "reflect-metadata";
 import dotenv from 'dotenv';
-
 import { App } from './app';
+
 // Load environment variables
 dotenv.config();
+
 // Create and start the application
 const app = new App();
-const port = parseInt(process.env.PORT || '3000', 10); 
-
-console.log('DATABASE_URL:', process.env.DATABASE_URL);
+const port = parseInt(process.env.PORT || '3000', 10);
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

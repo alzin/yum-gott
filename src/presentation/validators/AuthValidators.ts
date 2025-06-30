@@ -137,14 +137,19 @@ export class AuthValidators {
           }
           return true;
         }),
+      body('mobileNumber')
+        .optional()
+        .trim()
+        .matches(/^[0-9]{10,15}$/)
+        .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters'),
       body().custom((value) => {
-        if (!value.email) {
-          throw new Error('Email is required');
+        if (!value.email && !value.mobileNumber) {
+          throw new Error('Email or mobile number is required');
         }
         return true;
       })
