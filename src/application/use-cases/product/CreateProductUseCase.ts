@@ -10,7 +10,7 @@ export interface CreateProductRequest {
     description: string;
     price: number;
     discount?: number;
-    sizeOptions?: SizeOption[] | null; // Updated to array with SizeName
+    sizeOptions?: SizeOption[] | null;
     image?: Express.Multer.File;
 }
 
@@ -23,22 +23,18 @@ export class CreateProductUseCase {
         private createCategoryUseCase: CreateCategoryUseCase
     ) { }
 
-    async execute(request: CreateProductRequest & { newCategoryName?: string }, restaurantOwnerId: string): Promise<Product> {
-        const { image, sizeOptions, categoryName, newCategoryName } = request;
+    async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
+        const { image, sizeOptions, categoryName } = request;
 
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
-        let category;
-        if (newCategoryName) {
-            category = await this.createCategoryUseCase.execute({ name: newCategoryName }, restaurantOwnerId);
-        } else {
-            category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
-            if (!category) {
-                throw new Error('Category not found');
-            }
+        let category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId)
+        if (!category) {
+            category = await this.createCategoryUseCase.execute({ name: categoryName }, restaurantOwnerId);
+
         }
         if (category.restaurantOwnerId !== restaurantOwnerId) {
             throw new Error('Category does not belong to this restaurant owner');

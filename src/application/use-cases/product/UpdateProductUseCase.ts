@@ -23,8 +23,8 @@ export class UpdateProductUseCase {
         private categoryRepository: ICategoryRepository,
         private createCategoryUseCase: CreateCategoryUseCase
     ) { }
-    async execute(request: UpdateProductRequest & { newCategoryName?: string }): Promise<Product> {
-        const { productId, restaurantOwnerId, image, sizeOptions, categoryName, newCategoryName } = request;
+    async execute(request: UpdateProductRequest): Promise<Product> {
+        const { productId, restaurantOwnerId, image, sizeOptions, categoryName } = request;
 
         const product = await this.productRepository.findById(productId);
         if (!product) {
@@ -63,13 +63,10 @@ export class UpdateProductUseCase {
         }
 
         let categoryNameToUse = product.categoryName;
-        if (newCategoryName) {
-            const category = await this.createCategoryUseCase.execute({ name: newCategoryName }, restaurantOwnerId);
-            categoryNameToUse = category.name;
-        } else if (categoryName) {
+        if (categoryName) {
             let category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
             if (!category) {
-                throw new Error('Category not found');
+                category = await this.createCategoryUseCase.execute({ name: categoryName }, restaurantOwnerId);
             }
             categoryNameToUse = category.name;
         }
