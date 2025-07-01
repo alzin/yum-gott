@@ -477,12 +477,8 @@ paths:
               properties:
                 categoryName:
                   type: string
-                  description: Name of the existing category.
+                  description: Name of the category. If the category does not exist, it will be created automatically.
                   example: "Main Course"
-                newCategoryName:
-                  type: string
-                  description: Name of the new category to create (optional; if provided, will be used instead of categoryName)
-                  example: ""
                 productName:
                   type: string
                   description: Name of the product
@@ -635,10 +631,6 @@ paths:
                   type: string
                   description: Name of the category. If the category does not exist, it will be created automatically.
                   example: "Main Course"
-                newCategoryName:
-                  type: string
-                  description: Name of the new category to create (optional; if provided, will be used instead of categoryName)
-                  example: ""
                 productName:
                   type: string
                   description: Name of the product
