@@ -4,13 +4,7 @@ import { SizeName } from '@/domain/entities/Product';
 export class ProductValidators {
     static createProduct(): ValidationChain[] {
         return [
-            body('newCategoryName')
-                .optional()
-                .trim()
-                .isLength({ max: 255 })
-                .withMessage('New category name must not exceed 255 characters'),
             body('categoryName')
-                .if(body('newCategoryName').not().exists())
                 .trim()
                 .notEmpty()
                 .withMessage('Category name is required')
@@ -76,13 +70,7 @@ export class ProductValidators {
 
     static updateProduct(): ValidationChain[] {
         return [
-            body('newCategoryName')
-                .optional()
-                .trim()
-                .isLength({ max: 255 })
-                .withMessage('New category name must not exceed 255 characters'),
             body('categoryName')
-                .if(body('newCategoryName').not().exists())
                 .trim()
                 .notEmpty()
                 .withMessage('Category name is required')
