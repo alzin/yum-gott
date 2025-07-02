@@ -24,7 +24,8 @@ export class ProductOptionController {
 
             const request = {
                 productId: req.params.productId,
-                name: req.body.name
+                name: req.body.name,
+                required: typeof req.body.required === 'boolean' ? req.body.required : false
             };
 
             const option = await this.createProductOptionUseCase.execute(request, user.userId);

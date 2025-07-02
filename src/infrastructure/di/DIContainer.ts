@@ -45,7 +45,9 @@ export class DIContainer {
         DIContainer.instance.resolve('restaurantOwnerRepository'),
         DIContainer.instance.resolve('fileStorageService'),
         DIContainer.instance.resolve('ICategoryRepository'),
-        DIContainer.instance.resolve('createCategoryUseCase')
+        DIContainer.instance.resolve('createCategoryUseCase'),
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('productOptionValueRepository')
       ));
       DIContainer.instance.registerTransient('getProductUseCase', () => new GetProductUseCase(
         DIContainer.instance.resolve('IProductRepository')

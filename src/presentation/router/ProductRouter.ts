@@ -36,8 +36,8 @@ export class ProductRouter {
             this.diContainer.resolve('getProductUseCase'),
             this.diContainer.resolve('getProductsByRestaurantUseCase'),
             this.diContainer.resolve('updateProductUseCase'),
-            this.diContainer.resolve('deleteProductUseCase')
-
+            this.diContainer.resolve('deleteProductUseCase'),
+            this.diContainer.resolve('getProductOptionsUseCase')
         );
         const productOptionController = new ProductOptionController(
             this.diContainer.resolve('createProductOptionUseCase'),
@@ -59,7 +59,8 @@ export class ProductRouter {
                 'price',
                 'discount',
                 'sizeOptions',
-                'image'
+                'image',
+                'options'
             ]),
             ProductValidators.createProduct(),
             ValidationMiddleware.handleValidationErrors(),
@@ -92,7 +93,8 @@ export class ProductRouter {
                 'price',
                 'discount',
                 'sizeOptions',
-                'image'
+                'image',
+
             ]),
             ProductValidators.updateProduct(),
             ProductValidators.productId(),

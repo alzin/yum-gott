@@ -503,6 +503,11 @@ paths:
                   type: string
                   format: binary
                   description: Product image file (JPEG or PNG)
+                options:
+                  type: object
+                  description: >-
+                    Optional array of product options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5},{"name":"Olives","additionalPrice":1.0}]}]').
+                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5},{"name":"Olives","additionalPrice":1.0}]}]'
               required:
                 - categoryName
                 - productName
