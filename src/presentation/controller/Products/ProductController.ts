@@ -56,8 +56,8 @@ export class ProductController {
                 image: req.file,
                 restaurantOwnerId: user.userId
             };
-            delete request.categoryId;
-            delete request.category;
+            // delete request.categoryId;
+            // delete request.category;
 
             const product = await this.createProductUseCase.execute(request, user.userId);
             if (!product.id) throw new Error('Product ID is missing after creation');
