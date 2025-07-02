@@ -8,7 +8,7 @@ export class AuthRepository implements IAuthRepository {
   private readonly JWT_SECRET: string;
   private readonly REFRESH_SECRET: string;
   private readonly ACCESS_TOKEN_EXPIRY = '15m'; // Short-lived access token
-  private readonly REFRESH_TOKEN_EXPIRY = '7d';
+  private readonly REFRESH_TOKEN_EXPIRY = '30d';
   private db: DatabaseConnection;
 
   constructor() {

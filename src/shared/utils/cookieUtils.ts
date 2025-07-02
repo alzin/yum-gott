@@ -32,7 +32,7 @@ export const clearAuthCookies = (res: Response): void => {
     httpOnly: boolean;
     secure: boolean;
     sameSite: 'lax';
-    path: string;
+    path: '/';
   } = {
     httpOnly: true,
     secure: isProduction,

@@ -1,4 +1,4 @@
-import { IProductRepository , IRestaurantOwnerRepository} from "@/domain/repositories";
+import { IProductRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
 
 export interface DeleteProductRequest {
@@ -9,7 +9,7 @@ export interface DeleteProductRequest {
 export class DeleteProductUseCase {
     constructor(
         private productRepository: IProductRepository,
-        private restaurantOwnerRepository: IRestaurantOwnerRepository,
+        // private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
     async execute(request: DeleteProductRequest): Promise<void> {
