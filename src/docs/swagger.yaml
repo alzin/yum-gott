@@ -477,12 +477,8 @@ paths:
               properties:
                 categoryName:
                   type: string
-                  description: Name of the existing category.
+                  description: Name of the category. If the category does not exist, it will be created automatically.
                   example: "Main Course"
-                newCategoryName:
-                  type: string
-                  description: Name of the new category to create (optional; if provided, will be used instead of categoryName)
-                  example: ""
                 productName:
                   type: string
                   description: Name of the product
@@ -507,6 +503,11 @@ paths:
                   type: string
                   format: binary
                   description: Product image file (JPEG or PNG)
+                options:
+                  type: object
+                  description: >-
+                    Optional array of product options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5},{"name":"Olives","additionalPrice":1.0}]}]').
+                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5},{"name":"Olives","additionalPrice":1.0}]}]'
               required:
                 - categoryName
                 - productName
@@ -635,10 +636,6 @@ paths:
                   type: string
                   description: Name of the category. If the category does not exist, it will be created automatically.
                   example: "Main Course"
-                newCategoryName:
-                  type: string
-                  description: Name of the new category to create (optional; if provided, will be used instead of categoryName)
-                  example: ""
                 productName:
                   type: string
                   description: Name of the product

@@ -6,6 +6,7 @@ import {
     UpdateProductUseCase,
     DeleteProductUseCase
 } from '@/application/use-cases/product';
+import { GetProductOptionsUseCase } from '@/application/use-cases/product-option';
 import { AuthenticatedRequest } from '@/presentation/middleware';
 import { SizeOption } from '@/domain/entities/Product';
 
@@ -15,7 +16,8 @@ export class ProductController {
         private getProductUseCase: GetProductUseCase,
         private getProductsByRestaurantUseCase: GetProductsByRestaurantUseCase,
         private updateProductUseCase: UpdateProductUseCase,
-        private deleteProductUseCase: DeleteProductUseCase
+        private deleteProductUseCase: DeleteProductUseCase,
+        private getProductOptionsUseCase: GetProductOptionsUseCase
     ) { }
 
     async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -38,20 +40,35 @@ export class ProductController {
                 }
             }
 
+            let options = req.body.options;
+            if (typeof options === 'string') {
+                try {
+                    options = JSON.parse(options);
+                } catch (error) {
+                    throw new Error('Invalid options format: must be a valid JSON array');
+                }
+            }
+
             const request = {
                 ...req.body,
                 sizeOptions,
+                options,
                 image: req.file,
                 restaurantOwnerId: user.userId
             };
-            delete request.categoryId;
-            delete request.category;
+            // delete request.categoryId;
+            // delete request.category;
 
             const product = await this.createProductUseCase.execute(request, user.userId);
+            if (!product.id) throw new Error('Product ID is missing after creation');
+            const productOptions = await this.getProductOptionsUseCase.execute(product.id as string, user.userId);
             res.status(201).json({
                 success: true,
                 message: 'Product created successfully',
-                data: product
+                data: {
+                    ...product,
+                    options: productOptions
+                }
             });
         } catch (error) {
             res.status(400).json({
@@ -64,16 +81,15 @@ export class ProductController {
     async getProduct(req: Request, res: Response): Promise<void> {
         try {
             const product = await this.getProductUseCase.execute(req.params.id);
-
             if (!product) throw new Error('Product not found');
-
-            const {  restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
-
+            const options = await this.getProductOptionsUseCase.execute(req.params.id, product.restaurantOwnerId);
+            const { restaurantOwnerId, createdAt, updatedAt, ...productWithoutId } = product;
             res.status(200).json({
                 success: true,
                 message: 'Get Product successfully',
                 data: {
-                    ...productWithoutId
+                    ...productWithoutId,
+                    options
                 },
             });
         } catch (error) {
@@ -96,17 +112,19 @@ export class ProductController {
             }
 
             const products = await this.getProductsByRestaurantUseCase.execute(user.userId);
-            const productsWithCategoryName = products.map(product => {
-                const {  restaurantOwnerId, createdAt, updatedAt, ...rest } = product;
+            const productsWithOptions = await Promise.all(products.map(async product => {
+                const { restaurantOwnerId, createdAt, updatedAt, ...rest } = product;
+                const options = product.id ? await this.getProductOptionsUseCase.execute(product.id, user.userId) : [];
                 return {
-                    ...rest
+                    ...rest,
+                    options
                 };
-            });
+            }));
 
             res.status(200).json({
                 success: true,
                 message: 'Get All Products successfully',
-                data: productsWithCategoryName,
+                data: productsWithOptions,
             });
         } catch (error) {
             res.status(400).json({

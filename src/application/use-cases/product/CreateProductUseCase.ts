@@ -1,8 +1,19 @@
 import { Product, SizeOption, SizeName } from "@/domain/entities/Product";
-import { IProductRepository, IRestaurantOwnerRepository, ICategoryRepository } from "@/domain/repositories";
+import { IProductRepository, IRestaurantOwnerRepository, ICategoryRepository, IProductOptionRepository, IProductOptionValueRepository } from "@/domain/repositories";
 import { IFileStorageService } from "@/application/interface/IFileStorageService";
 import { v4 as uuidv4 } from 'uuid';
 import { CreateCategoryUseCase } from "@/application/use-cases/category/CreateCategoryUseCase";
+
+export interface ProductOptionValueInput {
+    name: string;
+    additionalPrice?: number;
+}
+
+export interface ProductOptionInput {
+    name: string;
+    required: boolean;
+    values: ProductOptionValueInput[];
+}
 
 export interface CreateProductRequest {
     categoryName: string;
@@ -10,8 +21,9 @@ export interface CreateProductRequest {
     description: string;
     price: number;
     discount?: number;
-    sizeOptions?: SizeOption[] | null; // Updated to array with SizeName
+    sizeOptions?: SizeOption[] | null;
     image?: Express.Multer.File;
+    options?: ProductOptionInput[];
 }
 
 export class CreateProductUseCase {
@@ -20,25 +32,23 @@ export class CreateProductUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService,
         private categoryRepository: ICategoryRepository,
-        private createCategoryUseCase: CreateCategoryUseCase
+        private createCategoryUseCase: CreateCategoryUseCase,
+        private productOptionRepository: IProductOptionRepository,
+        private productOptionValueRepository: IProductOptionValueRepository
     ) { }
 
-    async execute(request: CreateProductRequest & { newCategoryName?: string }, restaurantOwnerId: string): Promise<Product> {
-        const { image, sizeOptions, categoryName, newCategoryName } = request;
+    async execute(request: CreateProductRequest, restaurantOwnerId: string): Promise<Product> {
+        const { image, sizeOptions, categoryName } = request;
 
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
 
-        let category;
-        if (newCategoryName) {
-            category = await this.createCategoryUseCase.execute({ name: newCategoryName }, restaurantOwnerId);
-        } else {
-            category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId);
-            if (!category) {
-                throw new Error('Category not found');
-            }
+        let category = await this.categoryRepository.findByNameAndRestaurantOwner(categoryName, restaurantOwnerId)
+        if (!category) {
+            category = await this.createCategoryUseCase.execute({ name: categoryName }, restaurantOwnerId);
+
         }
         if (category.restaurantOwnerId !== restaurantOwnerId) {
             throw new Error('Category does not belong to this restaurant owner');
@@ -75,7 +85,33 @@ export class CreateProductUseCase {
         };
 
         await this.ExistingByNameAndRestaurantId(request, restaurantOwnerId);
-        return await this.productRepository.create(product);
+        const createdProduct = await this.productRepository.create(product);
+
+        if (request.options && request.options.length > 0) {
+            for (const optionInput of request.options) {
+                const option = await this.productOptionRepository.create({
+                    id: uuidv4(),
+                    productId: createdProduct.id!,
+                    name: optionInput.name,
+                    required: optionInput.required,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+                if (optionInput.values && optionInput.values.length > 0) {
+                    for (const valueInput of optionInput.values) {
+                        await this.productOptionValueRepository.create({
+                            id: uuidv4(),
+                            optionId: option.id,
+                            name: valueInput.name,
+                            additionalPrice: valueInput.additionalPrice,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        });
+                    }
+                }
+            }
+        }
+        return createdProduct;
     }
 
     private async ExistingByNameAndRestaurantId(request: CreateProductRequest, restaurantOwnerId: string): Promise<void> {

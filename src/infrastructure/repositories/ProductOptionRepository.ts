@@ -3,15 +3,15 @@ import { ProductOption } from '@/domain/entities/ProductOption';
 import { IProductOptionRepository } from '@/domain/repositories/IProductOptionRepository';
 
 export class ProductOptionRepository implements IProductOptionRepository {
-    constructor(private db: DatabaseConnection) {}
+    constructor(private db: DatabaseConnection) { }
 
     async create(option: ProductOption): Promise<ProductOption> {
         const query = `
-            INSERT INTO product_options (id, product_id, name, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO product_options (id, product_id, name, required, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `;
-        const values = [option.id, option.productId, option.name, option.createdAt, option.updatedAt];
+        const values = [option.id, option.productId, option.name, option.required, option.createdAt, option.updatedAt];
         const result = await this.db.query(query, values);
         return this.mapRowToProductOption(result.rows[0]);
     }
@@ -44,6 +44,7 @@ export class ProductOptionRepository implements IProductOptionRepository {
             id: row.id,
             productId: row.product_id,
             name: row.name,
+            required: row.required,
             createdAt: row.created_at,
             updatedAt: row.updated_at
         };
