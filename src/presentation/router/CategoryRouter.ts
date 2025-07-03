@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { CategoryController } from '../controller/Categories/CategoryController';
 import { AuthenticatedRequest, SanitizationMiddleware, ValidationMiddleware } from '../middleware';
 import { CategoryValidators } from '../validators/CategoryValidators';

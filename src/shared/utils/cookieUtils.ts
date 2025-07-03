@@ -1,10 +1,17 @@
 import { Response } from 'express';
-import { CONFIG } from '../../main/Config'
+import ms from 'ms';
+import { CONFIG } from '../../main/Config';
+
 export interface AuthToken {
   accessToken: string;
   refreshToken: string;
 }
+const AccessTokenMaxAge = ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any);
+const RefreshTokenMaxAge = ms(CONFIG.REFRESH_TOKEN_EXPIRATION as any);
 
+if (typeof AccessTokenMaxAge !== 'number' || typeof RefreshTokenMaxAge !== 'number') {
+  throw new Error('Invalid token expiration configuration');
+}
 const getCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -13,19 +20,14 @@ const getCookieOptions = () => ({
 });
 
 export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
-  const ONE_MINUTE_IN_MS = 60 * 1000;
-  const ONE_HOUR_IN_MS = 60 * ONE_MINUTE_IN_MS;
-  const ONE_DAY_IN_MS = 24 * ONE_HOUR_IN_MS;
-  const ONE_WEEK_IN_MS = 7 * ONE_DAY_IN_MS;
-
   res.cookie(CONFIG.ACCESS_TOKEN_COOKIE_NAME, authToken.accessToken, {
     ...getCookieOptions(),
-    maxAge: ONE_DAY_IN_MS,
+    maxAge: AccessTokenMaxAge,
   });
 
   res.cookie(CONFIG.REFRESH_TOKEN_COOKIE_NAME, authToken.refreshToken, {
     ...getCookieOptions(),
-    maxAge: ONE_WEEK_IN_MS,
+    maxAge: RefreshTokenMaxAge,
   });
 };
 
