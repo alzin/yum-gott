@@ -1,7 +1,7 @@
 export interface AuthToken {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn?: number;
 }
 
 export interface JWTpayload {

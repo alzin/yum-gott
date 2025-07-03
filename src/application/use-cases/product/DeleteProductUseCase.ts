@@ -24,6 +24,8 @@ export class DeleteProductUseCase {
         }
 
         if (product.imageUrl) {
+            console.log('fileStorageService:', this.fileStorageService);
+            console.log('DeleteOldImage:', typeof this.fileStorageService.DeleteOldImage);
             await this.fileStorageService.DeleteOldImage(product.imageUrl);
         }
 

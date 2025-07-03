@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { JWTpayload } from '@/domain/entities/AuthToken';
-import { setAuthCookies } from '@/shared/utils/cookieUtils';
+// import { setAuthCookies } from '@/shared/utils/cookieUtils';
 
 export interface AuthenticatedRequest extends Request {
   user?: JWTpayload;
@@ -16,26 +16,25 @@ export class AuthMiddleware {
     }
 
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader.startsWith('Bearer')) {
       return authHeader.substring(7);
     }
-
     return null;
   }
 
-  private async tryRefreshToken(req: Request, res: Response): Promise<JWTpayload | null> {
-    const refreshToken = req.cookies?.refreshToken;
-    const accessToken = this.extractToken(req);
-    if (!refreshToken || !accessToken) return null;
+  // private async tryRefreshToken(req: Request, res: Response): Promise<JWTpayload | null> {
+  //   const refreshToken = req.cookies?.refreshToken;
+  //   const accessToken = this.extractToken(req);
+  //   if (!refreshToken || !accessToken) return null;
 
-    try {
-      const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
-      setAuthCookies(res, newTokens);
-      return await this.authRepository.verifyToken(newTokens.accessToken);
-    } catch (error) {
-      return null;
-    }
-  }
+  //   try {
+  //     const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
+  //     setAuthCookies(res, newTokens);
+  //     return await this.authRepository.verifyToken(newTokens.accessToken);
+  //   } catch (error) {
+  //     return null;
+  //   }
+  // }
 
   requireRestaurantOwner = (req: Request, res: Response, next: NextFunction): void => {
     const authReq = req as AuthenticatedRequest;
@@ -60,28 +59,9 @@ export class AuthMiddleware {
 
       let payload = await this.authRepository.verifyToken(token);
       req.user = payload;
-
-      const refreshToken = req.cookies?.refreshToken;
-      if (refreshToken) {
-        try {
-          const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
-          setAuthCookies(res, newTokens);
-          payload = await this.authRepository.verifyToken(newTokens.accessToken);
-          req.user = payload;
-        } catch (error) {
-          console.warn('Token rotation failed:', error);
-        }
-      }
-
       next();
     } catch (error) {
-      const refreshedPayload = await this.tryRefreshToken(req, res);
-      if (refreshedPayload) {
-        req.user = refreshedPayload;
-        next();
-      } else {
-        res.status(401).json({ success: false, message: 'Invalid or expired token' });
-      }
+      res.status(401).json({ success: false, message: 'Invalid or expired token' });
     }
   };
 }

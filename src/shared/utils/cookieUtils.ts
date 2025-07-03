@@ -1,45 +1,35 @@
 import { Response } from 'express';
-
+import { CONFIG } from '../../main/Config'
 export interface AuthToken {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
 }
 
-export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+});
 
-  res.cookie('accessToken', authToken.accessToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    maxAge: 15 * 60 * 1000,
-    path: '/'
+export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
+  const ONE_MINUTE_IN_MS = 60 * 1000;
+  const ONE_HOUR_IN_MS = 60 * ONE_MINUTE_IN_MS;
+  const ONE_DAY_IN_MS = 24 * ONE_HOUR_IN_MS;
+  const ONE_WEEK_IN_MS = 7 * ONE_DAY_IN_MS;
+
+  res.cookie(CONFIG.ACCESS_TOKEN_COOKIE_NAME, authToken.accessToken, {
+    ...getCookieOptions(),
+    maxAge: ONE_DAY_IN_MS,
   });
 
-  res.cookie('refreshToken', authToken.refreshToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days 
-    path: '/'
+  res.cookie(CONFIG.REFRESH_TOKEN_COOKIE_NAME, authToken.refreshToken, {
+    ...getCookieOptions(),
+    maxAge: ONE_WEEK_IN_MS,
   });
 };
 
 export const clearAuthCookies = (res: Response): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const cookieOptions: {
-    httpOnly: boolean;
-    secure: boolean;
-    sameSite: 'lax';
-    path: '/';
-  } = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    path: '/'
-  };
-
-  res.clearCookie('accessToken', cookieOptions);
-  res.clearCookie('refreshToken', cookieOptions);
+  res.clearCookie(CONFIG.ACCESS_TOKEN_COOKIE_NAME, getCookieOptions());
+  res.clearCookie(CONFIG.REFRESH_TOKEN_COOKIE_NAME, getCookieOptions());
 };

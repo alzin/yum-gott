@@ -18,12 +18,10 @@ export class AuthController {
   refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const refreshToken = req.cookies.refreshToken;
-      const accessToken = req.cookies.accessToken;
-
-      if (!refreshToken || !accessToken) {
+      if (!refreshToken) {
         res.status(401).json({
           success: false,
-          message: 'Both access and refresh tokens are required',
+          message: 'Refresh token is required',
         });
         return;
       }
@@ -57,7 +55,7 @@ export class AuthController {
         return;
       }
 
-      const request = {  
+      const request = {
         refreshToken,
         userId: user.userId,
         userType: user.userType,

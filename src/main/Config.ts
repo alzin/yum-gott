@@ -1,0 +1,6 @@
+export const CONFIG = {
+    ACCESS_TOKEN_EXPIRATION: '15m',
+    REFRESH_TOKEN_EXPIRATION: '7d',
+    ACCESS_TOKEN_COOKIE_NAME: "accessToken",
+    REFRESH_TOKEN_COOKIE_NAME: "refreshToken",
+}

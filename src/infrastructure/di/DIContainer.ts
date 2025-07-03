@@ -64,8 +64,7 @@ export class DIContainer {
       ));
       DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),
-        DIContainer.instance.resolve('restaurantOwnerRepository'),
-        // DIContainer.instance.resolve('fileStorageService')
+        DIContainer.instance.resolve('fileStorageService')
       ));
 
       // Register category-related dependencies
