@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { IAuthRepository } from '@/domain/repositories/IAuthRepository';
 import { JWTpayload } from '@/domain/entities/AuthToken';
-// import { setAuthCookies } from '@/shared/utils/cookieUtils';
 
 export interface AuthenticatedRequest extends Request {
   user?: JWTpayload;
@@ -16,25 +15,11 @@ export class AuthMiddleware {
     }
 
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer')) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
       return authHeader.substring(7);
     }
     return null;
   }
-
-  // private async tryRefreshToken(req: Request, res: Response): Promise<JWTpayload | null> {
-  //   const refreshToken = req.cookies?.refreshToken;
-  //   const accessToken = this.extractToken(req);
-  //   if (!refreshToken || !accessToken) return null;
-
-  //   try {
-  //     const newTokens = await this.authRepository.rotateRefreshToken(refreshToken);
-  //     setAuthCookies(res, newTokens);
-  //     return await this.authRepository.verifyToken(newTokens.accessToken);
-  //   } catch (error) {
-  //     return null;
-  //   }
-  // }
 
   requireRestaurantOwner = (req: Request, res: Response, next: NextFunction): void => {
     const authReq = req as AuthenticatedRequest;
@@ -48,7 +33,7 @@ export class AuthMiddleware {
     next();
   };
 
-  authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       let token = this.extractToken(req);
 

@@ -9,7 +9,6 @@ export interface DeleteProductRequest {
 export class DeleteProductUseCase {
     constructor(
         private productRepository: IProductRepository,
-        // private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
     ) { }
     async execute(request: DeleteProductRequest): Promise<void> {
