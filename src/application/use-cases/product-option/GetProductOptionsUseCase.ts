@@ -4,8 +4,6 @@ import { IProductOptionValueRepository , IProductOptionRepository , IProductRepo
 export interface ProductOptionWithValue extends ProductOption{
     values: ProductOptionValue[];
 }
-
-
 export class GetProductOptionsUseCase {
     constructor(
         private productOptionRepository: IProductOptionRepository,

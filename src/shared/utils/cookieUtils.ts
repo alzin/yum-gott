@@ -1,45 +1,37 @@
 import { Response } from 'express';
+import ms from 'ms';
+import { CONFIG } from '../../main/Config';
 
 export interface AuthToken {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
 }
+const AccessTokenMaxAge = ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any);
+const RefreshTokenMaxAge = ms(CONFIG.REFRESH_TOKEN_EXPIRATION as any);
+
+if (typeof AccessTokenMaxAge !== 'number' || typeof RefreshTokenMaxAge !== 'number') {
+  throw new Error('Invalid token expiration configuration');
+}
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+});
 
 export const setAuthCookies = (res: Response, authToken: AuthToken): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
-
-  res.cookie('accessToken', authToken.accessToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    maxAge: authToken.expiresIn * 1000,
-    path: '/'
+  res.cookie(CONFIG.ACCESS_TOKEN_COOKIE_NAME, authToken.accessToken, {
+    ...getCookieOptions(),
+    maxAge: AccessTokenMaxAge,
   });
 
-  res.cookie('refreshToken', authToken.refreshToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days 
-    path: '/'
+  res.cookie(CONFIG.REFRESH_TOKEN_COOKIE_NAME, authToken.refreshToken, {
+    ...getCookieOptions(),
+    maxAge: RefreshTokenMaxAge,
   });
 };
 
 export const clearAuthCookies = (res: Response): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const cookieOptions: {
-    httpOnly: boolean;
-    secure: boolean;
-    sameSite: 'lax';
-    path: string;
-  } = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    path: '/'
-  };
-
-  res.clearCookie('accessToken', cookieOptions);
-  res.clearCookie('refreshToken', cookieOptions);
+  res.clearCookie(CONFIG.ACCESS_TOKEN_COOKIE_NAME, getCookieOptions());
+  res.clearCookie(CONFIG.REFRESH_TOKEN_COOKIE_NAME, getCookieOptions());
 };

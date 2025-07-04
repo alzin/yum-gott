@@ -40,7 +40,7 @@ export class AuthRouter {
 
     this.router.get(
       '/profile/restaurant-owner',
-      authMiddleware.authenticate,
+      authMiddleware.authenticateUser,
       authMiddleware.requireRestaurantOwner,
       (req: Request, res: Response) => {
         const controller = new getRestaurantOwnerProfile(this.diContainer.resolve('getRestaurantOwnerProfileUseCase'));
@@ -103,7 +103,7 @@ export class AuthRouter {
     this.router.post(
       '/profile/image',
       this.upload.single('profileImage'),
-      authMiddleware.authenticate,
+      authMiddleware.authenticateUser,
       AuthValidators.validateProfileImage(),
       ValidationMiddleware.handleValidationErrors(),
       (req: Request, res: Response) => {
@@ -114,7 +114,7 @@ export class AuthRouter {
 
     this.router.post(
       '/location/restaurant',
-      authMiddleware.authenticate,
+      authMiddleware.authenticateUser,
       SanitizationMiddleware.sanitizeRestaurantLocationUpdate(),
       AuthValidators.updateRestaurantLocation(),
       ValidationMiddleware.handleValidationErrors(),
@@ -131,7 +131,7 @@ export class AuthRouter {
 
     this.router.post(
       '/logout',
-      authMiddleware.authenticate,
+      authMiddleware.authenticateUser,
       (req: Request, res: Response) => {
         this.authController.logout(req as AuthenticatedRequest, res)
       }

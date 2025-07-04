@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { CategoryController } from '../controller/Categories/CategoryController';
 import { AuthenticatedRequest, SanitizationMiddleware, ValidationMiddleware } from '../middleware';
 import { CategoryValidators } from '../validators/CategoryValidators';
@@ -23,7 +23,7 @@ export class CategoryRouter {
 
         this.router.post(
             '/',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             SanitizationMiddleware.allowedFields(['name']),
             CategoryValidators.createCategory(),
@@ -33,7 +33,7 @@ export class CategoryRouter {
 
         this.router.get(
             '/restaurant',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             (req: AuthenticatedRequest, res: Response) => controller.getCategoriesByRestaurant(req, res)
         );

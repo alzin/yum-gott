@@ -50,7 +50,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
 
-   
+
 
     async findById(id: string): Promise<RestaurantOwner | null> {
         const query = 'SELECT * FROM restaurant_owners WHERE id = $1';

@@ -49,7 +49,7 @@ export class ProductRouter {
 
         this.router.post(
             '/',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             this.upload.single('image'),
             SanitizationMiddleware.allowedFields([
@@ -69,7 +69,7 @@ export class ProductRouter {
 
         this.router.get(
             '/restaurant',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             (req: AuthenticatedRequest, res: Response) => controller.getProductsByRestaurant(req, res)
         );
@@ -83,7 +83,7 @@ export class ProductRouter {
 
         this.router.put(
             '/:id',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             this.upload.single('image'),
             SanitizationMiddleware.allowedFields([
@@ -94,7 +94,6 @@ export class ProductRouter {
                 'discount',
                 'sizeOptions',
                 'image',
-
             ]),
             ProductValidators.updateProduct(),
             ProductValidators.productId(),
@@ -104,7 +103,7 @@ export class ProductRouter {
 
         this.router.delete(
             '/:id',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             ProductValidators.productId(),
             ValidationMiddleware.handleValidationErrors(),
@@ -115,7 +114,7 @@ export class ProductRouter {
 
         this.router.post(
             '/:productId/options',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             SanitizationMiddleware.allowedFields(['name']),
             ProductValidators.productIdParam(),
@@ -126,7 +125,7 @@ export class ProductRouter {
 
         this.router.post(
             '/options/:optionId/values',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             SanitizationMiddleware.allowedFields(['name', 'additionalPrice']),
             ProductOptionValidators.createProductOptionValue(),
@@ -136,7 +135,7 @@ export class ProductRouter {
 
         this.router.get(
             '/:productId/options',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             ProductValidators.productIdParam(),
             ValidationMiddleware.handleValidationErrors(),
@@ -145,7 +144,7 @@ export class ProductRouter {
 
         this.router.delete(
             '/options/:optionId',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             ProductOptionValidators.optionId(),
             ValidationMiddleware.handleValidationErrors(),
@@ -154,7 +153,7 @@ export class ProductRouter {
 
         this.router.delete(
             '/option-values/:valueId',
-            authMiddleware.authenticate,
+            authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             ProductOptionValidators.valueId(),
             ValidationMiddleware.handleValidationErrors(),

@@ -32,11 +32,7 @@ export class uploadProfileImage {
                 userId: user.userId,
             };
 
-            console.log('Processing upload request:', request);
-
             const result = await this.uploadProfileImageUseCase.execute(request, user.userType);
-
-            console.log('Upload successful:', result);
 
             res.status(200).json({
                 success: true,

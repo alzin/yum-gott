@@ -1,5 +1,5 @@
 CREATE TABLE refresh_tokens (
-    token UUID PRIMARY KEY,
+    token TEXT PRIMARY KEY,
     user_id UUID NOT NULL,
     user_type VARCHAR(50) NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
