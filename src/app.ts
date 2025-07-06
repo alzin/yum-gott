@@ -61,8 +61,8 @@ export class App {
 
 
     this.diContainer = DIContainer.getInstance();
-    const cleanupService = new CleanupUnverifiedAccounts(this.diContainer.cleanupUnverifiedAccountsUseCase);
-    cleanupService.startScheduledJobs();
+    // const cleanupService = new CleanupUnverifiedAccounts(this.diContainer.cleanupUnverifiedAccountsUseCase);
+    // cleanupService.startScheduledJobs();
     this.setupMiddleware();
     this.setupRoutes();
     this.setupErrorHandling();

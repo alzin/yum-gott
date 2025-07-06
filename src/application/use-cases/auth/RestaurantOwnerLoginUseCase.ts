@@ -18,9 +18,9 @@ export class RestaurantOwnerLoginUseCase {
             throw new Error('Invalid credentials');
         }
 
-        if (!restaurantOwner.isEmailVerified) {
-            throw new Error('Please verify your email before logging in. Check your email for the verification link.');
-        }
+        // if (!restaurantOwner.isEmailVerified) {
+        //     throw new Error('Please verify your email before logging in. Check your email for the verification link.');
+        // }
 
         const isPasswordValid = await this.passwordHasher.compare(request.password, restaurantOwner.password);
         if (!isPasswordValid) {

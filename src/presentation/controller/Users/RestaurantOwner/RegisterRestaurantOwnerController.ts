@@ -15,7 +15,8 @@ export class registerRestaurantOwner {
             this.setAuthCookies(res, tokens);
             res.status(201).json({
                 success: true,
-                message: 'Restaurant owner registration successful. Please check your email for verification link.',
+                // message: 'Restaurant owner registration successful. Please check your email for verification link.',
+                message: 'Restaurant owner registration successful.',
 
             });
         } catch (error) {
