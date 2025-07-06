@@ -182,7 +182,7 @@ export class DIContainer {
       return new RegisterCustomerUseCase(
         this.resolve('customerRepository'),
         this.resolve('passwordHasher'),
-        this.resolve('emailService'),
+        // this.resolve('emailService'),
         this.resolve('authRepository')
       );
     });
@@ -192,7 +192,7 @@ export class DIContainer {
       return new RegisterRestaurantOwnerUseCase(
         this.resolve('restaurantOwnerRepository'),
         this.resolve('passwordHasher'),
-        this.resolve('emailService'),
+        // this.resolve('emailService'),
         this.resolve('authRepository')
       );
     });

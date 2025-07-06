@@ -1,7 +1,7 @@
 import { Customer , AuthToken} from '@/domain/entities/index';
 import { ICustomerRepository , IAuthRepository } from '@/domain/repositories/index';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
-import { EmailService } from '@/infrastructure/services/EmailService';
+// import { EmailService } from '@/infrastructure/services/EmailService';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface RegisterCustomerRequest {
@@ -15,7 +15,7 @@ export class RegisterCustomerUseCase {
     constructor(
         private customerRepository: ICustomerRepository,
         private passwordHasher: IPasswordHasher,
-        private emailService: EmailService,
+        // private emailService: EmailService,
         private authRepository: IAuthRepository
     ) { }
 
@@ -39,7 +39,7 @@ export class RegisterCustomerUseCase {
         };
 
         const createdCustomer = await this.customerRepository.create(customer);
-        await this.emailService.sendVerificationEmail(request.email, verificationToken);
+        // await this.emailService.sendVerificationEmail(request.email, verificationToken);
 
         const tokens = await this.authRepository.generateToken({
             userId: createdCustomer.id!,
