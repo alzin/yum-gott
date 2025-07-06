@@ -1256,6 +1256,28 @@ components:
           type: string
           nullable: true
           example: "https://yum-gott-product-images.s3.us-east-1.amazonaws.com/product/123.jpg"
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              required:
+                type: boolean
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    additionalPrice:
+                      type: number
 
   responses:
     BadRequestError:
