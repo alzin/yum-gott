@@ -39,6 +39,44 @@ export class ProductOptionRepository implements IProductOptionRepository {
         return result.rows.length > 0;
     }
 
+    async update(optionId: string, updates: Partial<ProductOption>): Promise<ProductOption> {
+        const setClause: string[] = [];
+        const values: any[] = [];
+        let paramIndex = 1;
+
+        if (updates.name !== undefined) {
+            setClause.push(`name = $${paramIndex++}`);
+            values.push(updates.name);
+        }
+        if (updates.required !== undefined) {
+            setClause.push(`required = $${paramIndex++}`);
+            values.push(updates.required);
+        }
+        if (updates.updatedAt !== undefined) {
+            setClause.push(`updated_at = $${paramIndex++}`);
+            values.push(updates.updatedAt);
+        }
+
+        if (setClause.length === 0) {
+            throw new Error('No updates provided');
+        }
+
+        values.push(optionId);
+        const query = `
+            UPDATE product_options 
+            SET ${setClause.join(', ')}
+            WHERE id = $${paramIndex}
+            RETURNING *
+        `;
+
+        const result = await this.db.query(query, values);
+        if (result.rows.length === 0) {
+            throw new Error('Product option not found');
+        }
+
+        return this.mapRowToProductOption(result.rows[0]);
+    }
+
     private mapRowToProductOption(row: any): ProductOption {
         return {
             id: row.id,

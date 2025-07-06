@@ -20,9 +20,9 @@ export class CustomerLoginUseCase {
       throw new Error('Account is deactivated');
     }
 
-    if (!customer.isEmailVerified) {
-      throw new Error('Please verify your email before logging in. Check your email for the verification link.');
-    }
+    // if (!customer.isEmailVerified) {
+    //   throw new Error('Please verify your email before logging in. Check your email for the verification link.');
+    // }
 
     const isPasswordValid = await this.passwordHasher.compare(request.password, customer.password);
     if (!isPasswordValid) {

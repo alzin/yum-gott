@@ -14,7 +14,8 @@ export class registerCustomer {
             this.setAuthCookies(res, tokens);
             res.status(201).json({
                 success: true,
-                message: 'Registration successful. Please check your email for verification link.'
+                // message: 'Registration successful. Please check your email for verification link.'
+                message: 'Registration successful.'
             });
         } catch (error) {
             res.status(400).json({

@@ -1,7 +1,7 @@
 import { RestaurantOwner , AuthToken } from '@/domain/entities/index';
 import { IRestaurantOwnerRepository , IAuthRepository} from '@/domain/repositories/index';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
-import { EmailService } from '@/infrastructure/services/EmailService';
+// import { EmailService } from '@/infrastructure/services/EmailService';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface RegisterRestaurantOwnerRequest {
@@ -16,7 +16,7 @@ export class RegisterRestaurantOwnerUseCase {
     constructor(
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private passwordHasher: IPasswordHasher,
-        private emailService: EmailService,
+        // private emailService: EmailService,
         private authRepository: IAuthRepository
     ) { }
 
@@ -46,7 +46,7 @@ export class RegisterRestaurantOwnerUseCase {
         };
 
         const createdOwner = await this.restaurantOwnerRepository.create(restaurantOwner);
-        await this.emailService.sendVerificationEmail(request.email, verificationToken);
+        // await this.emailService.sendVerificationEmail(request.email, verificationToken);
         
         const tokens = await this.authRepository.generateToken({
             userId: createdOwner.id!,

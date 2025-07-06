@@ -3,7 +3,7 @@ import { ProductOptionValue } from '@/domain/entities/ProductOptionValue';
 import { IProductOptionValueRepository } from '@/domain/repositories/IProductOptionValueRepository';
 
 export class ProductOptionValueRepository implements IProductOptionValueRepository {
-    constructor(private db: DatabaseConnection) {}
+    constructor(private db: DatabaseConnection) { }
 
     async create(value: ProductOptionValue): Promise<ProductOptionValue> {
         const query = `
@@ -31,6 +31,44 @@ export class ProductOptionValueRepository implements IProductOptionValueReposito
     async delete(valueId: string): Promise<void> {
         const query = 'DELETE FROM product_option_values WHERE id = $1';
         await this.db.query(query, [valueId]);
+    }
+
+    async update(valueId: string, updates: Partial<ProductOptionValue>): Promise<ProductOptionValue> {
+        const setClause: string[] = [];
+        const values: any[] = [];
+        let paramIndex = 1;
+
+        if (updates.name !== undefined) {
+            setClause.push(`name = $${paramIndex++}`);
+            values.push(updates.name);
+        }
+        if (updates.additionalPrice !== undefined) {
+            setClause.push(`additional_price = $${paramIndex++}`);
+            values.push(updates.additionalPrice);
+        }
+        if (updates.updatedAt !== undefined) {
+            setClause.push(`updated_at = $${paramIndex++}`);
+            values.push(updates.updatedAt);
+        }
+
+        if (setClause.length === 0) {
+            throw new Error('No updates provided');
+        }
+
+        values.push(valueId);
+        const query = `
+            UPDATE product_option_values 
+            SET ${setClause.join(', ')}
+            WHERE id = $${paramIndex}
+            RETURNING *
+        `;
+
+        const result = await this.db.query(query, values);
+        if (result.rows.length === 0) {
+            throw new Error('Product option value not found');
+        }
+
+        return this.mapRowToProductOptionValue(result.rows[0]);
     }
 
     private mapRowToProductOptionValue(row: any): ProductOptionValue {
