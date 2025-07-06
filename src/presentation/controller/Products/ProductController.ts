@@ -56,8 +56,6 @@ export class ProductController {
                 image: req.file,
                 restaurantOwnerId: user.userId
             };
-            // delete request.categoryId;
-            // delete request.category;
 
             const product = await this.createProductUseCase.execute(request, user.userId);
             if (!product.id) throw new Error('Product ID is missing after creation');
@@ -145,7 +143,6 @@ export class ProductController {
                 return;
             }
 
-            // Parse sizeOptions if it's a string (e.g., from multipart/form-data)
             let sizeOptions: SizeOption[] | null = req.body.sizeOptions;
             if (typeof sizeOptions === 'string') {
                 try {
@@ -155,7 +152,6 @@ export class ProductController {
                 }
             }
 
-            // Parse productOption or options if it's a string (e.g., from multipart/form-data)
             let productOption = req.body.productOption || req.body.options;
             if (typeof productOption === 'string') {
                 try {
@@ -173,9 +169,7 @@ export class ProductController {
                 image: req.file,
                 restaurantOwnerId: user.userId,
             };
-            delete request.categoryId;
-            delete request.category;
-
+           
             const product = await this.updateProductUseCase.execute(request);
             const productOptions = await this.getProductOptionsUseCase.execute(req.params.id, user.userId);
 
