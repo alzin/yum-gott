@@ -53,17 +53,6 @@ export class UpdateProductUseCase {
             throw new Error('Unauthorized: Product does not belong to this restaurant owner');
         }
 
-        if (sizeOptions) {
-            for (const size of sizeOptions) {
-                if (!Object.values(SizeName).includes(size.name)) {
-                    throw new Error(`Invalid size name: ${size.name}. Must be one of: ${Object.values(SizeName).join(', ')}`);
-                }
-                if (typeof size.additionalPrice !== 'number' || size.additionalPrice < 0) {
-                    throw new Error('Invalid size option: non-negative additionalPrice is required');
-                }
-            }
-        }
-
         let imageUrl = product.imageUrl;
         if (image) {
             if (imageUrl) {
