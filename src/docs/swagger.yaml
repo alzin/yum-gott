@@ -505,9 +505,9 @@ paths:
                   description: Product image file (JPEG or PNG)
                 options:
                   type: object
-                  description: >-
-                    Optional array of product options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5},{"name":"Olives","additionalPrice":1.0}]}]').
-                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5},{"name":"Olives","additionalPrice":1.0}]}]'
+                  description: >
+                    Optional array of product options (as JSON string). Each option can include name, required, and values (array of {name, additionalPrice}). Do NOT send id when creating new options/values; it will be generated automatically.
+                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5}]}]'
               required:
                 - categoryName
                 - productName
@@ -660,6 +660,11 @@ paths:
                   type: string
                   format: binary
                   description: Product image file (JPEG or PNG)
+                options:
+                  type: object
+                  description: >
+                    Optional array of product options (as JSON string). Each option can include name, required, and values (array of {name, additionalPrice}). Do NOT send id when creating new options/values; it will be generated automatically.
+                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5}]}]'
       responses:
         "200":
           description: Product updated successfully
@@ -1257,27 +1262,10 @@ components:
           nullable: true
           example: "https://yum-gott-product-images.s3.us-east-1.amazonaws.com/product/123.jpg"
         options:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                type: string
-              required:
-                type: boolean
-              values:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    additionalPrice:
-                      type: number
+          type: string
+          description: >
+            Optional array of product options (as JSON string). Each option can include name, required, and values (array of {name, additionalPrice}). Do NOT send id when creating new options/values; it will be generated automatically.
+          example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5}]}]'
 
   responses:
     BadRequestError:

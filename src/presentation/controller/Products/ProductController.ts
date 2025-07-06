@@ -155,10 +155,21 @@ export class ProductController {
                 }
             }
 
+            // Parse productOption or options if it's a string (e.g., from multipart/form-data)
+            let productOption = req.body.productOption || req.body.options;
+            if (typeof productOption === 'string') {
+                try {
+                    productOption = JSON.parse(productOption);
+                } catch (error) {
+                    throw new Error('Invalid productOption/options format: must be a valid JSON array');
+                }
+            }
+
             const request = {
                 ...req.body,
                 productId: req.params.id,
                 sizeOptions,
+                productOption,
                 image: req.file,
                 restaurantOwnerId: user.userId,
             };
@@ -166,10 +177,15 @@ export class ProductController {
             delete request.category;
 
             const product = await this.updateProductUseCase.execute(request);
+            const productOptions = await this.getProductOptionsUseCase.execute(req.params.id, user.userId);
+
             res.status(200).json({
                 success: true,
                 message: 'Product updated successfully',
-                data: product
+                data: {
+                    ...product,
+                    options: productOptions
+                }
             });
         } catch (error) {
             res.status(400).json({

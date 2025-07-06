@@ -1,8 +1,22 @@
 import { Product, SizeOption, SizeName } from '@/domain/entities/Product';
-import { IProductRepository } from '@/domain/repositories/IProductRepository';
+import { IProductRepository, IProductOptionRepository, IProductOptionValueRepository } from '@/domain/repositories/index';
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
 import { ICategoryRepository } from '@/domain/repositories/ICategoryRepository';
 import { CreateCategoryUseCase } from '@/application/use-cases/category/CreateCategoryUseCase';
+import { v4 as uuidv4 } from 'uuid';
+
+export interface UpdateProductOptionValueRequest {
+    id?: string;
+    name: string;
+    additionalPrice?: number;
+}
+
+export interface UpdateProductOptionRequest {
+    id?: string;
+    name: string;
+    required: boolean;
+    values?: UpdateProductOptionValueRequest[];
+}
 
 export interface UpdateProductRequest {
     productId: string;
@@ -12,6 +26,7 @@ export interface UpdateProductRequest {
     price?: number;
     discount?: number;
     sizeOptions?: SizeOption[] | null;
+    productOption?: UpdateProductOptionRequest[];
     image?: Express.Multer.File;
     restaurantOwnerId: string;
 }
@@ -21,8 +36,11 @@ export class UpdateProductUseCase {
         private productRepository: IProductRepository,
         private fileStorageService: IFileStorageService,
         private categoryRepository: ICategoryRepository,
-        private createCategoryUseCase: CreateCategoryUseCase
-    ) { }
+        private createCategoryUseCase: CreateCategoryUseCase,
+        private productOptionRepository: IProductOptionRepository,
+        private productOptionValueRepository: IProductOptionValueRepository
+    ) {}
+
     async execute(request: UpdateProductRequest): Promise<Product> {
         const { productId, restaurantOwnerId, image, sizeOptions, categoryName } = request;
 
@@ -30,6 +48,7 @@ export class UpdateProductUseCase {
         if (!product) {
             throw new Error('Product not found');
         }
+
         if (product.restaurantOwnerId !== restaurantOwnerId) {
             throw new Error('Unauthorized: Product does not belong to this restaurant owner');
         }
@@ -47,13 +66,14 @@ export class UpdateProductUseCase {
 
         let imageUrl = product.imageUrl;
         if (image) {
-            if (product.imageUrl) {
+            if (imageUrl) {
                 try {
-                    await this.fileStorageService.DeleteOldImage(product.imageUrl);
+                    await this.fileStorageService.DeleteOldImage(imageUrl);
                 } catch (error) {
                     console.error('Failed to delete old image:', error);
                 }
             }
+
             imageUrl = await this.fileStorageService.UploadProductImage(
                 image,
                 productId,
@@ -82,6 +102,79 @@ export class UpdateProductUseCase {
             updatedAt: new Date()
         };
 
-        return await this.productRepository.update(productId, updatedProduct);
+        const result = await this.productRepository.update(productId, updatedProduct);
+
+        if (request.productOption !== undefined) {
+            await this.syncProductOptions(productId, request.productOption);
+        }
+
+        return result;
+    }
+
+    private async syncProductOptions(productId: string, options: UpdateProductOptionRequest[]): Promise<void> {
+        const existingOptions = await this.productOptionRepository.findByProductId(productId);
+        const incomingOptionIds = new Set(options.filter(opt => opt.id).map(opt => opt.id!));
+
+        for (const existing of existingOptions) {
+            if (!incomingOptionIds.has(existing.id)) {
+                await this.productOptionRepository.delete(existing.id);
+            }
+        }
+
+        for (const option of options) {
+            let optionId = option.id;
+
+            if (optionId) {
+                await this.productOptionRepository.update(optionId, {
+                    name: option.name,
+                    required: option.required,
+                    updatedAt: new Date()
+                });
+            } else {
+                const created = await this.productOptionRepository.create({
+                    id: uuidv4(),
+                    productId,
+                    name: option.name,
+                    required: option.required,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+                optionId = created.id;
+            }
+
+            if (option.values) {
+                await this.syncOptionValues(optionId, option.values);
+            }
+        }
+    }
+
+    private async syncOptionValues(optionId: string, values: UpdateProductOptionValueRequest[]): Promise<void> {
+        const existingValues = await this.productOptionValueRepository.findByOptionId(optionId);
+        const incomingValueIds = new Set(values.filter(val => val.id).map(val => val.id!));
+
+        for (const oldValue of existingValues) {
+            if (!incomingValueIds.has(oldValue.id)) {
+                await this.productOptionValueRepository.delete(oldValue.id);
+            }
+        }
+
+        for (const value of values) {
+            if (value.id) {
+                await this.productOptionValueRepository.update(value.id, {
+                    name: value.name,
+                    additionalPrice: value.additionalPrice,
+                    updatedAt: new Date()
+                });
+            } else {
+                await this.productOptionValueRepository.create({
+                    id: uuidv4(),
+                    optionId,
+                    name: value.name,
+                    additionalPrice: value.additionalPrice,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+            }
+        }
     }
 }

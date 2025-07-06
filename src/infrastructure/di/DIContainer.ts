@@ -60,7 +60,9 @@ export class DIContainer {
         DIContainer.instance.resolve('IProductRepository'),
         DIContainer.instance.resolve('fileStorageService'),
         DIContainer.instance.resolve('ICategoryRepository'),
-        DIContainer.instance.resolve('createCategoryUseCase')
+        DIContainer.instance.resolve('createCategoryUseCase'),
+        DIContainer.instance.resolve('productOptionRepository'),
+        DIContainer.instance.resolve('productOptionValueRepository')
       ));
       DIContainer.instance.registerTransient('deleteProductUseCase', () => new DeleteProductUseCase(
         DIContainer.instance.resolve('IProductRepository'),

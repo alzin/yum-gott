@@ -94,6 +94,7 @@ export class ProductRouter {
                 'discount',
                 'sizeOptions',
                 'image',
+                'options'
             ]),
             ProductValidators.updateProduct(),
             ProductValidators.productId(),
