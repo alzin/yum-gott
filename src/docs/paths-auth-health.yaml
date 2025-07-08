@@ -1,3 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Yum-Gott Platform API
+  description: API for the Yum-Gott platform, supporting customer and restaurant owner authentication, profile management, product management, and category management.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://yum-gott.onrender.com
+    description: Production server
+
 paths:
   /health:
     get:
@@ -25,6 +37,7 @@ paths:
                     type: number
                     description: Server uptime in seconds
                     example: 3600.5
+
   /api/auth/register/customer:
     post:
       tags:
@@ -37,7 +50,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "../swagger.yaml#/components/schemas/RegisterCustomerRequest"
+              $ref: "./swagger-root.yaml#/components/schemas/RegisterCustomerRequest"
             examples:
               validCustomer:
                 summary: Valid customer registration
@@ -66,7 +79,8 @@ paths:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
   /api/auth/register/restaurant-owner:
     post:
       tags:
@@ -79,7 +93,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "../swagger.yaml#/components/schemas/RegisterRestaurantOwnerRequest"
+              $ref: "./swagger-root.yaml#/components/schemas/RegisterRestaurantOwnerRequest"
             examples:
               validOwner:
                 summary: Valid restaurant owner registration
@@ -109,7 +123,8 @@ paths:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
   /api/auth/verify:
     get:
       tags:
@@ -145,10 +160,11 @@ paths:
                     properties:
                       user:
                         oneOf:
-                          - $ref: "../swagger.yaml#/components/schemas/CustomerResponse"
-                          - $ref: "../swagger.yaml#/components/schemas/RestaurantOwnerResponse"
+                          - $ref: "./swagger-root.yaml#/components/schemas/CustomerResponse"
+                          - $ref: "./swagger-root.yaml#/components/schemas/RestaurantOwnerResponse"
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
   /api/auth/login/customer:
     post:
       tags:
@@ -161,7 +177,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "../swagger.yaml#/components/schemas/LoginRequest"
+              $ref: "./swagger-root.yaml#/components/schemas/LoginRequest"
             examples:
               loginWithEmail:
                 summary: Login with email
@@ -188,11 +204,12 @@ paths:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":
-          $ref: "../swagger.yaml#/components/responses/UnauthorizedError"
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
         "429":
-          $ref: "../swagger.yaml#/components/responses/TooManyRequestsError"
+          $ref: "./swagger-root.yaml#/components/responses/TooManyRequestsError"
+
   /api/auth/login/restaurant-owner:
     post:
       tags:
@@ -205,7 +222,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "../swagger.yaml#/components/schemas/LoginRequest"
+              $ref: "./swagger-root.yaml#/components/schemas/LoginRequest"
             examples:
               loginWithEmail:
                 summary: Login with email
@@ -232,11 +249,12 @@ paths:
                 type: string
                 example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":
-          $ref: "../swagger.yaml#/components/responses/UnauthorizedError"
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
         "429":
-          $ref: "../swagger.yaml#/components/responses/TooManyRequestsError"
+          $ref: "./swagger-root.yaml#/components/responses/TooManyRequestsError"
+
   /api/auth/profile/restaurant-owner:
     get:
       tags:
@@ -268,9 +286,10 @@ paths:
                         nullable: true
                         example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/123.jpg"
         "401":
-          $ref: "../swagger.yaml#/components/responses/UnauthorizedError"
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
         "403":
-          $ref: "../swagger.yaml#/components/responses/ForbiddenError"
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
   /api/auth/profile/image:
     post:
       tags:
@@ -313,11 +332,12 @@ paths:
                         type: string
                         example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg"
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":
-          $ref: "../swagger.yaml#/components/responses/UnauthorizedError"
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
         "403":
-          $ref: "../swagger.yaml#/components/responses/ForbiddenError"
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
   /api/auth/location/restaurant:
     post:
       tags:
@@ -332,7 +352,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "../swagger.yaml#/components/schemas/UpdateRestaurantLocationRequest"
+              $ref: "./swagger-root.yaml#/components/schemas/UpdateRestaurantLocationRequest"
       responses:
         "200":
           description: Restaurant location updated successfully
@@ -360,11 +380,12 @@ paths:
                         type: number
                         example: -74.0060
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":
-          $ref: "../swagger.yaml#/components/responses/UnauthorizedError"
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
         "403":
-          $ref: "../swagger.yaml#/components/responses/ForbiddenError"
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
   /api/auth/refresh-token:
     post:
       tags:
@@ -409,6 +430,7 @@ paths:
                   message:
                     type: string
                     example: "Invalid or expired refresh token"
+
   /api/auth/logout:
     post:
       tags:
@@ -433,6 +455,6 @@ paths:
                     type: string
                     example: "Logout successful"
         "400":
-          $ref: "../swagger.yaml#/components/responses/BadRequestError"
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":
-          $ref: "../swagger.yaml#/components/responses/UnauthorizedError" 
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
