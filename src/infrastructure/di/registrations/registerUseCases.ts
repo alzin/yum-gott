@@ -14,6 +14,7 @@ import {
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/application/use-cases/category';
 import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
+import { CreateOpeningHoursUseCase, GetopeningHoursUseCase } from '@/application/use-cases/opening-hours';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 
@@ -142,6 +143,16 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('productOptionValueRepository'),
         container.resolve('productOptionRepository'),
         container.resolve('IProductRepository')
+    ));
+
+    // Opening Hours UseCases
+    container.registerTransient('createOpeningHoursUseCase', () => new CreateOpeningHoursUseCase(
+        container.resolve('IOpeningHoursRepository'),
+        container.resolve('restaurantOwnerRepository')
+    ));
+    container.registerTransient('getOpeningHoursUseCase', () => new GetopeningHoursUseCase(
+        container.resolve('IOpeningHoursRepository'),
+        container.resolve('restaurantOwnerRepository')
     ));
 
     // Logout, Refresh, Cleanup
