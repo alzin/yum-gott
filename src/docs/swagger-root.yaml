@@ -53,6 +53,10 @@ paths:
     $ref: './paths-products-categories.yaml#/paths/~1api~1categories'
   /api/categories/restaurant:
     $ref: './paths-products-categories.yaml#/paths/~1api~1categories~1restaurant'
+  /api/opening-hours:
+    $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours'
+  /api/opening-hours/restaurant:
+    $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours~1restaurant'
 components:
   schemas:
     RegisterCustomerRequest:

@@ -9,7 +9,7 @@ CREATE TABLE opening_hours (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_restaurant_owner
         FOREIGN KEY (restaurant_owner_id)
-        REFERENCES restaurant_owner(id)
+        REFERENCES restaurant_owners(id)
         ON DELETE CASCADE
 );
 
