@@ -1048,7 +1048,7 @@ paths:
       tags:
         - Opening Hours
       summary: Create opening hours for a restaurant
-      description: Allows restaurant owners to define opening hours for a specific day
+      description: 'Allows restaurant owners to define one or more Working_hours per day (e.g., morning and evening shifts) in a single request.'
       operationId: createOpeningHours
       security:
         - bearerAuth: []
@@ -1061,6 +1061,7 @@ paths:
               required:
                 - day
                 - isClosed
+                - Working_hours
               properties:
                 day:
                   type: string
@@ -1073,17 +1074,38 @@ paths:
                     - Saturday
                     - Sunday
                   example: Monday
-                startTime:
-                  type: string
-                  format: time
-                  example: '09:00:00'
-                endTime:
-                  type: string
-                  format: time
-                  example: '18:00:00'
+                Working_hours:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startTime:
+                        type: string
+                        format: time
+                        example: '08:00:00'
+                      endTime:
+                        type: string
+                        format: time
+                        example: '12:00:00'
+                  example:
+                    - startTime: '08:00:00'
+                      endTime: '12:00:00'
+                    - startTime: '14:00:00'
+                      endTime: '18:00:00'
                 isClosed:
                   type: boolean
                   example: false
+            examples:
+              multipleWorkingHours:
+                summary: Multiple working hours in one request
+                value:
+                  day: Monday
+                  Working_hours:
+                    - startTime: '08:00:00'
+                      endTime: '12:00:00'
+                    - startTime: '14:00:00'
+                      endTime: '18:00:00'
+                  isClosed: false
       responses:
         '201':
           description: Opening hours created successfully
@@ -1110,12 +1132,24 @@ paths:
                       day:
                         type: string
                         example: Monday
-                      startTime:
-                        type: string
-                        example: '09:00:00'
-                      endTime:
-                        type: string
-                        example: '18:00:00'
+                      Working_hours:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            startTime:
+                              type: string
+                              format: time
+                              example: '08:00:00'
+                            endTime:
+                              type: string
+                              format: time
+                              example: '12:00:00'
+                        example:
+                          - startTime: '08:00:00'
+                            endTime: '12:00:00'
+                          - startTime: '14:00:00'
+                            endTime: '18:00:00'
                       isClosed:
                         type: boolean
                         example: false
@@ -1134,7 +1168,7 @@ paths:
       tags:
         - Opening Hours
       summary: Get opening hours for a restaurant
-      description: Retrieves all opening hours for the authenticated restaurant owner
+      description: Retrieves all opening hours for the authenticated restaurant owner. Each day will have an array of Working_hours.
       operationId: getOpeningHours
       security:
         - bearerAuth: []
@@ -1166,12 +1200,24 @@ paths:
                         day:
                           type: string
                           example: Monday
-                        startTime:
-                          type: string
-                          example: '09:00:00'
-                        endTime:
-                          type: string
-                          example: '18:00:00'
+                        Working_hours:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              startTime:
+                                type: string
+                                format: time
+                                example: '08:00:00'
+                              endTime:
+                                type: string
+                                format: time
+                                example: '12:00:00'
+                          example:
+                            - startTime: '08:00:00'
+                              endTime: '12:00:00'
+                            - startTime: '14:00:00'
+                              endTime: '18:00:00'
                         isClosed:
                           type: boolean
                           example: false
@@ -1181,10 +1227,64 @@ paths:
                         updatedAt:
                           type: string
                           format: date-time
+              examples:
+                multipleWorkingHours:
+                  summary: Multiple working hours for the same day
+                  value:
+                    success: true
+                    message: Opening hours retrieved successfully
+                    data:
+                      - id: uuid-1
+                        restaurantOwnerId: uuid-owner
+                        day: Monday
+                        Working_hours:
+                          - startTime: '08:00:00'
+                            endTime: '12:00:00'
+                          - startTime: '14:00:00'
+                            endTime: '18:00:00'
+                        isClosed: false
+                        createdAt: '2025-01-01T00:00:00Z'
+                        updatedAt: '2025-01-01T00:00:00Z'
         '400':
           description: Bad request
         '403':
           description: Forbidden
+  '/api/opening-hours/{id}':
+    delete:
+      tags:
+        - Opening Hours
+      summary: Delete a working hour entry
+      description: Deletes a working hour entry by its id. Only the restaurant owner can delete their own entries.
+      operationId: deleteOpeningHours
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the working hour entry to delete
+      responses:
+        '200':
+          description: Opening hours deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Opening hours deleted successfully
+        '400':
+          description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   schemas:
     RegisterCustomerRequest:

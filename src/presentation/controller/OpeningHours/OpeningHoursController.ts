@@ -5,8 +5,9 @@ import { CreateOpeningHoursUseCase, GetopeningHoursUseCase } from '@/application
 export class OpeningHoursController {
     constructor(
         private createOpeningHoursUseCase: CreateOpeningHoursUseCase,
-        private getOpeningHoursUseCase: GetopeningHoursUseCase
-    ) {}
+        private getOpeningHoursUseCase: GetopeningHoursUseCase,
+        private deleteOpeningHoursUseCase: any
+    ) { }
 
     async createOpeningHours(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -21,8 +22,7 @@ export class OpeningHoursController {
 
             const request = {
                 day: req.body.day,
-                startTime: req.body.startTime,
-                endTime: req.body.endTime,
+                Working_hours: req.body.Working_hours,
                 isClosed: req.body.isClosed
             };
 
@@ -61,6 +61,30 @@ export class OpeningHoursController {
             res.status(400).json({
                 success: false,
                 message: error instanceof Error ? error.message : 'Failed to retrieve opening hours'
+            });
+        }
+    }
+
+    async deleteOpeningHours(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const user = req.user;
+            if (!user || user.userType !== 'restaurant_owner') {
+                res.status(403).json({
+                    success: false,
+                    message: 'Forbidden: Only restaurant owners can delete opening hours'
+                });
+                return;
+            }
+            const { id } = req.params;
+            await this.deleteOpeningHoursUseCase.execute(id, user.userId);
+            res.status(200).json({
+                success: true,
+                message: 'Opening hours deleted successfully'
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to delete opening hours'
             });
         }
     }

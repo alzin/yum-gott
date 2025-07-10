@@ -6,4 +6,5 @@ export interface IOpeningHoursRepository {
     findByRestaurantOwnerId(restaurantOwnerId: string): Promise<OpeningHours[]>;
     delete(id: string): Promise<void>;
     findByDayAndRestaurantOwnerId(day: string, restaurantOwnerId: string): Promise<OpeningHours | null>;
+    hasOpeningHoursForDay(restaurantOwnerId: string, day: string): Promise<boolean>;
 }

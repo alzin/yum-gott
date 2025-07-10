@@ -1,4 +1,4 @@
 export * from './AuthRouter'
 export * from './CategoryRouter'
-export * from './OpeningHoursValidators'
+export * from './OpeningHoursRouter'
 export * from './ProductRouter'

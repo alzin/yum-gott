@@ -18,14 +18,15 @@ export class OpeningHoursRouter {
         const authMiddleware = this.diContainer.authMiddleware;
         const controller = new OpeningHoursController(
             this.diContainer.resolve('createOpeningHoursUseCase'),
-            this.diContainer.resolve('getOpeningHoursUseCase')
+            this.diContainer.resolve('getOpeningHoursUseCase'),
+            this.diContainer.resolve('deleteOpeningHoursUseCase')
         );
 
         this.router.post(
             '/',
             authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
-            SanitizationMiddleware.allowedFields(['day', 'startTime', 'endTime', 'isClosed']),
+            SanitizationMiddleware.allowedFields(['day', 'Working_hours', 'isClosed']),
             OpeningHoursValidators.createOpeningHours(),
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => controller.createOpeningHours(req, res)
@@ -36,6 +37,13 @@ export class OpeningHoursRouter {
             authMiddleware.authenticateUser,
             authMiddleware.requireRestaurantOwner,
             (req: AuthenticatedRequest, res: Response) => controller.getOpeningHours(req, res)
+        );
+
+        this.router.delete(
+            '/:id',
+            authMiddleware.authenticateUser,
+            authMiddleware.requireRestaurantOwner,
+            (req: AuthenticatedRequest, res: Response) => controller.deleteOpeningHours(req, res)
         );
     }
 

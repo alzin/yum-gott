@@ -9,23 +9,28 @@ export class OpeningHoursValidators {
                 .withMessage('Day is required')
                 .isIn(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
                 .withMessage('Invalid day'),
-            body('startTime')
-                .optional()
+            body('Working_hours')
+                .if(body('isClosed').equals('false'))
+                .isArray({ min: 1 })
+                .withMessage('Working_hours must be a non-empty array when isClosed is false'),
+            body('Working_hours.*.startTime')
+                .if(body('isClosed').equals('false'))
+                .notEmpty()
+                .withMessage('Each working hour period must have startTime')
                 .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-                .withMessage('Start time must be in HH:mm:ss format (e.g., 09:00:00)'),
-            body('endTime')
-                .optional()
+                .withMessage('startTime must be in HH:mm:ss format (e.g., 09:00:00)'),
+            body('Working_hours.*.endTime')
+                .if(body('isClosed').equals('false'))
+                .notEmpty()
+                .withMessage('Each working hour period must have endTime')
                 .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-                .withMessage('End time must be in HH:mm:ss format (e.g., 18:00:00)'),
+                .withMessage('endTime must be in HH:mm:ss format (e.g., 18:00:00)'),
             body('isClosed')
                 .isBoolean()
                 .withMessage('isClosed must be a boolean'),
             body().custom((value) => {
-                if (!value.isClosed && (!value.startTime || !value.endTime)) {
-                    throw new Error('Start and end times are required when isClosed is false');
-                }
-                if (value.isClosed && (value.startTime || value.endTime)) {
-                    throw new Error('Start and end times should not be provided when isClosed is true');
+                if (value.isClosed && value.Working_hours && value.Working_hours.length > 0) {
+                    throw new Error('Working_hours should be empty when isClosed is true');
                 }
                 return true;
             })

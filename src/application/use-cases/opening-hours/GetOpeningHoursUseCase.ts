@@ -6,8 +6,7 @@ export class GetopeningHoursUseCase {
         private restaurantOwnerRepository: IRestaurantOwnerRepository
     ) { }
     async execute(restaurantOwnerId: string): Promise<OpeningHours[]> {
-        const restaurantOwner = await this.restaurantOwnerRepository.findById
-            (restaurantOwnerId);
+        const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error("Restaurant owner not found")
         }

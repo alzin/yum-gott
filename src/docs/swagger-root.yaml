@@ -57,6 +57,8 @@ paths:
     $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours'
   /api/opening-hours/restaurant:
     $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours~1restaurant'
+  /api/opening-hours/{id}:
+    $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours~1{id}'
 components:
   schemas:
     RegisterCustomerRequest:

@@ -15,13 +15,13 @@ import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase
 import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/application/use-cases/category';
 import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
 import { CreateOpeningHoursUseCase, GetopeningHoursUseCase } from '@/application/use-cases/opening-hours';
+import { DeleteOpeningHoursUseCase } from '@/application/use-cases/opening-hours/DeleteOpeningHoursUseCase';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 
 export function registerUseCases(container: DIContainer) {
     // Auth UseCases
     container.registerTransient('registerCustomerUseCase', () => {
-        console.log('DIContainer: Registering registerCustomerUseCase');
         return new RegisterCustomerUseCase(
             container.resolve('customerRepository'),
             container.resolve('passwordHasher'),
@@ -30,7 +30,6 @@ export function registerUseCases(container: DIContainer) {
     });
 
     container.registerTransient('registerRestaurantOwnerUseCase', () => {
-        console.log('DIContainer: Registering registerRestaurantOwnerUseCase');
         return new RegisterRestaurantOwnerUseCase(
             container.resolve('restaurantOwnerRepository'),
             container.resolve('passwordHasher'),
@@ -48,7 +47,6 @@ export function registerUseCases(container: DIContainer) {
     });
 
     container.registerTransient('restaurantOwnerLoginUseCase', () => {
-        console.log('DIContainer: Registering restaurantOwnerLoginUseCase');
         return new RestaurantOwnerLoginUseCase(
             container.resolve('restaurantOwnerRepository'),
             container.resolve('authRepository'),
@@ -57,7 +55,6 @@ export function registerUseCases(container: DIContainer) {
     });
 
     container.registerTransient('uploadProfileImageUseCase', () => {
-        console.log('DIContainer: Registering uploadProfileImageUseCase');
         return new UploadProfileImageUseCase(
             container.resolve('customerRepository'),
             container.resolve('restaurantOwnerRepository'),
@@ -73,7 +70,6 @@ export function registerUseCases(container: DIContainer) {
     });
 
     container.registerTransient('getRestaurantOwnerProfileUseCase', () => {
-        console.log('DIContainer: Registering getRestaurantOwnerProfileUseCase');
         return new GetRestaurantOwnerProfileUseCase(
             container.resolve('restaurantOwnerRepository')
         );
@@ -153,6 +149,9 @@ export function registerUseCases(container: DIContainer) {
     container.registerTransient('getOpeningHoursUseCase', () => new GetopeningHoursUseCase(
         container.resolve('IOpeningHoursRepository'),
         container.resolve('restaurantOwnerRepository')
+    ));
+    container.registerTransient('deleteOpeningHoursUseCase', () => new DeleteOpeningHoursUseCase(
+        container.resolve('IOpeningHoursRepository')
     ));
 
     // Logout, Refresh, Cleanup
