@@ -25,7 +25,7 @@ export class CreateProductOptionUseCase {
             throw new Error('Unauthorized: Product does not belong to this restaurant owner');
         }
 
-        const optionExists = await this.productOptionRepository.existsByNameAndProductId(name, productId);
+        const optionExists = await this.productOptionRepository.checkExistsByNameAndProductId(name, productId);
         if (optionExists) {
             throw new Error('Option already exists with this name for the product');
         }

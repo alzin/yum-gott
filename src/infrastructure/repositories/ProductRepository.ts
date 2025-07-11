@@ -95,7 +95,7 @@ export class ProductRepository implements IProductRepository {
         return result.rows.map(this.mapToProduct);
     }
 
-    async ExistingByNameAndRestaurantId(productName: string, restaurantOwnerId: string): Promise<boolean> {
+    async checkExistingProductByNameAndRestaurantId(productName: string, restaurantOwnerId: string): Promise<boolean> {
         const query = `
             SELECT EXISTS (
                 SELECT 1 FROM products

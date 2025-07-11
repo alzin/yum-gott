@@ -74,7 +74,7 @@ export class CreateProductUseCase {
             updatedAt: new Date()
         };
 
-        await this.ExistingByNameAndRestaurantId(request, restaurantOwnerId);
+        await this.checkExistingProductByNameAndRestaurantId(request, restaurantOwnerId);
         const createdProduct = await this.productRepository.create(product);
 
         if (request.options && request.options.length > 0) {
@@ -104,8 +104,8 @@ export class CreateProductUseCase {
         return createdProduct;
     }
 
-    private async ExistingByNameAndRestaurantId(request: CreateProductRequest, restaurantOwnerId: string): Promise<void> {
-        const productExists = await this.productRepository.ExistingByNameAndRestaurantId(request.productName, restaurantOwnerId);
+    private async checkExistingProductByNameAndRestaurantId(request: CreateProductRequest, restaurantOwnerId: string): Promise<void> {
+        const productExists = await this.productRepository.checkExistingProductByNameAndRestaurantId(request.productName, restaurantOwnerId);
         if (productExists) {
             throw new Error('Product already exists with this name in your restaurant');
         }

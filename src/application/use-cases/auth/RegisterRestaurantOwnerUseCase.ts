@@ -1,9 +1,10 @@
-import { RestaurantOwner , AuthToken } from '@/domain/entities/index';
-import { IRestaurantOwnerRepository , IAuthRepository} from '@/domain/repositories/index';
+import { RestaurantOwner, AuthToken } from '@/domain/entities/index';
+import { IRestaurantOwnerRepository, IAuthRepository } from '@/domain/repositories/index';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 // import { EmailService } from '@/infrastructure/services/EmailService';
 import { v4 as uuidv4 } from 'uuid';
-
+import { CONFIG } from '@/main/Config'
+import ms from 'ms';
 export interface RegisterRestaurantOwnerRequest {
     restaurantName: string;
     organizationNumber: string;
@@ -27,7 +28,7 @@ export class RegisterRestaurantOwnerUseCase {
         const hashedPassword = await this.passwordHasher.hash(request.password);
 
         const verificationToken = uuidv4();
-        const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        const tokenExpiresAt = new Date(Date.now() + ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any));
 
         const restaurantOwner: RestaurantOwner = {
             restaurantName: request.restaurantName,
@@ -47,14 +48,14 @@ export class RegisterRestaurantOwnerUseCase {
 
         const createdOwner = await this.restaurantOwnerRepository.create(restaurantOwner);
         // await this.emailService.sendVerificationEmail(request.email, verificationToken);
-        
+
         const tokens = await this.authRepository.generateToken({
             userId: createdOwner.id!,
             userType: 'restaurant_owner',
             email: createdOwner.email
         });
-        
-        return tokens; 
+
+        return tokens;
     }
 
     private async checkExistingByEmail(request: RegisterRestaurantOwnerRequest): Promise<void> {

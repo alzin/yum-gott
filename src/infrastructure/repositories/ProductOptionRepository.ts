@@ -33,7 +33,7 @@ export class ProductOptionRepository implements IProductOptionRepository {
         await this.db.query(query, [optionId]);
     }
 
-    async existsByNameAndProductId(name: string, productId: string): Promise<boolean> {
+    async checkExistsByNameAndProductId(name: string, productId: string): Promise<boolean> {
         const query = 'SELECT 1 FROM product_options WHERE name = $1 AND product_id = $2 LIMIT 1';
         const result = await this.db.query(query, [name, productId]);
         return result.rows.length > 0;
