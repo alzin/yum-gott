@@ -1,8 +1,10 @@
-import { Customer , AuthToken} from '@/domain/entities/index';
-import { ICustomerRepository , IAuthRepository } from '@/domain/repositories/index';
+import { Customer, AuthToken } from '@/domain/entities/index';
+import { ICustomerRepository, IAuthRepository } from '@/domain/repositories/index';
 import { IPasswordHasher } from '@/application/interface/IPasswordHasher';
 // import { EmailService } from '@/infrastructure/services/EmailService';
 import { v4 as uuidv4 } from 'uuid';
+import { CONFIG } from '@/main/Config';
+import ms from 'ms';
 
 export interface RegisterCustomerRequest {
     name: string;
@@ -24,7 +26,7 @@ export class RegisterCustomerUseCase {
 
         const hashedPassword = await this.passwordHasher.hash(request.password);
         const verificationToken = uuidv4();
-        const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        const tokenExpiresAt = new Date(Date.now() + ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any)); // 24 hours
 
         const customer: Customer = {
             name: request.name,
@@ -54,6 +56,6 @@ export class RegisterCustomerUseCase {
         const emailExists = await this.customerRepository.existsByEmail(email);
         if (emailExists) {
             throw new Error('User already exists with this email');
-        } 
+        }
     }
 }
