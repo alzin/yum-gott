@@ -26,7 +26,7 @@ export class RegisterCustomerUseCase {
 
         const hashedPassword = await this.passwordHasher.hash(request.password);
         const verificationToken = uuidv4();
-        const tokenExpiresAt = new Date(Date.now() + ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any)); // 24 hours
+        const tokenExpiresAt = new Date(Date.now() + ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any)); 
 
         const customer: Customer = {
             name: request.name,
