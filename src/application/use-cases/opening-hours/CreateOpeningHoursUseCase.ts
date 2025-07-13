@@ -1,11 +1,6 @@
-import { OpeningHours } from '@/domain/entities/OpeningHours';
+import { OpeningHours, OpeningHoursPeriod } from '@/domain/entities/OpeningHours';
 import { IOpeningHoursRepository, IRestaurantOwnerRepository } from '@/domain/repositories';
 import { v4 as uuidv4 } from 'uuid';
-
-export interface OpeningHoursPeriod {
-    startTime: string;
-    endTime: string;
-}
 
 export interface CreateOpeningHoursRequest {
     day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';

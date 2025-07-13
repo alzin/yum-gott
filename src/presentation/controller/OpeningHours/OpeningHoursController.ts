@@ -2,12 +2,13 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '@/presentation/middleware';
 import { CreateOpeningHoursUseCase, GetopeningHoursUseCase } from '@/application/use-cases/opening-hours';
 import { UpdateOpeningHoursUseCase } from '@/application/use-cases/opening-hours/UpdateOpeningHoursUseCase';
+import { DeleteOpeningHoursUseCase } from '@/application/use-cases/opening-hours/DeleteOpeningHoursUseCase';
 export class OpeningHoursController {
     constructor(
         private createOpeningHoursUseCase: CreateOpeningHoursUseCase,
         private getOpeningHoursUseCase: GetopeningHoursUseCase,
-        private deleteOpeningHoursUseCase: any,
-        private updateOpeningHoursUseCase : UpdateOpeningHoursUseCase
+        private deleteOpeningHoursUseCase: DeleteOpeningHoursUseCase,
+        private updateOpeningHoursUseCase: UpdateOpeningHoursUseCase
     ) { }
 
     async createOpeningHours(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -89,7 +90,7 @@ export class OpeningHoursController {
             });
         }
     }
-    async updateOpeningHours(req : AuthenticatedRequest , res:Response):Promise<void>{
+    async updateOpeningHours(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const user = req.user;
             if (!user || user.userType !== 'restaurant_owner') {
