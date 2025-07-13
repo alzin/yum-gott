@@ -4,7 +4,6 @@ export class DeleteOpeningHoursUseCase {
     constructor(private openingHoursRepository: IOpeningHoursRepository) { }
 
     async execute(id: string, restaurantOwnerId: string): Promise<void> {
-        // Optionally, check if the entry belongs to the restaurant owner
         const entry = await this.openingHoursRepository.findById(id);
         if (!entry) {
             throw new Error('Opening hours entry not found');

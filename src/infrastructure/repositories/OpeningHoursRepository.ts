@@ -62,7 +62,17 @@ export class OpeningHoursRepository implements IOpeningHoursRepository {
     async findById(id: string): Promise<OpeningHours | null> {
         const query = 'SELECT * FROM opening_hours WHERE id = $1';
         const result = await this.db.query(query, [id]);
-        return result.rows[0] || null;
+        if (result.rows.length === 0) return null;
+        const row = result.rows[0];
+        return {
+            id: row.id,
+            restaurantOwnerId: row.restaurant_owner_id,
+            day: row.day,
+            Working_hours: row.Working_hours ? JSON.parse(row.Working_hours) : [],
+            isClosed: row.is_closed,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at,
+        };
     }
 
     async findByRestaurantOwnerId(restaurantOwnerId: string): Promise<OpeningHours[]> {
