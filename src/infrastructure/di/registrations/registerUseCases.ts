@@ -153,6 +153,10 @@ export function registerUseCases(container: DIContainer) {
     container.registerTransient('deleteOpeningHoursUseCase', () => new DeleteOpeningHoursUseCase(
         container.resolve('IOpeningHoursRepository')
     ));
+    container.registerTransient('updateOpeningHoursUseCase', () => new (require('@/application/use-cases/opening-hours/UpdateOpeningHoursUseCase').UpdateOpeningHoursUseCase)(
+        container.resolve('IOpeningHoursRepository'),
+        container.resolve('restaurantOwnerRepository')
+    ));
 
     // Logout, Refresh, Cleanup
     container.registerTransient('logoutUseCase', () => new LogoutUseCase(container.resolve('authRepository')));

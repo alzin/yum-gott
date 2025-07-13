@@ -23,12 +23,12 @@ export class UpdateOpeningHoursUseCase {
         if (entry.restaurantOwnerId !== restaurantOwnerId) {
             throw new Error('You are not authorized to update this entry');
         }
-        // Optionally check if the restaurant owner exists
+
         const restaurantOwner = await this.restaurantOwnerRepository.findById(restaurantOwnerId);
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
-        // Validation logic (similar to create)
+        
         if (isClosed === false) {
             if (!Working_hours || Working_hours.length === 0) {
                 throw new Error('At least one working hour period is required when not closed');
@@ -42,14 +42,13 @@ export class UpdateOpeningHoursUseCase {
         if (isClosed === true && Working_hours && Working_hours.length > 0) {
             throw new Error('Working_hours should be empty when isClosed is true');
         }
-        // Prepare update object
-        const updateObj: Partial<OpeningHours> = {
+        const openingHoursUpdate: Partial<OpeningHours> = {
             ...(day !== undefined ? { day } : {}),
             ...(Working_hours !== undefined ? { Working_hours: isClosed ? [] : Working_hours } : {}),
             ...(isClosed !== undefined ? { isClosed } : {}),
             updatedAt: new Date(),
         };
-        const updated = await this.openingHoursRepository.update(id, updateObj);
+        const updated = await this.openingHoursRepository.update(id, openingHoursUpdate);
         return updated;
     }
 }
