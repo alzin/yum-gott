@@ -1285,6 +1285,126 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+    put:
+      tags:
+        - Opening Hours
+      summary: Update opening hours
+      description: Updates an existing opening hours entry for a restaurant owner.
+      operationId: updateOpeningHours
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the opening hours entry to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                day:
+                  type: string
+                  enum:
+                    - Monday
+                    - Tuesday
+                    - Wednesday
+                    - Thursday
+                    - Friday
+                    - Saturday
+                    - Sunday
+                  example: Monday
+                Working_hours:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startTime:
+                        type: string
+                        format: time
+                        example: '08:00:00'
+                      endTime:
+                        type: string
+                        format: time
+                        example: '12:00:00'
+                  example:
+                    - startTime: '08:00:00'
+                      endTime: '12:00:00'
+                    - startTime: '14:00:00'
+                      endTime: '18:00:00'
+                isClosed:
+                  type: boolean
+                  example: false
+            examples:
+              updateExample:
+                summary: Update opening hours for a day
+                value:
+                  day: Monday
+                  Working_hours:
+                    - startTime: '09:00:00'
+                      endTime: '13:00:00'
+                  isClosed: false
+      responses:
+        '200':
+          description: Opening hours updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Opening hours updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      restaurantOwnerId:
+                        type: string
+                        format: uuid
+                      day:
+                        type: string
+                        example: Monday
+                      Working_hours:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            startTime:
+                              type: string
+                              format: time
+                              example: '09:00:00'
+                            endTime:
+                              type: string
+                              format: time
+                              example: '13:00:00'
+                        example:
+                          - startTime: '09:00:00'
+                            endTime: '13:00:00'
+                      isClosed:
+                        type: boolean
+                        example: false
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '400':
+          description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   schemas:
     RegisterCustomerRequest:
