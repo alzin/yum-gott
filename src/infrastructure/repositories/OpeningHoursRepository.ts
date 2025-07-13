@@ -35,7 +35,7 @@ export class OpeningHoursRepository implements IOpeningHoursRepository {
             values.push(openingHours.day);
         }
         if (openingHours.Working_hours !== undefined) {
-            fields.push(`periods = $${index++}`);
+            fields.push(`Working_hours = $${index++}`);
             values.push(JSON.stringify(openingHours.Working_hours));
         }
         if (openingHours.isClosed !== undefined) {

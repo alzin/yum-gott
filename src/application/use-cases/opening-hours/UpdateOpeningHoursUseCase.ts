@@ -28,7 +28,7 @@ export class UpdateOpeningHoursUseCase {
         if (!restaurantOwner) {
             throw new Error('Restaurant owner not found');
         }
-        
+
         if (isClosed === false) {
             if (!Working_hours || Working_hours.length === 0) {
                 throw new Error('At least one working hour period is required when not closed');
@@ -42,12 +42,23 @@ export class UpdateOpeningHoursUseCase {
         if (isClosed === true && Working_hours && Working_hours.length > 0) {
             throw new Error('Working_hours should be empty when isClosed is true');
         }
-        const openingHoursUpdate: Partial<OpeningHours> = {
-            ...(day !== undefined ? { day } : {}),
-            ...(Working_hours !== undefined ? { Working_hours: isClosed ? [] : Working_hours } : {}),
-            ...(isClosed !== undefined ? { isClosed } : {}),
-            updatedAt: new Date(),
-        };
+        // Prepare update object
+        let openingHoursUpdate: Partial<OpeningHours>;
+        if (isClosed === true) {
+            openingHoursUpdate = {
+                ...(day !== undefined ? { day } : {}),
+                Working_hours: [],
+                isClosed: true,
+                updatedAt: new Date(),
+            };
+        } else {
+            openingHoursUpdate = {
+                ...(day !== undefined ? { day } : {}),
+                ...(Working_hours !== undefined ? { Working_hours } : {}),
+                ...(isClosed !== undefined ? { isClosed } : {}),
+                updatedAt: new Date(),
+            };
+        }
         const updated = await this.openingHoursRepository.update(id, openingHoursUpdate);
         return updated;
     }
