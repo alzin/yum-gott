@@ -1051,7 +1051,7 @@ paths:
       description: 'Allows restaurant owners to define one or more Working_hours per day (e.g., morning and evening shifts) in a single request.'
       operationId: createOpeningHours
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         required: true
         content:
@@ -1171,7 +1171,7 @@ paths:
       description: Retrieves all opening hours for the authenticated restaurant owner. Each day will have an array of Working_hours.
       operationId: getOpeningHours
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Opening hours retrieved successfully
@@ -1257,7 +1257,7 @@ paths:
       description: Deletes a working hour entry by its id. Only the restaurant owner can delete their own entries.
       operationId: deleteOpeningHours
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -1292,7 +1292,7 @@ paths:
       description: Updates an existing opening hours entry for a restaurant owner.
       operationId: updateOpeningHours
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
