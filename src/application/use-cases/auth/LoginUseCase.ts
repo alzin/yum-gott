@@ -20,7 +20,6 @@ export class LoginUseCase {
     ) {}
 
     async execute(request: LoginRequest): Promise<LoginResponse> {
-        // Try to find user in both tables
         const customer = await this.customerRepository.findByEmail(request.email);
         const restaurantOwner = await this.restaurantOwnerRepository.findByEmail(request.email);
         

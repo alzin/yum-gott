@@ -25,6 +25,7 @@ export function registerUseCases(container: DIContainer) {
         return new RegisterCustomerUseCase(
             container.resolve('customerRepository'),
             container.resolve('passwordHasher'),
+            container.resolve('emailService'),
             container.resolve('authRepository')
         );
     });
