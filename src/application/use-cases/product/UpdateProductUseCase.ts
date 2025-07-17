@@ -39,7 +39,7 @@ export class UpdateProductUseCase {
         private createCategoryUseCase: CreateCategoryUseCase,
         private productOptionRepository: IProductOptionRepository,
         private productOptionValueRepository: IProductOptionValueRepository
-    ) {}
+    ) { }
 
     async execute(request: UpdateProductRequest): Promise<Product> {
         const { productId, restaurantOwnerId, image, sizeOptions, categoryName } = request;
