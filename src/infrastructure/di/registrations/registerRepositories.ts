@@ -1,10 +1,11 @@
 import { DIContainer } from '../DIContainer';
 import { CustomerRepository, RestaurantOwnerRepository, AuthRepository, CategoryRepository, ProductRepository, ProductOptionRepository, ProductOptionValueRepository, OpeningHoursRepository } from '../../repositories';
+import { VideoRepository } from '../../repositories/VideoRepository';
 import { DatabaseConnection } from '../../database/DataBaseConnection';
 
 export function registerRepositories(container: DIContainer) {
     container.registerSingleton('databaseConnection', () => {
-        return DatabaseConnection.getInstance(); 
+        return DatabaseConnection.getInstance();
     });
 
     container.registerSingleton('customerRepository', () => {
@@ -25,4 +26,5 @@ export function registerRepositories(container: DIContainer) {
     container.registerSingleton('productOptionValueRepository', () => new ProductOptionValueRepository(container.resolve('databaseConnection')));
     container.registerSingleton('IProductOptionRepository', () => new ProductOptionRepository(container.resolve('databaseConnection')));
     container.registerSingleton('IOpeningHoursRepository', () => new OpeningHoursRepository(container.resolve('databaseConnection')));
+    container.registerSingleton('IVideoRepository', () => new VideoRepository(container.resolve('databaseConnection')));
 } 

@@ -147,6 +147,14 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('IOpeningHoursRepository'),
         container.resolve('restaurantOwnerRepository')
     ));
+    
+    // Video UseCases
+    container.registerTransient('createVideoUseCase', () => new (require('@/application/use-cases/video/CreateVideoUseCase').CreateVideoUseCase)(
+        container.resolve('IVideoRepository'),
+        container.resolve('customerRepository'),
+        container.resolve('fileStorageService')
+    ));
+    
     container.registerTransient('getOpeningHoursUseCase', () => new GetopeningHoursUseCase(
         container.resolve('IOpeningHoursRepository'),
         container.resolve('restaurantOwnerRepository')
