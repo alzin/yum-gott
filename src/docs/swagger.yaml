@@ -1407,6 +1407,8 @@ paths:
           description: Not found
   /api/videos:
     post:
+      tags:
+        - Upload Videos
       summary: Create a new video
       description: Upload a video with associated metadata and invoice image. Requires customer authentication.
       security:
@@ -1417,6 +1419,15 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateVideoRequest'
+            examples:
+              sample:
+                value:
+                  publicId: yum_gott/videos/yum_gott_1752456506674
+                  secureUrl: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
+                  phoneNumber: 0987654321
+                  network: MTN
+                  invoiceImage: (binary image file)
+                  restaurantName: Falafel Ala Kefk
       responses:
         '201':
           description: Video created successfully
@@ -1431,6 +1442,21 @@ paths:
                     type: string
                   data:
                     $ref: '#/components/schemas/Video'
+              example:
+                success: true
+                message: Video uploaded successfully
+                data:
+                  id: 123e4567-e89b-12d3-a456-426614174000
+                  userId: 123e4567-e89b-12d3-a456-426614174001
+                  publicId: sample_public_id
+                  secureUrl: 'https://res.cloudinary.com/demo/video/upload/v1234567890/sample.mp4'
+                  phoneNumber: 0987654321
+                  network: MTN
+                  invoiceImage: 'https://res.cloudinary.com/demo/image/upload/v1234567890/invoice.jpg'
+                  statusVideo: pending
+                  createdAt: '2025-01-01T00:00:00Z'
+                  updatedAt: '2025-01-01T00:00:00Z'
+                  restaurantName: Tasty Bites
         '400':
           description: Invalid input
           content:
@@ -2018,11 +2044,15 @@ components:
         updatedAt:
           type: string
           format: date-time
+        restaurantName:
+          type: string
+          description: Name of the restaurant associated with the video
       required:
         - id
         - userId
         - publicId
         - secureUrl
+        - restaurantName
         - phoneNumber
         - network
         - invoiceImage
@@ -2034,25 +2064,34 @@ components:
           type: string
           description: Cloudinary public ID of the video
           maxLength: 255
+          example: yum_gott/videos/yum_gott_1752456506674
         secureUrl:
           type: string
           format: uri
           description: Secure URL of the uploaded video
           maxLength: 255
+          example: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
         phoneNumber:
           type: string
           description: Customer's phone number (10-15 digits)
           pattern: '^[0-9]{10,15}$'
+          example: 0987654321
         network:
           type: string
           enum:
             - MTN
             - Syriatel
           description: Network provider
+          example: MTN
         invoiceImage:
           type: string
           format: binary
           description: 'Invoice image file (JPEG or PNG, max 5MB)'
+          example: (binary image file)
+        restaurantName:
+          type: string
+          description: Name of the restaurant associated with the video
+          example: Falafel Ala Kefk
       required:
         - publicId
         - secureUrl

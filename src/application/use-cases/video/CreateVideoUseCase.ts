@@ -6,6 +6,7 @@ import { IFileStorageService } from '@/application/interface/IFileStorageService
 export interface CreateVideoRequest {
     publicId: string;
     secureUrl: string;
+    restaurantName: string;
     phoneNumber: string;
     network: Network;
     invoiceImage: Express.Multer.File;
@@ -23,7 +24,7 @@ export class CreateVideoUseCase {
     ) { }
 
     async execute(request: CreateVideoRequest, userId: string): Promise<CreateVideoResponse> {
-        const { publicId, secureUrl, phoneNumber, network, invoiceImage } = request;
+        const { publicId, secureUrl,restaurantName, phoneNumber, network, invoiceImage } = request;
 
         // Validate customer exists
         const customer = await this.customerRepository.findById(userId);
@@ -32,9 +33,9 @@ export class CreateVideoUseCase {
         }
 
         // Validate phone number format
-        // if (!/^[0-9]{10,15}$/.test(phoneNumber)) {
-        //     throw new Error('Invalid phone number format');
-        // }
+        if (!/^[0-9]{10,15}$/.test(phoneNumber)) {
+            throw new Error('Invalid phone number format');
+        }
 
         // Validate network
         if (!Object.values(Network).includes(network)) {
@@ -58,6 +59,7 @@ export class CreateVideoUseCase {
             userId,
             publicId,
             secureUrl,
+            restaurantName,
             phoneNumber,
             network,
             invoiceImage: invoiceImageUrl,

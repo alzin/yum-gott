@@ -41,6 +41,7 @@ export class VideoRouter {
             SanitizationMiddleware.allowedFields([
                 'publicId',
                 'secureUrl',
+                'restaurantName',
                 'phoneNumber',
                 'network'
             ]),

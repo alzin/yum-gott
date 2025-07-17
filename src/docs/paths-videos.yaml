@@ -1,6 +1,8 @@
 paths:
   /api/videos:
     post:
+      tags:
+        - Upload Videos
       summary: Create a new video
       description: Upload a video with associated metadata and invoice image. Requires customer authentication.
       security:
@@ -11,6 +13,15 @@ paths:
           multipart/form-data:
             schema:
               $ref: './swagger-root.yaml#/components/schemas/CreateVideoRequest'
+            examples:
+              sample:
+                value:
+                  publicId: "yum_gott/videos/yum_gott_1752456506674"
+                  secureUrl: "https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4"
+                  phoneNumber: "0987654321"
+                  network: "MTN"
+                  invoiceImage: "(binary image file)"
+                  restaurantName: "Falafel Ala Kefk"
       responses:
         '201':
           description: Video created successfully
@@ -25,6 +36,21 @@ paths:
                     type: string
                   data:
                     $ref: './swagger-root.yaml#/components/schemas/Video'
+              example:
+                success: true
+                message: "Video uploaded successfully"
+                data:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  userId: "123e4567-e89b-12d3-a456-426614174001"
+                  publicId: "sample_public_id"
+                  secureUrl: "https://res.cloudinary.com/demo/video/upload/v1234567890/sample.mp4"
+                  phoneNumber: "0987654321"
+                  network: "MTN"
+                  invoiceImage: "https://res.cloudinary.com/demo/image/upload/v1234567890/invoice.jpg"
+                  statusVideo: "pending"
+                  createdAt: "2025-01-01T00:00:00Z"
+                  updatedAt: "2025-01-01T00:00:00Z"
+                  restaurantName: "Tasty Bites"
         '400':
           description: Invalid input
           content:

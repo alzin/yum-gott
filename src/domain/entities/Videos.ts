@@ -14,6 +14,7 @@ export interface Video {
     userId: string;
     publicId: string;
     secureUrl: string;
+    restaurantName: string;
     phoneNumber: string;
     network: Network;
     invoiceImage: string;

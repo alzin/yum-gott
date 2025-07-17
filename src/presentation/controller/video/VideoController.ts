@@ -21,6 +21,7 @@ export class VideoController {
             const request = {
                 publicId: req.body.publicId,
                 secureUrl: req.body.secureUrl,
+                restaurantName: req.body.restaurantName,
                 phoneNumber: req.body.phoneNumber,
                 network: req.body.network,
                 invoiceImage: req.file!
