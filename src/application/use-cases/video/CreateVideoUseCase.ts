@@ -32,9 +32,9 @@ export class CreateVideoUseCase {
         }
 
         // Validate phone number format
-        if (!/^[0-9]{10,15}$/.test(phoneNumber)) {
-            throw new Error('Invalid phone number format');
-        }
+        // if (!/^[0-9]{10,15}$/.test(phoneNumber)) {
+        //     throw new Error('Invalid phone number format');
+        // }
 
         // Validate network
         if (!Object.values(Network).includes(network)) {
