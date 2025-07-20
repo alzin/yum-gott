@@ -1407,10 +1407,9 @@ paths:
           description: Not found
   /api/videos:
     post:
-      tags:
-        - Upload Videos
       summary: Create a new video
-      description: Upload a video with associated metadata and invoice image. Requires customer authentication.
+      tags:
+        - Videos
       security:
         - cookieAuth: []
       requestBody:
@@ -1418,16 +1417,38 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreateVideoRequest'
-            examples:
-              sample:
-                value:
-                  publicId: yum_gott/videos/yum_gott_1752456506674
-                  secureUrl: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
-                  phoneNumber: 0987654321
-                  network: MTN
-                  invoiceImage: (binary image file)
-                  restaurantName: Falafel Ala Kefk
+              type: object
+              properties:
+                publicId:
+                  type: string
+                  description: Public ID of the video
+                secureUrl:
+                  type: string
+                  format: uri
+                  description: Secure URL of the video
+                restaurantName:
+                  type: string
+                  description: Name of the restaurant
+                phoneNumber:
+                  type: string
+                  description: Phone number associated with the video
+                network:
+                  type: string
+                  enum:
+                    - MTN
+                    - Syriatel
+                  description: Network provider
+                invoiceImage:
+                  type: string
+                  format: binary
+                  description: Invoice image file (JPEG or PNG)
+              required:
+                - publicId
+                - secureUrl
+                - restaurantName
+                - phoneNumber
+                - network
+                - invoiceImage
       responses:
         '201':
           description: Video created successfully
@@ -1438,112 +1459,131 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    example: true
                   message:
                     type: string
+                    example: Video created successfully
                   data:
-                    $ref: '#/components/schemas/Video'
-              example:
-                success: true
-                message: Video uploaded successfully
-                data:
-                  id: 123e4567-e89b-12d3-a456-426614174000
-                  userId: 123e4567-e89b-12d3-a456-426614174001
-                  publicId: sample_public_id
-                  secureUrl: 'https://res.cloudinary.com/demo/video/upload/v1234567890/sample.mp4'
-                  phoneNumber: 0987654321
-                  network: MTN
-                  invoiceImage: 'https://res.cloudinary.com/demo/image/upload/v1234567890/invoice.jpg'
-                  statusVideo: pending
-                  createdAt: '2025-01-01T00:00:00Z'
-                  updatedAt: '2025-01-01T00:00:00Z'
-                  restaurantName: Tasty Bites
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      customerId:
+                        type: string
+                        format: uuid
+                      publicId:
+                        type: string
+                      secureUrl:
+                        type: string
+                        format: uri
+                      restaurantName:
+                        type: string
+                      phoneNumber:
+                        type: string
+                      network:
+                        type: string
+                        enum:
+                          - MTN
+                          - Syriatel
+                      invoiceImageUrl:
+                        type: string
+                        format: uri
+                        nullable: true
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                    required:
+                      - id
+                      - customerId
+                      - publicId
+                      - secureUrl
+                      - restaurantName
+                      - phoneNumber
+                      - network
+                      - createdAt
+                      - updatedAt
         '400':
-          description: Invalid input
+          description: Bad request (validation error)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                required:
+                  - success
+                  - message
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '403':
-          description: Forbidden - Only customers can create videos
+          description: Forbidden (only customers can create videos)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
   '/api/videos/{id}':
     put:
+      summary: Update an existing video
       tags:
-        - Upload Videos
-      summary: Update a video by ID
-      description: Update video details by its unique identifier. Requires customer authentication. Invoice image is optional for updates.
+        - Videos
       security:
         - cookieAuth: []
       parameters:
         - in: path
           name: id
-          required: true
           schema:
             type: string
-          description: The unique identifier of the video to update
-          example: 123e4567-e89b-12d3-a456-426614174000
+            format: uuid
+          required: true
+          description: ID of the video to update
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               type: object
+              properties:
+                publicId:
+                  type: string
+                  description: Public ID of the video
+                secureUrl:
+                  type: string
+                  format: uri
+                  description: Secure URL of the video
+                restaurantName:
+                  type: string
+                  description: Name of the restaurant
+                phoneNumber:
+                  type: string
+                  description: Phone number associated with the video
+                network:
+                  type: string
+                  enum:
+                    - MTN
+                    - Syriatel
+                  description: Network provider
+                invoiceImage:
+                  type: string
+                  format: binary
+                  description: 'Invoice image file (JPEG or PNG, optional)'
               required:
                 - publicId
                 - secureUrl
                 - restaurantName
                 - phoneNumber
                 - network
-              properties:
-                publicId:
-                  type: string
-                  description: Public ID of the video from Cloudinary
-                  example: yum_gott/videos/yum_gott_1752456506674
-                secureUrl:
-                  type: string
-                  format: uri
-                  description: Secure URL of the video from Cloudinary
-                  example: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
-                restaurantName:
-                  type: string
-                  minLength: 2
-                  maxLength: 100
-                  description: Name of the restaurant
-                  example: Falafel Ala Kefk
-                phoneNumber:
-                  type: string
-                  pattern: '^[0-9]{10,15}$'
-                  description: Phone number (10-15 digits)
-                  example: 0987654321
-                network:
-                  type: string
-                  enum:
-                    - MTN
-                    - Syriatel
-                  description: Mobile network provider
-                  example: MTN
-                invoiceImage:
-                  type: string
-                  format: binary
-                  description: 'Invoice image file (JPEG/PNG, optional for updates)'
-            examples:
-              sample:
-                value:
-                  publicId: yum_gott/videos/yum_gott_1752456506674
-                  secureUrl: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
-                  restaurantName: Falafel Ala Kefk
-                  phoneNumber: 0987654321
-                  network: MTN
-                  invoiceImage: (optional binary image file)
       responses:
         '200':
           description: Video updated successfully
@@ -1554,71 +1594,50 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    example: true
                   message:
                     type: string
+                    example: Video updated successfully
                   data:
-                    $ref: '#/components/schemas/Video'
-              example:
-                success: true
-                message: Video updated successfully
-                data:
-                  id: 123e4567-e89b-12d3-a456-426614174000
-                  userId: 123e4567-e89b-12d3-a456-426614174001
-                  publicId: yum_gott/videos/yum_gott_1752456506674
-                  secureUrl: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
-                  restaurantName: Falafel Ala Kefk
-                  phoneNumber: 0987654321
-                  network: MTN
-                  invoiceImage: 'https://res.cloudinary.com/demo/image/upload/v1234567890/invoice.jpg'
-                  statusVideo: pending
-                  createdAt: '2025-01-01T00:00:00Z'
-                  updatedAt: '2025-01-01T00:00:00Z'
+                    $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
         '400':
-          description: Invalid input or validation error
+          description: Bad request (validation error)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                success: false
-                message: Phone number must be 10-15 digits
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '403':
-          description: Forbidden - Only customers can update videos
+          description: Forbidden (only customers can update videos)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                success: false
-                message: 'Forbidden: Only customers can update videos'
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '404':
-          description: Video not found or user not authorized
+          description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                success: false
-                message: Video not found
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
     delete:
+      summary: Delete a video
       tags:
-        - Upload Videos
-      summary: Delete a video by ID
-      description: Delete a video by its unique identifier. Requires customer authentication.
+        - Videos
       security:
         - cookieAuth: []
       parameters:
         - in: path
           name: id
-          required: true
           schema:
             type: string
+            format: uuid
+          required: true
+          description: ID of the video to delete
       responses:
         '200':
           description: Video deleted successfully
@@ -1629,23 +1648,81 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    example: true
                   message:
                     type: string
-              example:
-                success: true
-                message: Video deleted successfully
-        '403':
-          description: Forbidden - Only customers can delete videos
+                    example: Video deleted successfully
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '403':
+          description: Forbidden (only customers can delete videos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '404':
           description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+  /api/videos/customer:
+    get:
+      summary: Get all videos by customer ID
+      tags:
+        - Videos
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Videos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Videos retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
+                required:
+                  - success
+                  - message
+                  - data
+        '400':
+          description: 'Bad request (e.g., customer not found)'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '403':
+          description: Forbidden (only customers can access their videos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
 components:
   schemas:
     RegisterCustomerRequest:
@@ -2179,106 +2256,6 @@ components:
           type: string
           format: date-time
           example: '2025-01-01T00:00:00Z'
-    Video:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userId:
-          type: string
-          format: uuid
-        publicId:
-          type: string
-        secureUrl:
-          type: string
-          format: uri
-        phoneNumber:
-          type: string
-        network:
-          type: string
-          enum:
-            - MTN
-            - Syriatel
-        invoiceImage:
-          type: string
-          format: uri
-        statusVideo:
-          type: string
-          enum:
-            - pending
-            - rejected
-            - accepted
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        restaurantName:
-          type: string
-          description: Name of the restaurant associated with the video
-      required:
-        - id
-        - userId
-        - publicId
-        - secureUrl
-        - restaurantName
-        - phoneNumber
-        - network
-        - invoiceImage
-        - statusVideo
-    CreateVideoRequest:
-      type: object
-      properties:
-        publicId:
-          type: string
-          description: Cloudinary public ID of the video
-          maxLength: 255
-          example: yum_gott/videos/yum_gott_1752456506674
-        secureUrl:
-          type: string
-          format: uri
-          description: Secure URL of the uploaded video
-          maxLength: 255
-          example: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4'
-        phoneNumber:
-          type: string
-          description: Customer's phone number (10-15 digits)
-          pattern: '^[0-9]{10,15}$'
-          example: 0987654321
-        network:
-          type: string
-          enum:
-            - MTN
-            - Syriatel
-          description: Network provider
-          example: MTN
-        invoiceImage:
-          type: string
-          format: binary
-          description: 'Invoice image file (JPEG or PNG, max 5MB)'
-          example: (binary image file)
-        restaurantName:
-          type: string
-          description: Name of the restaurant associated with the video
-          example: Falafel Ala Kefk
-      required:
-        - publicId
-        - secureUrl
-        - phoneNumber
-        - network
-        - invoiceImage
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-      required:
-        - success
-        - message
   securitySchemes:
     cookieAuth:
       type: apiKey

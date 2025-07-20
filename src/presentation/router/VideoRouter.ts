@@ -33,7 +33,8 @@ export class VideoRouter {
         const controller = new VideoController(
             this.diContainer.resolve('createVideoUseCase'),
             this.diContainer.resolve('updateVideoUseCase'),
-            this.diContainer.resolve('deleteVideoUseCase')
+            this.diContainer.resolve('deleteVideoUseCase'),
+            this.diContainer.resolve('getVideosByCustomerUseCase')
         );
 
         this.router.post(
@@ -72,6 +73,12 @@ export class VideoRouter {
             '/:id',
             authMiddleware.authenticateUser,
             (req: AuthenticatedRequest, res: Response) => controller.deleteVideo(req, res)
+        );
+
+        this.router.get(
+            '/customer',
+            authMiddleware.authenticateUser,
+            (req: AuthenticatedRequest, res: Response) => controller.getVideosByCustomer(req, res)
         );
     }
 

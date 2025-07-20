@@ -95,7 +95,7 @@ export class VideoRepository implements IVideoRepository {
         return rows.length > 0 ? this.mapRowToVideoEntites(rows[0]) : null;
     }
 
-    async findByUserId(userId: string): Promise<Video[]> {
+    async findByCustomerId(userId: string): Promise<Video[]> {
         const query = 'SELECT * FROM videos WHERE user_id = $1';
         const { rows } = await this.db.query(query, [userId]);
         return rows.map(this.mapRowToVideoEntites);

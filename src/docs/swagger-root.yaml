@@ -63,6 +63,8 @@ paths:
     $ref: './paths-videos.yaml#/paths/~1api~1videos'
   /api/videos/{id}:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1{id}'
+  /api/videos/customer:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1customer'
 components:
   schemas:
     RegisterCustomerRequest:
@@ -593,99 +595,6 @@ components:
           type: string
           format: date-time
           example: "2025-01-01T00:00:00Z"
-    Video:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userId:
-          type: string
-          format: uuid
-        publicId:
-          type: string
-        secureUrl:
-          type: string
-          format: uri
-        phoneNumber:
-          type: string
-        network:
-          type: string
-          enum: [MTN, Syriatel]
-        invoiceImage:
-          type: string
-          format: uri
-        statusVideo:
-          type: string
-          enum: [pending, rejected, accepted]
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        restaurantName:
-          type: string
-          description: Name of the restaurant associated with the video
-      required:
-        - id
-        - userId
-        - publicId
-        - secureUrl
-        - restaurantName
-        - phoneNumber
-        - network
-        - invoiceImage
-        - statusVideo
-    CreateVideoRequest:
-      type: object
-      properties:
-        publicId:
-          type: string
-          description: Cloudinary public ID of the video
-          maxLength: 255
-          example: "yum_gott/videos/yum_gott_1752456506674"
-        secureUrl:
-          type: string
-          format: uri
-          description: Secure URL of the uploaded video
-          maxLength: 255
-          example: "https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4"
-        phoneNumber:
-          type: string
-          description: Customer's phone number (10-15 digits)
-          pattern: '^[0-9]{10,15}$'
-          example: "0987654321"
-        network:
-          type: string
-          enum: [MTN, Syriatel]
-          description: Network provider
-          example: "MTN"
-        invoiceImage:
-          type: string
-          format: binary
-          description: Invoice image file (JPEG or PNG, max 5MB)
-          example: "(binary image file)"
-        restaurantName:
-          type: string
-          description: Name of the restaurant associated with the video
-          example: "Falafel Ala Kefk"
-      required:
-        - publicId
-        - secureUrl
-        - phoneNumber
-        - network
-        - invoiceImage
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-      required:
-        - success
-        - message
   securitySchemes:
     cookieAuth:
       type: apiKey

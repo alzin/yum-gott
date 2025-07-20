@@ -178,6 +178,11 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('restaurantOwnerRepository')
     ));
 
+    container.registerTransient('getVideosByCustomerUseCase', () => new (require('@/application/use-cases/video/GetVideosByCustomerUseCase').GetVideosByCustomerUseCase)(
+        container.resolve('IVideoRepository'),
+        container.resolve('customerRepository')
+    ));
+
     // Logout, Refresh, Cleanup
     container.registerTransient('logoutUseCase', () => new LogoutUseCase(container.resolve('authRepository')));
     container.registerTransient('refreshTokenUseCase', () => new RefreshTokenUseCase(container.resolve('authRepository')));
