@@ -106,7 +106,7 @@ export class VideoController {
                 return;
             }
             await this.deleteVideoUseCase.execute(videoId, user.userId);
-            res.status(204).send();
+            res.status(200).json({ success: true, message: 'Video deleted successfully' });
         } catch (error) {
             const statusCode = error instanceof Error && error.message.includes('not found') ? 404 : 400;
             res.status(statusCode).json({ success: false, message: error instanceof Error ? error.message : 'Failed to delete video' });

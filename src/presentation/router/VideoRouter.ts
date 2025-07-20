@@ -32,7 +32,8 @@ export class VideoRouter {
         const authMiddleware = this.diContainer.authMiddleware;
         const controller = new VideoController(
             this.diContainer.resolve('createVideoUseCase'),
-            this.diContainer.resolve('updateVideoUseCase')
+            this.diContainer.resolve('updateVideoUseCase'),
+            this.diContainer.resolve('deleteVideoUseCase')
         );
 
         this.router.post(
@@ -65,6 +66,12 @@ export class VideoRouter {
             VideoValidators.updateVideo(),
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => controller.updateVideos(req, res)
+        );
+
+        this.router.delete(
+            '/:id',
+            authMiddleware.authenticateUser,
+            (req: AuthenticatedRequest, res: Response) => controller.deleteVideo(req, res)
         );
     }
 

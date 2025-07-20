@@ -161,6 +161,11 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('fileStorageService')
     ));
 
+    container.registerTransient('deleteVideoUseCase', () => new (require('@/application/use-cases/video/DeleteVideoUseCase').DeleteVideoUseCase)(
+        container.resolve('IVideoRepository'),
+        container.resolve('customerRepository')
+    ));
+
     container.registerTransient('getOpeningHoursUseCase', () => new GetopeningHoursUseCase(
         container.resolve('IOpeningHoursRepository'),
         container.resolve('restaurantOwnerRepository')
