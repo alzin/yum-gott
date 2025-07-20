@@ -1,10 +1,10 @@
-import { OpeningHours } from "@/domain/entities";
+import { OpeningHours , OpeningHoursPeriod } from "@/domain/entities";
 import { IOpeningHoursRepository, IRestaurantOwnerRepository } from "@/domain/repositories";
 
 export interface UpdateOpeningHoursRequest {
     id: string;
     day?: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
-    Working_hours?: { startTime: string; endTime: string }[];
+    Working_hours?: OpeningHoursPeriod[];
     isClosed?: boolean;
 }
 
