@@ -10,7 +10,7 @@ export interface UpdateVideoRequest {
     restaurantName: string;
     phoneNumber: string;
     network: Network;
-    invoiceImage: Express.Multer.File;
+    invoiceImage?: Express.Multer.File;
 }
 
 export interface UpdateVideoResponse {
@@ -69,7 +69,7 @@ export class UpdateVideoUseCase {
             phoneNumber,
             network,
             invoiceImage: invoiceImageUrl,
-            statusVideo: VideoStatus.PENDING, 
+            statusVideo: VideoStatus.PENDING,
             createdAt: existingVideo.createdAt,
             updatedAt: new Date()
         };
