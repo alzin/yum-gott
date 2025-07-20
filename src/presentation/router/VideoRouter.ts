@@ -31,7 +31,8 @@ export class VideoRouter {
     private setupRoutes(): void {
         const authMiddleware = this.diContainer.authMiddleware;
         const controller = new VideoController(
-            this.diContainer.resolve('createVideoUseCase')
+            this.diContainer.resolve('createVideoUseCase'),
+            this.diContainer.resolve('updateVideoUseCase')
         );
 
         this.router.post(
@@ -48,6 +49,22 @@ export class VideoRouter {
             VideoValidators.createVideo(),
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => controller.createVideo(req, res)
+        );
+
+        this.router.put(
+            '/:id',
+            authMiddleware.authenticateUser,
+            this.upload.single('invoiceImage'),
+            SanitizationMiddleware.allowedFields([
+                'publicId',
+                'secureUrl',
+                'restaurantName',
+                'phoneNumber',
+                'network'
+            ]),
+            VideoValidators.updateVideo(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: AuthenticatedRequest, res: Response) => controller.updateVideos(req, res)
         );
     }
 

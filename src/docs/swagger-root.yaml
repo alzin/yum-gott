@@ -61,6 +61,8 @@ paths:
     $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours~1{id}'
   /api/videos:
     $ref: './paths-videos.yaml#/paths/~1api~1videos'
+  /api/videos/{id}:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1{id}'
 components:
   schemas:
     RegisterCustomerRequest:

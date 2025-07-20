@@ -24,12 +24,17 @@ export class CreateVideoUseCase {
     ) { }
 
     async execute(request: CreateVideoRequest, userId: string): Promise<CreateVideoResponse> {
-        const { publicId, secureUrl,restaurantName, phoneNumber, network, invoiceImage } = request;
+        const { publicId, secureUrl, restaurantName, phoneNumber, network, invoiceImage } = request;
 
         // Validate customer exists
         const customer = await this.customerRepository.findById(userId);
         if (!customer) {
             throw new Error('Customer not found');
+        }
+
+        const existingVideo = await this.videoRepository.findBySecureUrl(secureUrl);
+        if (existingVideo) {
+            throw new Error(`Video with this secure URL already exists.`);
         }
 
         // Validate phone number format

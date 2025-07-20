@@ -70,76 +70,130 @@ paths:
               schema:
                 $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
   /api/videos/{id}:
-    get:
-      summary: Get a video by ID
-      description: Retrieve a video by its unique identifier.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Video found
-          content:
-            application/json:
-              schema:
-                $ref: './swagger-root.yaml#/components/schemas/Video'
-        '404':
-          description: Video not found
-          content:
-            application/json:
-              schema:
-                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
     put:
+      tags:
+        - Upload Videos
       summary: Update a video by ID
-      description: Update video details by its unique identifier.
+      description: Update video details by its unique identifier. Requires customer authentication. Invoice image is optional for updates.
+      security:
+        - cookieAuth: []
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+          description: The unique identifier of the video to update
+          example: "123e4567-e89b-12d3-a456-426614174000"
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: './swagger-root.yaml#/components/schemas/CreateVideoRequest'
+              type: object
+              required:
+                - publicId
+                - secureUrl
+                - restaurantName
+                - phoneNumber
+                - network
+              properties:
+                publicId:
+                  type: string
+                  description: Public ID of the video from Cloudinary
+                  example: "yum_gott/videos/yum_gott_1752456506674"
+                secureUrl:
+                  type: string
+                  format: uri
+                  description: Secure URL of the video from Cloudinary
+                  example: "https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4"
+                restaurantName:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                  description: Name of the restaurant
+                  example: "Falafel Ala Kefk"
+                phoneNumber:
+                  type: string
+                  pattern: '^[0-9]{10,15}$'
+                  description: Phone number (10-15 digits)
+                  example: "0987654321"
+                network:
+                  type: string
+                  enum: [MTN, Syriatel]
+                  description: Mobile network provider
+                  example: "MTN"
+                invoiceImage:
+                  type: string
+                  format: binary
+                  description: Invoice image file (JPEG/PNG, optional for updates)
+            examples:
+              sample:
+                value:
+                  publicId: "yum_gott/videos/yum_gott_1752456506674"
+                  secureUrl: "https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4"
+                  restaurantName: "Falafel Ala Kefk"
+                  phoneNumber: "0987654321"
+                  network: "MTN"
+                  invoiceImage: "(optional binary image file)"
       responses:
         '200':
           description: Video updated successfully
           content:
             application/json:
               schema:
-                $ref: './swagger-root.yaml#/components/schemas/Video'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: './swagger-root.yaml#/components/schemas/Video'
+              example:
+                success: true
+                message: "Video updated successfully"
+                data:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  userId: "123e4567-e89b-12d3-a456-426614174001"
+                  publicId: "yum_gott/videos/yum_gott_1752456506674"
+                  secureUrl: "https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456519/yum_gott/videos/yum_gott_1752456506674.mp4"
+                  restaurantName: "Falafel Ala Kefk"
+                  phoneNumber: "0987654321"
+                  network: "MTN"
+                  invoiceImage: "https://res.cloudinary.com/demo/image/upload/v1234567890/invoice.jpg"
+                  statusVideo: "pending"
+                  createdAt: "2025-01-01T00:00:00Z"
+                  updatedAt: "2025-01-01T00:00:00Z"
         '400':
-          description: Invalid input
+          description: Invalid input or validation error
           content:
             application/json:
               schema:
                 $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
-        '404':
-          description: Video not found
+              example:
+                success: false
+                message: "Phone number must be 10-15 digits"
+        '403':
+          description: Forbidden - Only customers can update videos
           content:
             application/json:
               schema:
                 $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
-    delete:
-      summary: Delete a video by ID
-      description: Delete a video by its unique identifier.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Video deleted successfully
+              example:
+                success: false
+                message: "Forbidden: Only customers can update videos"
         '404':
-          description: Video not found
+          description: Video not found or user not authorized
+          content:
+            application/json:
+              schema:
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Video not found"
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:

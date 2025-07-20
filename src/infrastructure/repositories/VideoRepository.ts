@@ -101,6 +101,12 @@ export class VideoRepository implements IVideoRepository {
         return rows.map(this.mapRowToVideoEntites);
     }
 
+    async findBySecureUrl(secureUrl: string): Promise<Video | null> {
+        const query = 'SELECT * FROM videos WHERE secure_url = $1';
+        const { rows } = await this.db.query(query, [secureUrl]);
+        return rows.length > 0 ? this.mapRowToVideoEntites(rows[0]) : null;
+    }
+
     private mapRowToVideoEntites(row: any): Video {
         return {
             id: row.id,
