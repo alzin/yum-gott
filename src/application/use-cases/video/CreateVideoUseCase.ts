@@ -37,11 +37,7 @@ export class CreateVideoUseCase {
             throw new Error(`Video with this secure URL already exists.`);
         }
 
-        // Validate phone number format
-        // if (!/^[0-9]{10,15}$/.test(phoneNumber)) {
-        //     throw new Error('Invalid phone number format');
-        // }
-
+    
         // Validate network
         if (!Object.values(Network).includes(network)) {
             throw new Error('Invalid network. Must be MTN or Syriatel');
