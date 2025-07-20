@@ -31,6 +31,64 @@ export class VideoRepository implements IVideoRepository {
         return this.mapRowToVideoEntites(rows[0]);
     }
 
+    async update(id: string, video: Partial<Video>): Promise<Video> {
+        const fields: string[] = [];
+        const values: any[] = [];
+        let index = 1;
+
+        // Field mapping: domain property -> database column
+        const fieldMappings: Record<string, string> = {
+            publicId: 'public_id',
+            secureUrl: 'secure_url',
+            restaurantName: 'restaurantName',
+            phoneNumber: 'phone_number',
+            network: 'network',
+            invoiceImage: 'invoice_image',
+            statusVideo: 'status_video'
+        };
+
+        // Helper function to add field if defined
+        const addFieldIfDefined = (property: keyof Video, dbColumn: string) => {
+            if (video[property] !== undefined) {
+                fields.push(`${dbColumn} = $${index}`);
+                values.push(video[property]);
+                index++;
+            }
+        };
+
+        // Add all defined fields
+        Object.entries(fieldMappings).forEach(([property, dbColumn]) => {
+            addFieldIfDefined(property as keyof Video, dbColumn);
+        });
+
+        // Always update timestamp
+        fields.push(`updated_at = $${index}`);
+        values.push(new Date());
+        index++;
+
+        // Add id for WHERE clause
+        values.push(id);
+
+        if (fields.length === 0) {
+            throw new Error('No fields to update');
+        }
+
+        const query = `
+            UPDATE videos 
+            SET ${fields.join(', ')}
+            WHERE id = $${index}
+            RETURNING *
+        `;
+
+        const { rows } = await this.db.query(query, values);
+
+        if (rows.length === 0) {
+            throw new Error('Video not found for update');
+        }
+
+        return this.mapRowToVideoEntites(rows[0]);
+    }
+
     async findById(id: string): Promise<Video | null> {
         const query = 'SELECT * FROM videos WHERE id = $1';
         const { rows } = await this.db.query(query, [id]);
