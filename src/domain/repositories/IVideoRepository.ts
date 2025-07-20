@@ -5,4 +5,5 @@ export interface IVideoRepository {
     findById(id: string): Promise<Video | null>;
     findByUserId(userId: string): Promise<Video[]>;
     findBySecureUrl(secureUrl: string): Promise<Video | null>;
+    delete(id: string): Promise<void>;
 }
