@@ -6,11 +6,9 @@ import YAML from 'yamljs';
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
-import { AuthRouter } from './presentation/router/AuthRouter';
+import { AuthRouter, CategoryRouter, OpeningHoursRouter, ProductRouter, VideoRouter } from './presentation/router/index';
 import path from "path";
-import { ProductRouter } from './presentation/router/ProductRouter';
-import { CategoryRouter } from './presentation/router/CategoryRouter';
-import { CleanupUnverifiedAccounts } from './infrastructure/services/CleanupUnverifiedAccounts';
+// import { CleanupUnverifiedAccounts } from './infrastructure/services/CleanupUnverifiedAccounts';
 
 export class App {
   private app: Application;
@@ -71,7 +69,6 @@ export class App {
 
 
   private setupRoutes(): void {
-    // Health check
     this.app.get('/health', (req: Request, res: Response) => {
       res.status(200).json({
         status: 'OK',
@@ -80,19 +77,22 @@ export class App {
       });
     });
 
-    // API routes
     const authRouter = new AuthRouter();
     this.app.use('/api/auth', authRouter.getRouter());
 
-
     const categoryRouter = new CategoryRouter();
     this.app.use('/api/categories', categoryRouter.getRouter());
-    // API Product
 
     const productRouter = new ProductRouter();
     this.app.use('/api/products', productRouter.getRouter());
 
-    // 404 handler - must be after all other routes
+    const openingHoursRouter = new OpeningHoursRouter();
+    this.app.use('/api/opening-hours', openingHoursRouter.getRouter());
+
+
+    const videoRouter = new VideoRouter();
+    this.app.use('/api/videos',videoRouter.getRouter())
+
     this.app.use((req: Request, res: Response) => {
       res.status(404).json({
         success: false,
@@ -102,7 +102,6 @@ export class App {
   }
 
   private setupErrorHandling(): void {
-    // Global error handler
     this.app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
       console.error('Global Error Handler:', error);
 
@@ -114,8 +113,6 @@ export class App {
     });
   }
 
-
-  // Helper to get local IP
   private getLocalIpAddress(): string {
     const os = require('os');
     const interfaces = os.networkInterfaces();

@@ -1,0 +1,604 @@
+paths:
+  /api/products:
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      description: Creates a new product for a restaurant owner.
+      operationId: createProduct
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  description: Name of the category. If the category does not exist, it will be created automatically.
+                  example: "Main Course"
+                productName:
+                  type: string
+                  description: Name of the product
+                  example: "Margherita Pizza"
+                description:
+                  type: string
+                  description: Product description
+                  example: "Classic pizza with tomato sauce and mozzarella"
+                price:
+                  type: number
+                  description: Base price of the product
+                  example: 100
+                discount:
+                  type: number
+                  description: Discount percentage
+                  example: 10
+                sizeOptions:
+                  type: object
+                  description: Optional array of size options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]').
+                  example: '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]'
+                image:
+                  type: string
+                  format: binary
+                  description: Product image file (JPEG or PNG)
+                options:
+                  type: object
+                  description: >
+                    Optional array of product options (as JSON string). Each option can include name, required, and values (array of {name, additionalPrice}). Do NOT send id when creating new options/values; it will be generated automatically.
+                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5}]}]'
+              required:
+                - categoryName
+                - productName
+                - description
+                - price
+                - image
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product created successfully"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid input"
+  /api/products/restaurant:
+    get:
+      tags:
+        - Products
+      summary: Get all products for a restaurant
+      description: Retrieves all products belonging to the authenticated restaurant owner.
+      operationId: getProductsByRestaurant
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Get All Products successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: "./swagger-root.yaml#/components/schemas/ProductResponse"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+  /api/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get a product by ID
+      description: Retrieves a specific product by its ID.
+      operationId: getProduct
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the product to retrieve
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Get Product successfully"
+                  data:
+                    $ref: "./swagger-root.yaml#/components/schemas/ProductResponse"
+        "404":
+          $ref: "./swagger-root.yaml#/components/responses/NotFoundError"
+    put:
+      tags:
+        - Products
+      summary: Update a product
+      description: Updates an existing product for a restaurant owner.
+      operationId: updateProduct
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  description: Name of the category. If the category does not exist, it will be created automatically.
+                  example: "Main Course"
+                productName:
+                  type: string
+                  description: Name of the product
+                  example: "Margherita Pizza"
+                description:
+                  type: string
+                  description: Product description
+                  example: "Classic pizza with tomato sauce and mozzarella"
+                price:
+                  type: number
+                  description: Base price of the product
+                  example: 100
+                discount:
+                  type: number
+                  description: Discount percentage
+                  example: 10
+                sizeOptions:
+                  type: object
+                  description: Optional array of size options. In multipart/form-data, must be a JSON string (e.g., '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]').
+                  example: '[{"name":"Medium","additionalPrice":50},{"name":"Large","additionalPrice":70}]'
+                image:
+                  type: string
+                  format: binary
+                  description: Product image file (JPEG or PNG)
+                options:
+                  type: object
+                  description: >
+                    Optional array of product options (as JSON string). Each option can include name, required, and values (array of {name, additionalPrice}). Do NOT send id when creating new options/values; it will be generated automatically.
+                  example: '[{"name":"Toppings","required":true,"values":[{"name":"Extra Cheese","additionalPrice":2.5}]}]'
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product updated successfully"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid input"
+    delete:
+      tags:
+        - Products
+      summary: Delete a product
+      description: Allows authenticated restaurant owners to delete a product.
+      operationId: deleteProduct
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the product to delete
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product deleted successfully"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+        "404":
+          $ref: "./swagger-root.yaml#/components/responses/NotFoundError"
+
+  /api/products/{productId}/options:
+    post:
+      tags:
+        - Product Options
+      summary: Create a product option
+      description: Allows authenticated restaurant owners to create a new option for a product.
+      operationId: createProductOption
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the product to add an option to
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Toppings"
+              required:
+                - name
+      responses:
+        "201":
+          description: Product option created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option created successfully"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+    get:
+      tags:
+        - Product Options
+      summary: Get product options
+      description: Retrieves all options and their values for a specific product.
+      operationId: getProductOptions
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the product to retrieve options for
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product options retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product options retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "Toppings"
+                        values:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: "Extra Cheese"
+                              additionalPrice:
+                                type: number
+                                example: 2.50
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/products/options/{optionId}/values:
+    post:
+      tags:
+        - Product Options
+      summary: Create a product option value
+      description: Allows authenticated restaurant owners to create a new value for a product option.
+      operationId: createProductOptionValue
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: optionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the option to add a value to
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Extra Cheese"
+                additionalPrice:
+                  type: number
+                  example: 2.50
+              required:
+                - name
+      responses:
+        "201":
+          description: Product option value created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option value created successfully"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/products/options/{optionId}:
+    delete:
+      tags:
+        - Product Options
+      summary: Delete a product option
+      description: Allows authenticated restaurant owners to delete a product option and its associated values.
+      operationId: deleteProductOption
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: optionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the option to delete
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product option deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option deleted successfully"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/products/option-values/{valueId}:
+    delete:
+      tags:
+        - Product Options
+      summary: Delete a product option value
+      description: Allows authenticated restaurant owners to delete a product option value.
+      operationId: deleteProductOptionValue
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: valueId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The ID of the option value to delete
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Product option value deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product option value deleted successfully"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/categories:
+    post:
+      tags:
+        - Categories
+      summary: Create a new category
+      description: Allows restaurant owners to create a new category for their products.
+      operationId: createCategory
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                  example: "Main Course"
+      responses:
+        "201":
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Category created successfully"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: "550e8400-e29b-41d4-a716-446655440000"
+                      name:
+                        type: string
+                        example: "Main Course"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/categories/restaurant:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories for a restaurant
+      description: Retrieves all categories belonging to the authenticated restaurant owner.
+      operationId: getCategoriesByRestaurant
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Categories retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
+                        name:
+                          type: string
+                          example: "Main Course"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"

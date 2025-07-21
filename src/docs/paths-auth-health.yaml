@@ -1,0 +1,460 @@
+openapi: 3.0.3
+info:
+  title: Yum-Gott Platform API
+  description: API for the Yum-Gott platform, supporting customer and restaurant owner authentication, profile management, product management, and category management.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://yum-gott.onrender.com
+    description: Production server
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Health check endpoint
+      description: Check if the API server is running and healthy
+      operationId: checkHealth
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-06-22T18:46:00Z"
+                  uptime:
+                    type: number
+                    description: Server uptime in seconds
+                    example: 3600.5
+
+  /api/auth/register/customer:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new customer
+      description: Initiates customer registration by storing details and sending a verification email.
+      operationId: registerCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./swagger-root.yaml#/components/schemas/RegisterCustomerRequest"
+            examples:
+              validCustomer:
+                summary: Valid customer registration
+                value:
+                  name: "Ahmed Mohamed"
+                  email: "ahmed@example.com"
+                  mobileNumber: "01234567890"
+                  password: "SecurePass123"
+      responses:
+        "201":
+          description: Customer registration initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Registration successful. Please check your email for verification link."
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
+  /api/auth/register/restaurant-owner:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new restaurant owner
+      description: Initiates restaurant owner registration by storing details and sending a verification email.
+      operationId: registerRestaurantOwner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./swagger-root.yaml#/components/schemas/RegisterRestaurantOwnerRequest"
+            examples:
+              validOwner:
+                summary: Valid restaurant owner registration
+                value:
+                  restaurantName: "Tasty Bites"
+                  organizationNumber: "ORG123456"
+                  email: "owner@example.com"
+                  mobileNumber: "09876543210"
+                  password: "SecurePass123"
+      responses:
+        "201":
+          description: Restaurant owner registration initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant owner registration successful. Please check your email for verification link."
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
+  /api/auth/verify:
+    get:
+      tags:
+        - Authentication
+      summary: Verify email address
+      description: Verifies a user's email using a token sent in the verification email.
+      operationId: verifyEmail
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Verification token sent to the user's email
+          example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Email verified successfully. You can now login."
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        oneOf:
+                          - $ref: "./swagger-root.yaml#/components/schemas/CustomerResponse"
+                          - $ref: "./swagger-root.yaml#/components/schemas/RestaurantOwnerResponse"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
+  /api/auth/login/customer:
+    post:
+      tags:
+        - Authentication
+      summary: Customer login
+      description: Authenticate a customer using email and password. Returns JWT tokens as HTTP-only cookies.
+      operationId: loginCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./swagger-root.yaml#/components/schemas/LoginRequest"
+            examples:
+              loginWithEmail:
+                summary: Login with email
+                value:
+                  email: "ahmed@example.com"
+                  password: "SecurePass123"
+      responses:
+        "200":
+          description: Customer login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Customer login successful"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "429":
+          $ref: "./swagger-root.yaml#/components/responses/TooManyRequestsError"
+
+  /api/auth/login/restaurant-owner:
+    post:
+      tags:
+        - Authentication
+      summary: Restaurant owner login
+      description: Authenticate a restaurant owner using email and password. Returns JWT tokens as HTTP-only cookies.
+      operationId: loginRestaurantOwner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./swagger-root.yaml#/components/schemas/LoginRequest"
+            examples:
+              loginWithEmail:
+                summary: Login with email
+                value:
+                  email: "owner@example.com"
+                  password: "SecurePass123"
+      responses:
+        "200":
+          description: Restaurant owner login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant owner login successful"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "429":
+          $ref: "./swagger-root.yaml#/components/responses/TooManyRequestsError"
+
+  /api/auth/profile/restaurant-owner:
+    get:
+      tags:
+        - Authentication
+      summary: Get restaurant owner profile
+      description: Retrieve the restaurant name and profile image URL for the authenticated restaurant owner
+      operationId: getRestaurantOwnerProfile
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Restaurant owner profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      restaurantName:
+                        type: string
+                        example: "Gourmet Delight"
+                      profileImageUrl:
+                        type: string
+                        nullable: true
+                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/123.jpg"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/auth/profile/image:
+    post:
+      tags:
+        - Authentication
+      summary: Upload profile image
+      description: Allows authenticated customers or restaurant owners to upload a profile image, stored in AWS S3.
+      operationId: uploadProfileImage
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profileImage:
+                  type: string
+                  format: binary
+              required:
+                - profileImage
+      responses:
+        "200":
+          description: Profile image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profile image uploaded successfully"
+                  data:
+                    type: object
+                    properties:
+                      profileImageUrl:
+                        type: string
+                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/auth/location/restaurant:
+    post:
+      tags:
+        - Authentication
+      summary: Update restaurant location
+      description: Allows authenticated restaurant owners to update their restaurant's address and coordinates.
+      operationId: updateRestaurantLocation
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./swagger-root.yaml#/components/schemas/UpdateRestaurantLocationRequest"
+      responses:
+        "200":
+          description: Restaurant location updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Restaurant location updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                        example: "123 Food Street, City"
+                      latitude:
+                        type: number
+                        example: 40.7128
+                      longitude:
+                        type: number
+                        example: -74.0060
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+
+  /api/auth/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: |
+        Refreshes the access token using the refresh token provided in the HTTP-only cookie.
+        This endpoint should be called when the access token is expired or about to expire.
+        The request must include the `refreshToken` and `accessToken` cookies.
+      operationId: refreshToken
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Token refreshed successfully. New tokens are set in HTTP-only cookies.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Token refreshed successfully"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=...; refreshToken=...;
+        "401":
+          description: Unauthorized. The refresh token is invalid, expired, or not provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid or expired refresh token"
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidates the refresh token and clears authentication cookies.
+      operationId: logout
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Logout successful"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"

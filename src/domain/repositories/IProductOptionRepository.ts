@@ -5,5 +5,5 @@ export interface IProductOptionRepository {
     findByProductId(productId: string): Promise<ProductOption[]>;
     update(optionId: string, updates: Partial<ProductOption>): Promise<ProductOption>
     delete(optionId: string): Promise<void>;
-    existsByNameAndProductId(name: string, productId: string): Promise<boolean>;
+    checkExistsByNameAndProductId(name: string, productId: string): Promise<boolean>;
 }

@@ -18,6 +18,8 @@ async function setupAndMigrateDatabase() {
       path.join(__dirname, 'migrations', 'create_invalidated_tokens_table.sql'),
       path.join(__dirname, 'migrations', 'create_refresh_tokens_table.sql'),
       path.join(__dirname, 'migrations', 'create_categories_table.sql'),
+      path.join(__dirname, 'migrations', 'create_opening_hours_table.sql'),
+      path.join(__dirname, 'migrations', 'create_videos_table.sql'),
 
     ];
 

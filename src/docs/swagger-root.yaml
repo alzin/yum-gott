@@ -1,0 +1,672 @@
+openapi: 3.0.3
+info:
+  title: Yum-Gott Platform API
+  description: API for the Yum-Gott platform, supporting customer and restaurant owner authentication, profile management, product management, and category management.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://yum-gott.onrender.com
+    description: Production server
+paths:
+  # Include paths from paths-auth-health.yaml
+  /health:
+    $ref: './paths-auth-health.yaml#/paths/~1health'
+  /api/auth/register/customer:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1register~1customer'
+  /api/auth/register/restaurant-owner:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1register~1restaurant-owner'
+  /api/auth/login/customer:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1customer'
+  /api/auth/login/restaurant-owner:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1restaurant-owner'
+  /api/auth/verify:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1verify'
+  /api/auth/profile/restaurant-owner:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1profile~1restaurant-owner'
+  /api/auth/profile/image:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1profile~1image'
+  /api/auth/location/restaurant:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1location~1restaurant'
+  /api/auth/refresh-token:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1refresh-token'
+  /api/auth/logout:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1logout'
+  # Include paths from paths-products-categories.yaml
+
+  /api/products:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products'
+  /api/products/restaurant:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products~1restaurant'
+  /api/products/{id}:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products~1{id}'
+  /api/products/{productId}/options:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products~1{productId}~1options'
+  /api/products/options/{optionId}:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products~1options~1{optionId}'
+  /api/products/option-values/{valueId}:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products~1option-values~1{valueId}'
+  /api/products/options/{optionId}/values:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1products~1options~1{optionId}~1values'
+  /api/categories:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1categories'
+  /api/categories/restaurant:
+    $ref: './paths-products-categories.yaml#/paths/~1api~1categories~1restaurant'
+  /api/opening-hours:
+    $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours'
+  /api/opening-hours/restaurant:
+    $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours~1restaurant'
+  /api/opening-hours/{id}:
+    $ref: './paths-opening-hours.yaml#/paths/~1api~1opening-hours~1{id}'
+  /api/videos:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos'
+  /api/videos/{id}:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1{id}'
+  /api/videos/customer:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1customer'
+components:
+  schemas:
+    RegisterCustomerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Ahmed Mohamed"
+        email:
+          type: string
+          example: "ahmed@example.com"
+        mobileNumber:
+          type: string
+          example: "01234567890"
+        password:
+          type: string
+          example: "SecurePass123"
+      required:
+        - name
+        - email
+        - mobileNumber
+        - password
+    RegisterRestaurantOwnerRequest:
+      type: object
+      properties:
+        restaurantName:
+          type: string
+          example: "Tasty Bites"
+        organizationNumber:
+          type: string
+          example: "ORG12345"
+        email:
+          type: string
+          example: "owner@example.com"
+        mobileNumber:
+          type: string
+          example: "01234567890"
+        password:
+          type: string
+          example: "SecurePass123"
+      required:
+        - restaurantName
+        - organizationNumber
+        - email
+        - mobileNumber
+        - password
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        password:
+          type: string
+          example: "SecurePass123"
+      required:
+        - email
+        - password
+    UpdateRestaurantLocationRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          example: "123 Main St, Cairo"
+        latitude:
+          type: number
+          example: 30.0444
+        longitude:
+          type: number
+          example: 31.2357
+      required:
+        - address
+        - latitude
+        - longitude
+    RestaurantOwner:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        restaurantName:
+          type: string
+          example: "Tasty Bites"
+        organizationNumber:
+          type: string
+          example: "ORG12345"
+        email:
+          type: string
+          example: "owner@example.com"
+        mobileNumber:
+          type: string
+          example: "01234567890"
+        isEmailVerified:
+          type: boolean
+          example: true
+        address:
+          type: string
+          example: "123 Main St, Cairo"
+        latitude:
+          type: number
+          example: 30.0444
+        longitude:
+          type: number
+          example: 31.2357
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: number
+          example: 86400
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Main Dishes"
+        restaurantId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Chicken Shawarma"
+        description:
+          type: string
+          example: "Delicious chicken shawarma with garlic sauce"
+        price:
+          type: number
+          example: 50
+        discount:
+          type: number
+          example: 10
+        imageUrl:
+          type: string
+          example: "https://example.com/image.jpg"
+        categoryId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        restaurantId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    CreateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Main Dishes"
+      required:
+        - name
+    CreateProductRequest:
+      type: object
+      properties:
+        categoryName:
+          type: string
+          example: "Main Dishes"
+        productName:
+          type: string
+          example: "Chicken Shawarma"
+        description:
+          type: string
+          example: "Delicious chicken shawarma with garlic sauce"
+        price:
+          type: number
+          example: 50
+        discount:
+          type: number
+          example: 10
+        sizeOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                enum: ["Small", "Medium", "Large"]
+              additionalPrice:
+                type: number
+                example: 0
+        image:
+          type: string
+          format: binary
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Toppings"
+              required:
+                type: boolean
+                example: false
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Extra Cheese"
+                    additionalPrice:
+                      type: number
+                      example: 5
+      required:
+        - categoryName
+        - productName
+        - description
+        - price
+        - image
+    UpdateProductRequest:
+      type: object
+      properties:
+        categoryName:
+          type: string
+          example: "Main Dishes"
+        productName:
+          type: string
+          example: "Chicken Shawarma"
+        description:
+          type: string
+          example: "Updated description"
+        price:
+          type: number
+          example: 55
+        discount:
+          type: number
+          example: 15
+        sizeOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                enum: ["Small", "Medium", "Large"]
+              additionalPrice:
+                type: number
+                example: 0
+        image:
+          type: string
+          format: binary
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Toppings"
+              required:
+                type: boolean
+                example: false
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Extra Cheese"
+                    additionalPrice:
+                      type: number
+                      example: 5
+      required:
+        - categoryName
+        - productName
+        - description
+        - price
+        - image
+    ProductOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Toppings"
+        required:
+          type: boolean
+          example: false
+        productId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    ProductOptionValue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Extra Cheese"
+        additionalPrice:
+          type: number
+          example: 5
+        optionId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    CreateProductOptionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Toppings"
+        required:
+          type: boolean
+          example: false
+      required:
+        - name
+        - required
+    CreateProductOptionValueRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Extra Cheese"
+        additionalPrice:
+          type: number
+          example: 5
+      required:
+        - name
+        - additionalPrice
+    CustomerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Ahmed Mohamed"
+        email:
+          type: string
+          example: "ahmed@example.com"
+        mobileNumber:
+          type: string
+          example: "01234567890"
+        isEmailVerified:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+
+    RestaurantOwnerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        restaurantName:
+          type: string
+          example: "Tasty Bites"
+        organizationNumber:
+          type: string
+          example: "ORG12345"
+        email:
+          type: string
+          example: "owner@example.com"
+        mobileNumber:
+          type: string
+          example: "01234567890"
+        isEmailVerified:
+          type: boolean
+          example: true
+        address:
+          type: string
+          example: "123 Main St, Cairo"
+        latitude:
+          type: number
+          example: 30.0444
+        longitude:
+          type: number
+          example: 31.2357
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Chicken Shawarma"
+        description:
+          type: string
+          example: "Delicious chicken shawarma with garlic sauce"
+        price:
+          type: number
+          example: 50
+        discount:
+          type: number
+          example: 10
+        imageUrl:
+          type: string
+          example: "https://example.com/image.jpg"
+        categoryId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        restaurantId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        categoryName:
+          type: string
+          example: "Main Dishes"
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductOptionWithValue'
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+
+    ProductOptionWithValue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Toppings"
+        required:
+          type: boolean
+          example: false
+        productId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductOptionValue'
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
+  responses:
+    BadRequestError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Bad request"
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Unauthorized"
+    ForbiddenError:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Forbidden"
+    NotFoundError:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Not found"
+    TooManyRequestsError:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Too many requests, please try again later"
+              retryAfter:
+                type: number
+                description: "Number of seconds to wait before making another request"
+                example: 60

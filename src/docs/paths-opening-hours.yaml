@@ -1,0 +1,349 @@
+paths:
+  /api/opening-hours:
+    post:
+      tags:
+        - Opening Hours
+      summary: Create opening hours for a restaurant
+      description: Allows restaurant owners to define one or more Working_hours per day (e.g., morning and evening shifts) in a single request.
+      operationId: createOpeningHours
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - day
+                - isClosed
+                - Working_hours
+              properties:
+                day:
+                  type: string
+                  enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+                  example: Monday
+                Working_hours:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startTime:
+                        type: string 
+                        format: time
+                        example: "08:00:00"
+                      endTime:
+                        type: string
+                        format: time
+                        example: "12:00:00"
+                  example:
+                    - startTime: "08:00:00"
+                      endTime: "12:00:00"
+                    - startTime: "14:00:00"
+                      endTime: "18:00:00"
+                isClosed:
+                  type: boolean
+                  example: false
+            examples:
+              multipleWorkingHours:
+                summary: Multiple working hours in one request
+                value:
+                  day: Monday
+                  Working_hours:
+                    - startTime: "08:00:00"
+                      endTime: "12:00:00"
+                    - startTime: "14:00:00"
+                      endTime: "18:00:00"
+                  isClosed: false
+      responses:
+        "201":
+          description: Opening hours created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Opening hours created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      restaurantOwnerId:
+                        type: string
+                        format: uuid
+                      day:
+                        type: string
+                        example: Monday
+                      Working_hours:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            startTime:
+                              type: string
+                              format: time
+                              example: "08:00:00"
+                            endTime:
+                              type: string
+                              format: time
+                              example: "12:00:00"
+                        example:
+                          - startTime: "08:00:00"
+                            endTime: "12:00:00"
+                          - startTime: "14:00:00"
+                            endTime: "18:00:00"
+                      isClosed:
+                        type: boolean
+                        example: false
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+  /api/opening-hours/restaurant:
+    get:
+      tags:
+        - Opening Hours
+      summary: Get opening hours for a restaurant
+      description: Retrieves all opening hours for the authenticated restaurant owner. Each day will have an array of Working_hours.
+      operationId: getOpeningHours
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Opening hours retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Opening hours retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        restaurantOwnerId:
+                          type: string
+                          format: uuid
+                        day:
+                          type: string
+                          example: Monday
+                        Working_hours:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              startTime:
+                                type: string
+                                format: time
+                                example: "08:00:00"
+                              endTime:
+                                type: string
+                                format: time
+                                example: "12:00:00"
+                          example:
+                            - startTime: "08:00:00"
+                              endTime: "12:00:00"
+                            - startTime: "14:00:00"
+                              endTime: "18:00:00"
+                        isClosed:
+                          type: boolean
+                          example: false
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+              examples:
+                multipleWorkingHours:
+                  summary: Multiple working hours for the same day
+                  value:
+                    success: true
+                    message: Opening hours retrieved successfully
+                    data:
+                      - id: "uuid-1"
+                        restaurantOwnerId: "uuid-owner"
+                        day: Monday
+                        Working_hours:
+                          - startTime: "08:00:00"
+                            endTime: "12:00:00"
+                          - startTime: "14:00:00"
+                            endTime: "18:00:00"
+                        isClosed: false
+                        createdAt: "2025-01-01T00:00:00Z"
+                        updatedAt: "2025-01-01T00:00:00Z"
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+  /api/opening-hours/{id}:
+    delete:
+      tags:
+        - Opening Hours
+      summary: Delete a working hour entry
+      description: Deletes a working hour entry by its id. Only the restaurant owner can delete their own entries.
+      operationId: deleteOpeningHours
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the working hour entry to delete
+      responses:
+        "200":
+          description: Opening hours deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Opening hours deleted successfully
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    put:
+      tags:
+        - Opening Hours
+      summary: Update opening hours
+      description: Updates an existing opening hours entry for a restaurant owner.
+      operationId: updateOpeningHours
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the opening hours entry to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                day:
+                  type: string
+                  enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+                  example: Monday
+                Working_hours:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startTime:
+                        type: string
+                        format: time
+                        example: "08:00:00"
+                      endTime:
+                        type: string
+                        format: time
+                        example: "12:00:00"
+                  example:
+                    - startTime: "08:00:00"
+                      endTime: "12:00:00"
+                    - startTime: "14:00:00"
+                      endTime: "18:00:00"
+                isClosed:
+                  type: boolean
+                  example: false
+            examples:
+              updateExample:
+                summary: Update opening hours for a day
+                value:
+                  day: Monday
+                  Working_hours:
+                    - startTime: "09:00:00"
+                      endTime: "13:00:00"
+                  isClosed: false
+      responses:
+        "200":
+          description: Opening hours updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Opening hours updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      restaurantOwnerId:
+                        type: string
+                        format: uuid
+                      day:
+                        type: string
+                        example: Monday
+                      Working_hours:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            startTime:
+                              type: string
+                              format: time
+                              example: "09:00:00"
+                            endTime:
+                              type: string
+                              format: time
+                              example: "13:00:00"
+                        example:
+                          - startTime: "09:00:00"
+                            endTime: "13:00:00"
+                      isClosed:
+                        type: boolean
+                        example: false
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
