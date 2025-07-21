@@ -1,6 +1,5 @@
 import { DIContainer } from '../DIContainer';
-import { CustomerRepository, RestaurantOwnerRepository, AuthRepository, CategoryRepository, ProductRepository, ProductOptionRepository, ProductOptionValueRepository, OpeningHoursRepository } from '../../repositories';
-import { VideoRepository } from '../../repositories/VideoRepository';
+import { VideoRepository, CustomerRepository, RestaurantOwnerRepository, AuthRepository, CategoryRepository, ProductRepository, ProductOptionRepository, ProductOptionValueRepository, OpeningHoursRepository } from '../../repositories';
 import { DatabaseConnection } from '../../database/DataBaseConnection';
 
 export function registerRepositories(container: DIContainer) {
@@ -16,10 +15,7 @@ export function registerRepositories(container: DIContainer) {
         return new RestaurantOwnerRepository(container.resolve('databaseConnection'));
     });
 
-    container.registerSingleton('authRepository', () => {
-        return new AuthRepository();
-    });
-
+    container.registerSingleton('authRepository', () => { return new AuthRepository(); });
     container.registerSingleton('ICategoryRepository', () => new CategoryRepository(container.resolve('databaseConnection')));
     container.registerSingleton('IProductRepository', () => new ProductRepository((container.resolve('databaseConnection') as DatabaseConnection).getPool()));
     container.registerSingleton('productOptionRepository', () => new ProductOptionRepository(container.resolve('databaseConnection')));

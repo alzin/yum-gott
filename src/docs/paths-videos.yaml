@@ -90,24 +90,30 @@ paths:
                 publicId:
                   type: string
                   description: Public ID of the video
+                  example: yum_gott/videos/yum_gott_1752456506674
                 secureUrl:
                   type: string
                   format: uri
                   description: Secure URL of the video
+                  example: https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456506674/yum_gott/videos/yum_gott_1752456506674.mp4
                 restaurantName:
                   type: string
                   description: Name of the restaurant
+                  example: Falafel Ala Kefk
                 phoneNumber:
                   type: string
                   description: Phone number associated with the video
+                  example: '2054353'
                 network:
                   type: string
                   enum: [MTN, Syriatel]
                   description: Network provider
+                  example: MTN
                 invoiceImage:
                   type: string
                   format: binary
                   description: Invoice image file (JPEG or PNG)
+                  example: invoice.jpg
               required:
                 - publicId
                 - secureUrl
@@ -175,24 +181,30 @@ paths:
                 publicId:
                   type: string
                   description: Public ID of the video
+                  example: yum_gott/videos/yum_gott_1752456506674
                 secureUrl:
                   type: string
                   format: uri
                   description: Secure URL of the video
+                  example: https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456506674/yum_gott/videos/yum_gott_1752456506674.mp4
                 restaurantName:
                   type: string
                   description: Name of the restaurant
+                  example: Falafel Ala Kefk
                 phoneNumber:
                   type: string
                   description: Phone number associated with the video
+                  example: '2054353'
                 network:
                   type: string
                   enum: [MTN, Syriatel]
                   description: Network provider
+                  example: MTN
                 invoiceImage:
                   type: string
                   format: binary
                   description: Invoice image file (JPEG or PNG, optional)
+                  example: invoice.jpg
               required:
                 - publicId
                 - secureUrl
