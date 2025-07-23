@@ -27,7 +27,7 @@ export class verifyEmail {
                     success: true,
                     message: 'Email verified successfully. You can now login.'
                 });
-            } catch (customerError) {
+            } catch (error) {
                 await restaurantOwnerRepo.verifyEmail(token);
                 res.status(200).json({
                     success: true,
