@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, Request } from 'express';
 import { VideoController } from '../controller/video/VideoController';
 import { AuthenticatedRequest, SanitizationMiddleware, ValidationMiddleware } from '../middleware';
 import { VideoValidators } from '../validators/VideoValidators';
@@ -34,7 +34,7 @@ export class VideoRouter {
             this.diContainer.resolve('createVideoUseCase'),
             this.diContainer.resolve('updateVideoUseCase'),
             this.diContainer.resolve('deleteVideoUseCase'),
-            this.diContainer.resolve('getVideosByCustomerUseCase')
+            this.diContainer.resolve('getAcceptedVideosUseCase')
         );
 
         this.router.post(
@@ -76,9 +76,9 @@ export class VideoRouter {
         );
 
         this.router.get(
-            '/customer',
+            '/accepted',
             authMiddleware.authenticateUser,
-            (req: AuthenticatedRequest, res: Response) => controller.getVideosByCustomer(req, res)
+            (req: AuthenticatedRequest, res: Response) => controller.getAcceptedVideos(req, res)
         );
     }
 

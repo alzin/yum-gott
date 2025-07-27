@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase, GetVideosByCustomerUseCase } from '@/application/use-cases/video/index';
+import { CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase, GetAcceptedVideosUseCase } from '@/application/use-cases/video/index';
 import { AuthenticatedRequest } from '@/presentation/middleware/AuthMiddleware';
 
 export class VideoController {
@@ -7,7 +7,7 @@ export class VideoController {
         private createVideoUseCase: CreateVideoUseCase,
         private updateVideoUseCase: UpdateVideoUseCase,
         private deleteVideoUseCase: DeleteVideoUseCase,
-        private getVideosByCustomerUseCase: GetVideosByCustomerUseCase
+        private getAcceptedVideosUseCase: GetAcceptedVideosUseCase
     ) { }
 
     async createVideo(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -114,34 +114,14 @@ export class VideoController {
         }
     }
 
-    async getVideosByCustomer(req: AuthenticatedRequest, res: Response): Promise<void> {
+    async getAcceptedVideos(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const user = req.user;
-            if (!user || user.userType !== 'customer') {
-                res.status(403).json({
-                    success: false,
-                    message: 'Forbidden: Only customers can access their videos'
-                });
-                return;
-            }
-
-            const request = {
-                customerId: user.userId
-            };
-
-            const videos = await this.getVideosByCustomerUseCase.execute(request);
-
-            res.status(200).json({
-                success: true,
-                message: 'Videos retrieved successfully',
-                data: videos
-            });
+            const videos = await this.getAcceptedVideosUseCase.execute();
+            res.status(200).json({ success: true, message: 'Videos retrieved successfully', data: videos });
         } catch (error) {
-            const statusCode = error instanceof Error && error.message.includes('not found') ? 404 : 400;
-            res.status(statusCode).json({
-                success: false,
-                message: error instanceof Error ? error.message : 'Failed to retrieve videos'
-            });
+            res.status(400).json({ success: false, message: error instanceof Error ? error.message : 'Failed to retrieve accepted videos' });
         }
     }
+
+
 }

@@ -305,28 +305,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api/videos/customer:
+  /api/videos/accepted:
     get:
-      summary: Get all videos by customer ID
+      summary: Get all videos with accepted status
       tags:
         - Videos
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Videos retrieved successfully
+          description: Accepted videos retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/VideosResponse'
         '400':
-          description: Bad request (e.g., customer not found)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '403':
-          description: Forbidden (only customers can access their videos)
+          description: Bad request
           content:
             application/json:
               schema:

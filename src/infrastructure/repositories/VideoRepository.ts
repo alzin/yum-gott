@@ -1,4 +1,4 @@
-import { Video } from '@/domain/entities/Videos';
+import { Video, VideoStatus } from '@/domain/entities/Videos';
 import { IVideoRepository } from '@/domain/repositories/IVideoRepository';
 import { DatabaseConnection } from '../database/DataBaseConnection';
 export class VideoRepository implements IVideoRepository {
@@ -95,9 +95,9 @@ export class VideoRepository implements IVideoRepository {
         return rows.length > 0 ? this.mapRowToVideoEntites(rows[0]) : null;
     }
 
-    async findByCustomerId(userId: string): Promise<Video[]> {
-        const query = 'SELECT * FROM videos WHERE user_id = $1';
-        const { rows } = await this.db.query(query, [userId]);
+    async findByStatusVideo(status: VideoStatus): Promise<Video[]> {
+        const query = 'SELECT * FROM videos WHERE status_video = $1';
+        const { rows } = await this.db.query(query, [status]);
         return rows.map(this.mapRowToVideoEntites);
     }
 

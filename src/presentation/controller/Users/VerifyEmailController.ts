@@ -2,10 +2,6 @@ import { Request, Response } from 'express';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 
 export class verifyEmail {
-    constructor(
-
-    ) { }
-
     verifyEmail = async (req: Request, res: Response): Promise<void> => {
         try {
             const { token } = req.query;
@@ -41,5 +37,4 @@ export class verifyEmail {
             });
         }
     };
-
 }

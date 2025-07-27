@@ -1688,16 +1688,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
-  /api/videos/customer:
+  /api/videos/accepted:
     get:
-      summary: Get all videos by customer ID
+      summary: Get all videos with accepted status
       tags:
         - Videos
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Videos retrieved successfully
+          description: Accepted videos retrieved successfully
           content:
             application/json:
               schema:
@@ -1718,19 +1718,13 @@ paths:
                   - message
                   - data
         '400':
-          description: 'Bad request (e.g., customer not found)'
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '401':
           description: Unauthorized (invalid or missing token)
-          content:
-            application/json:
-              schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
-        '403':
-          description: Forbidden (only customers can access their videos)
           content:
             application/json:
               schema:
@@ -1765,7 +1759,7 @@ components:
           example: Tasty Bites
         organizationNumber:
           type: string
-          example: ORG12345
+          example: 01234ORG567
         email:
           type: string
           example: owner@example.com
@@ -1821,7 +1815,7 @@ components:
           example: Tasty Bites
         organizationNumber:
           type: string
-          example: ORG12345
+          example: 01234ORG567
         email:
           type: string
           example: owner@example.com
@@ -2167,7 +2161,7 @@ components:
           example: Tasty Bites
         organizationNumber:
           type: string
-          example: ORG12345
+          example: 01234ORG567
         email:
           type: string
           example: owner@example.com

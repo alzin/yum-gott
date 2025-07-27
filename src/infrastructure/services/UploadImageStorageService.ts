@@ -3,7 +3,7 @@ import { IFileStorageService } from '@/application/interface/IFileStorageService
 import sharp from 'sharp';
 
 export class FileStorageService implements IFileStorageService {
-  private s3Client: S3Client;
+  private s3Client: S3Client; 
   private bucketName: string;
 
   constructor() {
@@ -15,7 +15,7 @@ export class FileStorageService implements IFileStorageService {
       },
     });
 
-    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'yum-gott-profile-images';
+    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'testbucketyumgott';
   }
 
   private extractKeyFromS3Url(url: string): { key: string; isValid: boolean } {
