@@ -14,7 +14,10 @@ export class restaurantOwnerLogin {
             this.setAuthCookies(res, result.authToken);
             res.status(200).json({
                 success: true,
-                message: 'Restaurant owner login successful'
+                message: 'Restaurant owner login successful',
+                data: {
+                    is_active: result.user.isActive
+                }
             });
         } catch (error) {
             res.status(401).json({

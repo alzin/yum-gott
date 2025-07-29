@@ -3,7 +3,7 @@ import { IRestaurantOwnerRepository } from "@/domain/repositories/IRestaurantOwn
 import { DatabaseConnection } from "../database/DataBaseConnection";
 
 export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
-    constructor(private db: DatabaseConnection) {}
+    constructor(private db: DatabaseConnection) { }
 
     async create(restaurantOwner: RestaurantOwner): Promise<RestaurantOwner> {
         const query = `
@@ -15,7 +15,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
         `;
-        
+
         const values = [
             restaurantOwner.restaurantName,
             restaurantOwner.organizationNumber,
@@ -42,11 +42,11 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             RETURNING *
         `;
         const result = await this.db.query(query, [token]);
-        
+
         if (result.rows.length === 0) {
             throw new Error('Invalid or expired verification token');
         }
-        
+
         return this.mapRowToRestaurantOwner(result.rows[0]);
     }
 
@@ -173,7 +173,7 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         await this.db.query(query, [id]);
     }
 
- 
+
 
     async existsByEmail(email: string): Promise<boolean> {
         const query = 'SELECT 1 FROM restaurant_owners WHERE email = $1 LIMIT 1';
@@ -198,18 +198,18 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return result.rowCount;
     }
 
-    async getRestaurantOwnerProfile(id: string): Promise<{ restaurantName: string; profileImageUrl: string | null }> {
+    async getRestaurantOwnerProfile(id: string): Promise<{ restaurantName: string; profileImageUrl: string | null; isActive: boolean }> {
         const query = `
-            SELECT restaurant_name as "restaurantName", profile_image_url as "profileImageUrl"
+            SELECT restaurant_name as "restaurantName", profile_image_url as "profileImageUrl", is_active as "isActive"
             FROM restaurant_owners
             WHERE id = $1
         `;
         const result = await this.db.query(query, [id]);
-        
+
         if (result.rows.length === 0) {
             throw new Error('Restaurant owner not found');
         }
-        
+
         return result.rows[0];
     }
 

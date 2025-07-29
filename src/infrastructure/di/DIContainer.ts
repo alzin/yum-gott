@@ -8,7 +8,7 @@ import {
   CustomerLoginUseCase,
   RestaurantOwnerLoginUseCase,
   UpdateRestaurantLocationUseCase,
-  GetRestaurantOwnerProfileUseCase,
+  // GetRestaurantOwnerProfileUseCase,
   LogoutUseCase,
   CleanupUnverifiedAccountsUseCase
 } from '@/application/use-cases/auth/index';
@@ -156,6 +156,7 @@ export class DIContainer {
     this.factories.set(key, factory);
     this.singletons.add(key);
   }
+  
 
   public registerTransient<T>(key: string, factory: DependencyFactory<T>): void {
     this.factories.set(key, factory);

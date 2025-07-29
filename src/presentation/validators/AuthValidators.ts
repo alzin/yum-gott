@@ -50,9 +50,9 @@ export class AuthValidators {
       body('mobileNumber')
         .trim()
         .notEmpty()
-        .withMessage('Mobile number is required')
-        .matches(/^[0-9]{10,15}$/)
-        .withMessage('Mobile number must be 10-15 digits'),
+        .withMessage('Mobile number is required'),
+        // .matches(/^[0-9]{10,15}$/)
+        // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')
@@ -102,9 +102,9 @@ export class AuthValidators {
       body('mobileNumber')
         .trim()
         .notEmpty()
-        .withMessage('Mobile number is required')
-        .matches(/^[0-9]{10,15}$/)
-        .withMessage('Mobile number must be 10-15 digits'),
+        .withMessage('Mobile number is required'),
+        // .matches(/^[0-9]{10,15}$/)
+        // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')

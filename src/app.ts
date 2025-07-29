@@ -12,7 +12,7 @@ import path from "path";
 
 export class App {
   private app: Application;
-  private diContainer: DIContainer;
+  // private diContainer: DIContainer;
   private setupMiddleware(): void {
     this.app.use(helmet());
     this.app.use(cookieParser());
@@ -58,7 +58,7 @@ export class App {
     );
 
 
-    this.diContainer = DIContainer.getInstance();
+    // this.diContainer = DIContainer.getInstance();
     // const cleanupService = new CleanupUnverifiedAccounts(this.diContainer.cleanupUnverifiedAccountsUseCase);
     // cleanupService.startScheduledJobs();
     this.setupMiddleware();

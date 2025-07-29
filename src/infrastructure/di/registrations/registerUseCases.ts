@@ -178,9 +178,8 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('restaurantOwnerRepository')
     ));
 
-    container.registerTransient('getVideosByCustomerUseCase', () => new (require('@/application/use-cases/video/GetVideosByCustomerUseCase').GetVideosByCustomerUseCase)(
-        container.resolve('IVideoRepository'),
-        container.resolve('customerRepository')
+    container.registerTransient('getAcceptedVideosUseCase', () => new (require('@/application/use-cases/video/GetAcceptedVideosUseCase').GetAcceptedVideosUseCase)(
+        container.resolve('IVideoRepository')
     ));
 
     // Logout, Refresh, Cleanup

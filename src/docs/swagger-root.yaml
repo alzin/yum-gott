@@ -63,8 +63,8 @@ paths:
     $ref: './paths-videos.yaml#/paths/~1api~1videos'
   /api/videos/{id}:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1{id}'
-  /api/videos/customer:
-    $ref: './paths-videos.yaml#/paths/~1api~1videos~1customer'
+  /api/videos/accepted:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1accepted'
 components:
   schemas:
     RegisterCustomerRequest:
@@ -95,7 +95,7 @@ components:
           example: "Tasty Bites"
         organizationNumber:
           type: string
-          example: "ORG12345"
+          example: "01234ORG567"
         email:
           type: string
           example: "owner@example.com"
@@ -151,7 +151,7 @@ components:
           example: "Tasty Bites"
         organizationNumber:
           type: string
-          example: "ORG12345"
+          example: "01234ORG567"
         email:
           type: string
           example: "owner@example.com"
@@ -492,7 +492,7 @@ components:
           example: "Tasty Bites"
         organizationNumber:
           type: string
-          example: "ORG12345"
+          example: "01234ORG567"
         email:
           type: string
           example: "owner@example.com"

@@ -27,9 +27,9 @@ export class VideoValidators {
             body('phoneNumber')
                 .trim()
                 .notEmpty()
-                .withMessage('Phone number is required')
-                .matches(/^[0-9]{10,15}$/)
-                .withMessage('Phone number must be 10-15 digits'),
+                .withMessage('Phone number is required'),
+                // .matches(/^[0-9]{10,15}$/)
+                // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
                 .withMessage('Network is required')
@@ -74,9 +74,9 @@ export class VideoValidators {
             body('phoneNumber')
                 .trim()
                 .notEmpty()
-                .withMessage('Phone number is required')
-                .matches(/^[0-9]{10,15}$/)
-                .withMessage('Phone number must be 10-15 digits'),
+                .withMessage('Phone number is required'),
+                // .matches(/^[0-9]{10,15}$/)
+                // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
                 .withMessage('Network is required')

@@ -197,6 +197,13 @@ paths:
                   message:
                     type: string
                     example: Restaurant owner login successful
+                  data:
+                    type: object
+                    properties:
+                      is_active:
+                        type: boolean
+                        description: Whether the restaurant owner account is active and approved by admin
+                        example: true
           headers:
             Set-Cookie:
               schema:
@@ -252,7 +259,7 @@ paths:
       tags:
         - Authentication
       summary: Get restaurant owner profile
-      description: Retrieve the restaurant name and profile image URL for the authenticated restaurant owner
+      description: 'Retrieve the restaurant name, profile image URL, and active status for the authenticated restaurant owner'
       operationId: getRestaurantOwnerProfile
       security:
         - cookieAuth: []
@@ -277,6 +284,10 @@ paths:
                         type: string
                         nullable: true
                         example: 'https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/restaurant_owner/123.jpg'
+                      isActive:
+                        type: boolean
+                        description: Whether the restaurant owner account is active and approved by admin
+                        example: true
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -1422,26 +1433,32 @@ paths:
                 publicId:
                   type: string
                   description: Public ID of the video
+                  example: yum_gott/videos/yum_gott_1752456506674
                 secureUrl:
                   type: string
                   format: uri
                   description: Secure URL of the video
+                  example: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456506674/yum_gott/videos/yum_gott_1752456506674.mp4'
                 restaurantName:
                   type: string
                   description: Name of the restaurant
+                  example: Falafel Ala Kefk
                 phoneNumber:
                   type: string
                   description: Phone number associated with the video
+                  example: '2054353'
                 network:
                   type: string
                   enum:
                     - MTN
                     - Syriatel
                   description: Network provider
+                  example: MTN
                 invoiceImage:
                   type: string
                   format: binary
                   description: Invoice image file (JPEG or PNG)
+                  example: invoice.jpg
               required:
                 - publicId
                 - secureUrl
@@ -1558,26 +1575,32 @@ paths:
                 publicId:
                   type: string
                   description: Public ID of the video
+                  example: yum_gott/videos/yum_gott_1752456506674
                 secureUrl:
                   type: string
                   format: uri
                   description: Secure URL of the video
+                  example: 'https://res.cloudinary.com/dbipfyr2o/video/upload/v1752456506674/yum_gott/videos/yum_gott_1752456506674.mp4'
                 restaurantName:
                   type: string
                   description: Name of the restaurant
+                  example: Falafel Ala Kefk
                 phoneNumber:
                   type: string
                   description: Phone number associated with the video
+                  example: '2054353'
                 network:
                   type: string
                   enum:
                     - MTN
                     - Syriatel
                   description: Network provider
+                  example: MTN
                 invoiceImage:
                   type: string
                   format: binary
                   description: 'Invoice image file (JPEG or PNG, optional)'
+                  example: invoice.jpg
               required:
                 - publicId
                 - secureUrl
@@ -1676,16 +1699,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
-  /api/videos/customer:
+  /api/videos/accepted:
     get:
-      summary: Get all videos by customer ID
+      summary: Get all videos with accepted status
       tags:
         - Videos
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Videos retrieved successfully
+          description: Accepted videos retrieved successfully
           content:
             application/json:
               schema:
@@ -1706,19 +1729,13 @@ paths:
                   - message
                   - data
         '400':
-          description: 'Bad request (e.g., customer not found)'
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '401':
           description: Unauthorized (invalid or missing token)
-          content:
-            application/json:
-              schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
-        '403':
-          description: Forbidden (only customers can access their videos)
           content:
             application/json:
               schema:
@@ -1753,7 +1770,7 @@ components:
           example: Tasty Bites
         organizationNumber:
           type: string
-          example: ORG12345
+          example: 01234ORG567
         email:
           type: string
           example: owner@example.com
@@ -1809,7 +1826,7 @@ components:
           example: Tasty Bites
         organizationNumber:
           type: string
-          example: ORG12345
+          example: 01234ORG567
         email:
           type: string
           example: owner@example.com
@@ -2155,7 +2172,7 @@ components:
           example: Tasty Bites
         organizationNumber:
           type: string
-          example: ORG12345
+          example: 01234ORG567
         email:
           type: string
           example: owner@example.com

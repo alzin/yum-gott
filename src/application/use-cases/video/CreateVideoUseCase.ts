@@ -37,7 +37,7 @@ export class CreateVideoUseCase {
             throw new Error(`Video with this secure URL already exists.`);
         }
 
-    
+
         // Validate network
         if (!Object.values(Network).includes(network)) {
             throw new Error('Invalid network. Must be MTN or Syriatel');
