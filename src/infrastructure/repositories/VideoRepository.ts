@@ -7,7 +7,7 @@ export class VideoRepository implements IVideoRepository {
     async create(video: Video): Promise<Video> {
         const query = `
             INSERT INTO videos (
-                id, user_id, public_id, secure_url, restaurantName, phone_number, 
+                id, user_id, public_id, secure_url, restaurantname, phone_number, 
                 network, invoice_image, status_video, created_at, updated_at
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING *
@@ -40,7 +40,7 @@ export class VideoRepository implements IVideoRepository {
         const fieldMappings: Record<string, string> = {
             publicId: 'public_id',
             secureUrl: 'secure_url',
-            restaurantName: 'restaurantName',
+            restaurantName: 'restaurantname',
             phoneNumber: 'phone_number',
             network: 'network',
             invoiceImage: 'invoice_image',
@@ -162,7 +162,7 @@ export class VideoRepository implements IVideoRepository {
             userId: row.user_id,
             publicId: row.public_id,
             secureUrl: row.secure_url,
-            restaurantName: row.restaurantName,
+            restaurantName: row.restaurantname,
             phoneNumber: row.phone_number,
             network: row.network,
             invoiceImage: row.invoice_image,

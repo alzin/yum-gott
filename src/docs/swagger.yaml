@@ -1486,7 +1486,7 @@ paths:
                       id:
                         type: string
                         format: uuid
-                      customerId:
+                      userId:
                         type: string
                         format: uuid
                       publicId:
@@ -1503,10 +1503,15 @@ paths:
                         enum:
                           - MTN
                           - Syriatel
-                      invoiceImageUrl:
+                      invoiceImage:
                         type: string
                         format: uri
-                        nullable: true
+                      statusVideo:
+                        type: string
+                        enum:
+                          - pending
+                          - rejected
+                          - accepted
                       createdAt:
                         type: string
                         format: date-time
@@ -1515,12 +1520,14 @@ paths:
                         format: date-time
                     required:
                       - id
-                      - customerId
+                      - userId
                       - publicId
                       - secureUrl
                       - restaurantName
                       - phoneNumber
                       - network
+                      - invoiceImage
+                      - statusVideo
                       - createdAt
                       - updatedAt
         '400':
