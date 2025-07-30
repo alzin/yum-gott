@@ -96,7 +96,7 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async findByStatusVideo(status: VideoStatus): Promise<Video[]> {
-        const query = 'SELECT * FROM videos WHERE status_video = $1';
+        const query = 'SELECT * FROM videos WHERE status_video = $1 ORDER BY created_at DESC';
         const { rows } = await this.db.query(query, [status]);
         return rows.map(this.mapRowToVideoEntites);
     }
