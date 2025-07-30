@@ -116,10 +116,41 @@ export class VideoController {
 
     async getAcceptedVideos(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const videos = await this.getAcceptedVideosUseCase.execute();
-            res.status(200).json({ success: true, message: 'Videos retrieved successfully', data: videos });
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+            const cursor = req.query.cursor as string | undefined;
+
+            // Validate limit parameter
+            if (limit !== undefined && (isNaN(limit) || limit < 1 || limit > 100)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Limit must be a number between 1 and 100'
+                });
+                return;
+            }
+
+            const request = {
+                limit,
+                cursor
+            };
+
+            const result = await this.getAcceptedVideosUseCase.execute(request);
+
+            res.status(200).json({
+                success: true,
+                message: 'Videos retrieved successfully',
+                data: {
+                    videos: result.videos,
+                    pagination: {
+                        nextCursor: result.nextCursor,
+                        hasMore: result.hasMore
+                    }
+                }
+            });
         } catch (error) {
-            res.status(400).json({ success: false, message: error instanceof Error ? error.message : 'Failed to retrieve accepted videos' });
+            res.status(400).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to retrieve accepted videos'
+            });
         }
     }
 

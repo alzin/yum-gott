@@ -72,6 +72,45 @@ components:
         - message
         - data
 
+    PaginatedVideosResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Videos retrieved successfully
+        data:
+          type: object
+          properties:
+            videos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Video'
+            pagination:
+              type: object
+              properties:
+                nextCursor:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Cursor for the next page
+                  example: "2024-01-15T10:30:00.000Z"
+                hasMore:
+                  type: boolean
+                  description: Whether there are more videos to fetch
+                  example: true
+              required:
+                - hasMore
+          required:
+            - videos
+            - pagination
+      required:
+        - success
+        - message
+        - data
+
 paths:
   /api/videos:
     post:
@@ -307,20 +346,37 @@ paths:
 
   /api/videos/accepted:
     get:
-      summary: Get all videos with accepted status
+      summary: Get all videos with accepted status (with pagination)
       tags:
         - Videos
       security:
         - cookieAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of videos to return per page
+          example: 10
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            format: date-time
+          description: Cursor for pagination (ISO 8601 date format)
+          example: "2024-01-15T10:30:00.000Z"
       responses:
         '200':
           description: Accepted videos retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VideosResponse'
+                $ref: '#/components/schemas/PaginatedVideosResponse'
         '400':
-          description: Bad request
+          description: Bad request (validation error)
           content:
             application/json:
               schema:

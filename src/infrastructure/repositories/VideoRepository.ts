@@ -1,5 +1,5 @@
 import { Video, VideoStatus } from '@/domain/entities/Videos';
-import { IVideoRepository } from '@/domain/repositories/IVideoRepository';
+import { IVideoRepository, PaginationParams, PaginatedVideosResult } from '@/domain/repositories/IVideoRepository';
 import { DatabaseConnection } from '../database/DataBaseConnection';
 export class VideoRepository implements IVideoRepository {
     constructor(private db: DatabaseConnection) { }
@@ -99,6 +99,50 @@ export class VideoRepository implements IVideoRepository {
         const query = 'SELECT * FROM videos WHERE status_video = $1 ORDER BY created_at DESC';
         const { rows } = await this.db.query(query, [status]);
         return rows.map(this.mapRowToVideoEntites);
+    }
+
+    async findByStatusVideoPaginated(status: VideoStatus, pagination: PaginationParams): Promise<PaginatedVideosResult> {
+        const { limit = 10, cursor } = pagination;
+        const offset = limit + 1; // Fetch one extra to check if there are more results
+
+        let query: string;
+        let values: any[];
+
+        if (cursor) {
+            // If cursor is provided, get videos after the cursor
+            query = `
+                SELECT * FROM videos 
+                WHERE status_video = $1 AND created_at < $2 
+                ORDER BY created_at DESC 
+                LIMIT $3
+            `;
+            values = [status, cursor, offset];
+        } else {
+            // If no cursor, get the first page
+            query = `
+                SELECT * FROM videos 
+                WHERE status_video = $1 
+                ORDER BY created_at DESC 
+                LIMIT $2
+            `;
+            values = [status, offset];
+        }
+
+        const { rows } = await this.db.query(query, values);
+
+        const hasMore = rows.length > limit;
+        const videos = rows.slice(0, limit).map(this.mapRowToVideoEntites);
+
+        let nextCursor: string | undefined;
+        if (hasMore && videos.length > 0) {
+            nextCursor = videos[videos.length - 1].createdAt.toISOString();
+        }
+
+        return {
+            videos,
+            nextCursor,
+            hasMore
+        };
     }
 
     async findBySecureUrl(secureUrl: string): Promise<Video | null> {

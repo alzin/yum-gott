@@ -1,4 +1,4 @@
-import { body, ValidationChain } from 'express-validator';
+import { body, query, ValidationChain } from 'express-validator';
 import { Network } from '@/domain/entities/Videos';
 
 export class VideoValidators {
@@ -28,8 +28,8 @@ export class VideoValidators {
                 .trim()
                 .notEmpty()
                 .withMessage('Phone number is required'),
-                // .matches(/^[0-9]{10,15}$/)
-                // .withMessage('Phone number must be 10-15 digits'),
+            // .matches(/^[0-9]{10,15}$/)
+            // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
                 .withMessage('Network is required')
@@ -75,8 +75,8 @@ export class VideoValidators {
                 .trim()
                 .notEmpty()
                 .withMessage('Phone number is required'),
-                // .matches(/^[0-9]{10,15}$/)
-                // .withMessage('Phone number must be 10-15 digits'),
+            // .matches(/^[0-9]{10,15}$/)
+            // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
                 .withMessage('Network is required')
@@ -93,6 +93,19 @@ export class VideoValidators {
                     }
                     return true;
                 })
+        ];
+    }
+
+    static getAcceptedVideos(): ValidationChain[] {
+        return [
+            query('limit')
+                .optional()
+                .isInt({ min: 1, max: 100 })
+                .withMessage('Limit must be a number between 1 and 100'),
+            query('cursor')
+                .optional()
+                .isISO8601()
+                .withMessage('Cursor must be a valid ISO 8601 date string')
         ];
     }
 }
