@@ -1,11 +1,15 @@
-CREATE TYPE status_enum AS ENUM ('pending', 'rejected', 'accepted');
+DO $$ BEGIN
+    CREATE TYPE status_enum AS ENUM ('pending', 'rejected', 'accepted');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 CREATE TABLE videos (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     public_id VARCHAR(255) NOT NULL,
     secure_url VARCHAR(255) NOT NULL,
-    restaurantName VARCHAR(225) NOT NULL,
+    restaurantname VARCHAR(225) NOT NULL,
     phone_number VARCHAR(15) NOT NULL,
     network VARCHAR(20) NOT NULL CHECK (network IN ('MTN', 'Syriatel')),
     invoice_image VARCHAR(255) NOT NULL,
