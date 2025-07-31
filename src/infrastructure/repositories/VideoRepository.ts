@@ -1,6 +1,18 @@
 import { Video, VideoStatus } from '@/domain/entities/Videos';
 import { IVideoRepository, PaginationParams, PaginatedVideosResult } from '@/domain/repositories/IVideoRepository';
 import { DatabaseConnection } from '../database/DataBaseConnection';
+
+// Common field mappings for database column names
+const VIDEO_FIELD_MAPPINGS: Record<string, string> = {
+    publicId: 'public_id',
+    secureUrl: 'secure_url',
+    restaurantName: 'restaurantname',
+    phoneNumber: 'phone_number',
+    network: 'network',
+    invoiceImage: 'invoice_image',
+    statusVideo: 'status_video'
+};
+
 export class VideoRepository implements IVideoRepository {
     constructor(private db: DatabaseConnection) { }
 
@@ -36,17 +48,6 @@ export class VideoRepository implements IVideoRepository {
         const values: any[] = [];
         let index = 1;
 
-        // Field mapping: domain property -> database column
-        const fieldMappings: Record<string, string> = {
-            publicId: 'public_id',
-            secureUrl: 'secure_url',
-            restaurantName: 'restaurantname',
-            phoneNumber: 'phone_number',
-            network: 'network',
-            invoiceImage: 'invoice_image',
-            statusVideo: 'status_video'
-        };
-
         // Helper function to add field if defined
         const addFieldIfDefined = (property: keyof Video, dbColumn: string) => {
             if (video[property] !== undefined) {
@@ -56,8 +57,8 @@ export class VideoRepository implements IVideoRepository {
             }
         };
 
-        // Add all defined fields
-        Object.entries(fieldMappings).forEach(([property, dbColumn]) => {
+        // Add all defined fields using the common mappings
+        Object.entries(VIDEO_FIELD_MAPPINGS).forEach(([property, dbColumn]) => {
             addFieldIfDefined(property as keyof Video, dbColumn);
         });
 
@@ -93,12 +94,6 @@ export class VideoRepository implements IVideoRepository {
         const query = 'SELECT * FROM videos WHERE id = $1';
         const { rows } = await this.db.query(query, [id]);
         return rows.length > 0 ? this.mapRowToVideoEntites(rows[0]) : null;
-    }
-
-    async findByStatusVideo(status: VideoStatus): Promise<Video[]> {
-        const query = 'SELECT * FROM videos WHERE status_video = $1 ORDER BY created_at DESC';
-        const { rows } = await this.db.query(query, [status]);
-        return rows.map(this.mapRowToVideoEntites);
     }
 
     async findByStatusVideoPaginated(status: VideoStatus, pagination: PaginationParams): Promise<PaginatedVideosResult> {
