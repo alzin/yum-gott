@@ -118,6 +118,8 @@ export class VideoController {
         try {
             const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
             const cursor = req.query.cursor as string | undefined;
+            const cursor_created = req.query.cursor_created as string | undefined;
+            const cursor_id = req.query.cursor_id as string | undefined;
 
             // Validate limit parameter
             if (limit !== undefined && (isNaN(limit) || limit < 1 || limit > 100)) {
@@ -128,9 +130,23 @@ export class VideoController {
                 return;
             }
 
+            // Validate cursor_created if provided
+            if (cursor_created) {
+                const date = new Date(cursor_created);
+                if (isNaN(date.getTime())) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'cursor_created must be a valid ISO8601 date string'
+                    });
+                    return;
+                }
+            }
+
             const request = {
                 limit,
-                cursor
+                cursor,
+                cursor_created,
+                cursor_id
             };
 
             const result = await this.getAcceptedVideosUseCase.execute(request);

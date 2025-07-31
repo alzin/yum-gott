@@ -1,6 +1,7 @@
 import { Video, VideoStatus } from '@/domain/entities/Videos';
 import { IVideoRepository, PaginationParams, PaginatedVideosResult } from '@/domain/repositories/IVideoRepository';
 import { DatabaseConnection } from '../database/DataBaseConnection';
+import { decodeCursor, encodeCursor } from '@/shared/utils/cursorUtils';
 
 // Common field mappings for database column names
 const VIDEO_FIELD_MAPPINGS: Record<string, string> = {
@@ -97,27 +98,50 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async findByStatusVideoPaginated(status: VideoStatus, pagination: PaginationParams): Promise<PaginatedVideosResult> {
-        const { limit = 10, cursor } = pagination;
+        const { limit = 10, cursor, cursor_created, cursor_id } = pagination;
         const offset = limit + 1; // Fetch one extra to check if there are more results
 
         let query: string;
         let values: any[];
 
-        if (cursor) {
-            // If cursor is provided, get videos after the cursor
+        // Handle legacy cursor format for backward compatibility
+        let finalCursorCreated = cursor_created;
+        let finalCursorId = cursor_id;
+
+        if (cursor && !cursor_created && !cursor_id) {
+            const decodedCursor = decodeCursor(cursor);
+            if (decodedCursor) {
+                finalCursorCreated = decodedCursor.created_at;
+                finalCursorId = decodedCursor.id;
+            }
+        }
+
+        if (finalCursorCreated && finalCursorId) {
+            // If both cursors are provided, get videos after the cursor
             query = `
                 SELECT * FROM videos 
-                WHERE status_video = $1 AND created_at < $2 
-                ORDER BY created_at DESC 
+                WHERE status_video = $1 
+                AND (created_at, id) < ($2, $3)
+                ORDER BY created_at DESC, id DESC 
+                LIMIT $4
+            `;
+            values = [status, finalCursorCreated, finalCursorId, offset];
+        } else if (finalCursorCreated) {
+            // If only created_at cursor is provided
+            query = `
+                SELECT * FROM videos 
+                WHERE status_video = $1 
+                AND created_at < $2
+                ORDER BY created_at DESC, id DESC 
                 LIMIT $3
             `;
-            values = [status, cursor, offset];
+            values = [status, finalCursorCreated, offset];
         } else {
             // If no cursor, get the first page
             query = `
                 SELECT * FROM videos 
                 WHERE status_video = $1 
-                ORDER BY created_at DESC 
+                ORDER BY created_at DESC, id DESC 
                 LIMIT $2
             `;
             values = [status, offset];
@@ -130,7 +154,8 @@ export class VideoRepository implements IVideoRepository {
 
         let nextCursor: string | undefined;
         if (hasMore && videos.length > 0) {
-            nextCursor = videos[videos.length - 1].createdAt.toISOString();
+            const lastVideo = videos[videos.length - 1];
+            nextCursor = encodeCursor(lastVideo.createdAt, lastVideo.id);
         }
 
         return {

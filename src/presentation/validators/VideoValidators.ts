@@ -104,8 +104,8 @@ export class VideoValidators {
                 .withMessage('Limit must be a number between 1 and 100'),
             query('cursor')
                 .optional()
-                .isISO8601()
-                .withMessage('Cursor must be a valid ISO 8601 date string')
+                // .isISO8601()
+                // .withMessage('Cursor must be a valid ISO 8601 date string')
         ];
     }
 }

@@ -3,6 +3,8 @@ import { Video, VideoStatus } from "../entities/Videos";
 export interface PaginationParams {
     limit?: number;
     cursor?: string;
+    cursor_created?: string; // ISO8601 date string
+    cursor_id?: string; // UUID or string
 }
 
 export interface PaginatedVideosResult {
