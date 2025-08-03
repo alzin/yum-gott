@@ -23,6 +23,8 @@ paths:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1restaurant-owner'
   /api/auth/verify:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1verify'
+  /api/auth/profile/customer:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1profile~1customer'
   /api/auth/profile/restaurant-owner:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1profile~1restaurant-owner'
   /api/auth/profile/image:
@@ -65,6 +67,8 @@ paths:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1{id}'
   /api/videos/accepted:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1accepted'
+  /api/videos/customer/accepted:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1customer~1accepted'
 components:
   schemas:
     RegisterCustomerRequest:

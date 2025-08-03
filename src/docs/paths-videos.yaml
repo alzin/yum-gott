@@ -391,3 +391,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/videos/customer/accepted:
+    get:
+      summary: Get all accepted videos for the authenticated customer
+      tags:
+        - Videos
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Customer accepted videos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Customer accepted videos retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      videos:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Video'
+                    required:
+                      - videos
+                required:
+                  - success
+                  - message
+                  - data
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (only customers can access their videos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -7,6 +7,7 @@ import {
     RestaurantOwnerLoginUseCase,
     UpdateRestaurantLocationUseCase,
     GetRestaurantOwnerProfileUseCase,
+    GetCustomerProfileUseCase,
     LogoutUseCase,
     CleanupUnverifiedAccountsUseCase,
     RefreshTokenUseCase
@@ -73,6 +74,12 @@ export function registerUseCases(container: DIContainer) {
     container.registerTransient('getRestaurantOwnerProfileUseCase', () => {
         return new GetRestaurantOwnerProfileUseCase(
             container.resolve('restaurantOwnerRepository')
+        );
+    });
+
+    container.registerTransient('getCustomerProfileUseCase', () => {
+        return new GetCustomerProfileUseCase(
+            container.resolve('customerRepository')
         );
     });
 
@@ -179,6 +186,10 @@ export function registerUseCases(container: DIContainer) {
     ));
 
     container.registerTransient('getAcceptedVideosUseCase', () => new (require('@/application/use-cases/video/GetAcceptedVideosUseCase').GetAcceptedVideosUseCase)(
+        container.resolve('IVideoRepository')
+    ));
+
+    container.registerTransient('getCustomerAcceptedVideosUseCase', () => new (require('@/application/use-cases/video/GetCustomerAcceptedVideosUseCase').GetCustomerAcceptedVideosUseCase)(
         container.resolve('IVideoRepository')
     ));
 

@@ -25,8 +25,8 @@ export class AuthValidators {
         .withMessage('Name is required')
         .isLength({ min: 2, max: 100 })
         .withMessage('Name must be between 2 and 100 characters')
-        .matches(/^[a-zA-Z\s]+$/)
-        .withMessage('Name can only contain letters and spaces'),
+        .matches(/^[a-zA-Z0-9\s]+$/) 
+        .withMessage('Name can only contain letters, numbers, and spaces'),
       body('email')
         .trim()
         .notEmpty()
@@ -51,8 +51,8 @@ export class AuthValidators {
         .trim()
         .notEmpty()
         .withMessage('Mobile number is required'),
-        // .matches(/^[0-9]{10,15}$/)
-        // .withMessage('Mobile number must be 10-15 digits'),
+      // .matches(/^[0-9]{10,15}$/)
+      // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')
@@ -103,8 +103,8 @@ export class AuthValidators {
         .trim()
         .notEmpty()
         .withMessage('Mobile number is required'),
-        // .matches(/^[0-9]{10,15}$/)
-        // .withMessage('Mobile number must be 10-15 digits'),
+      // .matches(/^[0-9]{10,15}$/)
+      // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')

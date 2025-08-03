@@ -262,6 +262,35 @@ paths:
         "429":
           $ref: "./swagger-root.yaml#/components/responses/TooManyRequestsError"
 
+  /api/auth/profile/customer:
+    get:
+      tags:
+        - Authentication
+      summary: Get customer profile
+      description: Retrieve the customer profile information for the authenticated customer
+      operationId: getCustomerProfile
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Customer profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "./swagger-root.yaml#/components/schemas/CustomerResponse"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+        "404":
+          $ref: "./swagger-root.yaml#/components/responses/NotFoundError"
+
   /api/auth/profile/restaurant-owner:
     get:
       tags:

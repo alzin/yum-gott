@@ -19,5 +19,6 @@ export interface IVideoRepository {
     findById(id: string): Promise<Video | null>;
     findByStatusVideoPaginated(statusVideo: VideoStatus, pagination: PaginationParams): Promise<PaginatedVideosResult>;
     findBySecureUrl(secureUrl: string): Promise<Video | null>;
+    findByCustomerIdAndStatus(customerId: string, status: VideoStatus): Promise<Video[]>;
     delete(id: string): Promise<void>;
 }

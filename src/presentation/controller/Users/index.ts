@@ -1,4 +1,5 @@
 export * from './Customer/CustomerLoginController'
+export * from './Customer/GetCustomerProfileController'
 export * from './RestaurantOwner/GetRestaurantOwnerProfileController'
 export * from './Customer/RegisterCustomerController'
 export * from './RestaurantOwner/RegisterRestaurantOwnerController'

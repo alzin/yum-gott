@@ -171,6 +171,12 @@ export class VideoRepository implements IVideoRepository {
         return rows.length > 0 ? this.mapRowToVideoEntites(rows[0]) : null;
     }
 
+    async findByCustomerIdAndStatus(customerId: string, status: VideoStatus): Promise<Video[]> {
+        const query = 'SELECT * FROM videos WHERE user_id = $1 AND status_video = $2 ORDER BY created_at DESC';
+        const { rows } = await this.db.query(query, [customerId, status]);
+        return rows.map(this.mapRowToVideoEntites);
+    }
+
     async delete(id: string): Promise<void> {
         const query = 'DELETE FROM videos WHERE id = $1';
         await this.db.query(query, [id]);

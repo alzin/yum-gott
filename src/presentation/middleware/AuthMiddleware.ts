@@ -21,6 +21,18 @@ export class AuthMiddleware {
     return null;
   }
 
+  requireCustomer = (req: Request, res: Response, next: NextFunction): void => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user || authReq.user.userType !== 'customer') {
+      res.status(403).json({
+        success: false,
+        message: 'Forbidden: Only customers can access this endpoint',
+      });
+      return;
+    }
+    next();
+  };
+
   requireRestaurantOwner = (req: Request, res: Response, next: NextFunction): void => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user || authReq.user.userType !== 'restaurant_owner') {

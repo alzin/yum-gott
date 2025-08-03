@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase, GetAcceptedVideosUseCase } from '@/application/use-cases/video/index';
+import { CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase, GetAcceptedVideosUseCase, GetCustomerAcceptedVideosUseCase } from '@/application/use-cases/video/index';
 import { AuthenticatedRequest } from '@/presentation/middleware/AuthMiddleware';
 
 export class VideoController {
@@ -7,7 +7,8 @@ export class VideoController {
         private createVideoUseCase: CreateVideoUseCase,
         private updateVideoUseCase: UpdateVideoUseCase,
         private deleteVideoUseCase: DeleteVideoUseCase,
-        private getAcceptedVideosUseCase: GetAcceptedVideosUseCase
+        private getAcceptedVideosUseCase: GetAcceptedVideosUseCase,
+        private getCustomerAcceptedVideosUseCase: GetCustomerAcceptedVideosUseCase
     ) { }
 
     async createVideo(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -166,6 +167,38 @@ export class VideoController {
             res.status(400).json({
                 success: false,
                 message: error instanceof Error ? error.message : 'Failed to retrieve accepted videos'
+            });
+        }
+    }
+
+    async getCustomerAcceptedVideos(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const user = req.user;
+            if (!user || user.userType !== 'customer') {
+                res.status(403).json({
+                    success: false,
+                    message: 'Forbidden: Only customers can access their videos'
+                });
+                return;
+            }
+
+            const request = {
+                customerId: user.userId
+            };
+
+            const result = await this.getCustomerAcceptedVideosUseCase.execute(request);
+
+            res.status(200).json({
+                success: true,
+                message: 'Customer accepted videos retrieved successfully',
+                data: {
+                    videos: result.videos
+                }
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to retrieve customer accepted videos'
             });
         }
     }

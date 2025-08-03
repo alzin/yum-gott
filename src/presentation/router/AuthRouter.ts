@@ -2,6 +2,7 @@ import { Router, Response, NextFunction, Request } from 'express';
 import { AuthenticatedRequest } from '../middleware/AuthMiddleware';
 import {
   getRestaurantOwnerProfile,
+  getCustomerProfile,
   registerCustomer,
   registerRestaurantOwner,
   customerLogin,
@@ -45,6 +46,16 @@ export class AuthRouter {
       (req: Request, res: Response) => {
         const controller = new getRestaurantOwnerProfile(this.diContainer.resolve('getRestaurantOwnerProfileUseCase'));
         controller.getRestaurantOwnerProfile(req as AuthenticatedRequest, res);
+      }
+    );
+
+    this.router.get(
+      '/profile/customer',
+      authMiddleware.authenticateUser,
+      authMiddleware.requireCustomer,
+      (req: Request, res: Response) => {
+        const controller = new getCustomerProfile(this.diContainer.resolve('getCustomerProfileUseCase'));
+        controller.getCustomerProfile(req as AuthenticatedRequest, res);
       }
     );
 

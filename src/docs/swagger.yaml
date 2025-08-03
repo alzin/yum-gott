@@ -254,6 +254,34 @@ paths:
                           - $ref: '#/components/schemas/RestaurantOwnerResponse'
         '400':
           $ref: '#/components/responses/BadRequestError'
+  /api/auth/profile/customer:
+    get:
+      tags:
+        - Authentication
+      summary: Get customer profile
+      description: Retrieve the customer profile information for the authenticated customer
+      operationId: getCustomerProfile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Customer profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CustomerResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
   /api/auth/profile/restaurant-owner:
     get:
       tags:
@@ -1781,6 +1809,58 @@ paths:
                 $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
         '401':
           description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+  /api/videos/customer/accepted:
+    get:
+      summary: Get all accepted videos for the authenticated customer
+      tags:
+        - Videos
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Customer accepted videos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Customer accepted videos retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      videos:
+                        type: array
+                        items:
+                          $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
+                    required:
+                      - videos
+                required:
+                  - success
+                  - message
+                  - data
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+        '403':
+          description: Forbidden (only customers can access their videos)
           content:
             application/json:
               schema:
