@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- DROP TYPE IF EXISTS user_type CASCADE;
 
 -- Create customers table
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE customers (
 );
 
 -- Create restaurant_owners table
-CREATE TABLE restaurant_owners (
+CREATE TABLE IF NOT EXISTS restaurant_owners (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     restaurant_name VARCHAR(255) NOT NULL,
     organization_number VARCHAR(50) UNIQUE NOT NULL,
@@ -43,16 +43,36 @@ CREATE TABLE restaurant_owners (
     longitude DECIMAL(9,6) -- New field for GPS longitude
 );
 
--- Create indexes for customers
-CREATE UNIQUE INDEX idx_customers_email ON customers(email);
-CREATE INDEX idx_customers_mobile_number ON customers(mobile_number);
-CREATE INDEX idx_customers_verification_token ON customers(verification_token);
+-- Create indexes for customers (only if they don't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_customers_email') THEN
+        CREATE UNIQUE INDEX idx_customers_email ON customers(email);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_customers_mobile_number') THEN
+        CREATE INDEX idx_customers_mobile_number ON customers(mobile_number);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_customers_verification_token') THEN
+        CREATE INDEX idx_customers_verification_token ON customers(verification_token);
+    END IF;
+END $$;
 
--- Create indexes for restaurant_owners
-CREATE UNIQUE INDEX idx_restaurant_owners_email ON restaurant_owners(email);
-CREATE UNIQUE INDEX idx_restaurant_owners_organization_number ON restaurant_owners(organization_number);
-CREATE INDEX idx_restaurant_owners_mobile_number ON restaurant_owners(mobile_number);
-CREATE INDEX idx_restaurant_owners_verification_token ON restaurant_owners(verification_token);
+-- Create indexes for restaurant_owners (only if they don't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_restaurant_owners_email') THEN
+        CREATE UNIQUE INDEX idx_restaurant_owners_email ON restaurant_owners(email);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_restaurant_owners_organization_number') THEN
+        CREATE UNIQUE INDEX idx_restaurant_owners_organization_number ON restaurant_owners(organization_number);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_restaurant_owners_mobile_number') THEN
+        CREATE INDEX idx_restaurant_owners_mobile_number ON restaurant_owners(mobile_number);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_restaurant_owners_verification_token') THEN
+        CREATE INDEX idx_restaurant_owners_verification_token ON restaurant_owners(verification_token);
+    END IF;
+END $$;
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -63,12 +83,22 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Trigger for customers table
-CREATE TRIGGER update_customers_updated_at 
-    BEFORE UPDATE ON customers
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Trigger for customers table (only if it doesn't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_customers_updated_at') THEN
+        CREATE TRIGGER update_customers_updated_at 
+            BEFORE UPDATE ON customers
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
--- Trigger for restaurant_owners table
-CREATE TRIGGER update_restaurant_owners_updated_at 
-    BEFORE UPDATE ON restaurant_owners
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Trigger for restaurant_owners table (only if it doesn't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_restaurant_owners_updated_at') THEN
+        CREATE TRIGGER update_restaurant_owners_updated_at 
+            BEFORE UPDATE ON restaurant_owners
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;

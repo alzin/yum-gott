@@ -5,13 +5,13 @@ export class ProductOptionValidators {
         return [
             param('productId')
                 .isUUID()
-                .withMessage('Invalid product ID format'),
+                .withMessage('Please provide a valid product ID'),
             body('name')
                 .trim()
                 .notEmpty()
-                .withMessage('Option name is required')
+                .withMessage('Please enter an option name')
                 .isLength({ max: 100 })
-                .withMessage('Option name must not exceed 100 characters')
+                .withMessage('Option name is too long')
         ];
     }
 
@@ -19,17 +19,17 @@ export class ProductOptionValidators {
         return [
             param('optionId')
                 .isUUID()
-                .withMessage('Invalid option ID format'),
+                .withMessage('Please provide a valid option ID'),
             body('name')
                 .trim()
                 .notEmpty()
-                .withMessage('Option value name is required')
+                .withMessage('Please enter an option value name')
                 .isLength({ max: 100 })
-                .withMessage('Option value name must not exceed 100 characters'),
+                .withMessage('Option value name is too long'),
             body('additionalPrice')
                 .optional()
                 .isFloat({ min: 0 })
-                .withMessage('Additional price must be a positive number')
+                .withMessage('Additional price must be zero or a positive number')
         ];
     }
 
@@ -37,7 +37,7 @@ export class ProductOptionValidators {
         return [
             param('optionId')
                 .isUUID()
-                .withMessage('Invalid option ID format')
+                .withMessage('Please provide a valid option ID')
         ];
     }
 
@@ -45,7 +45,7 @@ export class ProductOptionValidators {
         return [
             param('valueId')
                 .isUUID()
-                .withMessage('Invalid value ID format')
+                .withMessage('Please provide a valid value ID')
         ];
     }
 }

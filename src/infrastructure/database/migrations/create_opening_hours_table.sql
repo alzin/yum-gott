@@ -1,4 +1,4 @@
-CREATE TABLE opening_hours (
+CREATE TABLE IF NOT EXISTS opening_hours (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     restaurant_owner_id UUID NOT NULL,
     day VARCHAR(10) NOT NULL CHECK (day IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')),
@@ -12,4 +12,10 @@ CREATE TABLE opening_hours (
         ON DELETE CASCADE
 );
 
-CREATE INDEX idx_opening_hours_restaurant_owner_id ON opening_hours (restaurant_owner_id);
+-- Create index only if it doesn't exist
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_opening_hours_restaurant_owner_id') THEN
+        CREATE INDEX idx_opening_hours_restaurant_owner_id ON opening_hours (restaurant_owner_id);
+    END IF;
+END $$;

@@ -6,28 +6,28 @@ export class OpeningHoursValidators {
             body('day')
                 .trim()
                 .notEmpty()
-                .withMessage('Day is required')
+                .withMessage('Please select a day of the week')
                 .isIn(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-                .withMessage('Invalid day'),
+                .withMessage('Please select a valid day of the week'),
             body('Working_hours')
                 .if(body('isClosed').equals('false'))
                 .isArray({ min: 1 })
-                .withMessage('Working_hours must be a non-empty array when isClosed is false'),
+                .withMessage('Please add at least one working hour period when the business is open'),
             body('Working_hours.*.startTime')
                 .if(body('isClosed').equals('false'))
                 .notEmpty()
-                .withMessage('Each working hour period must have startTime')
+                .withMessage('Please enter a start time for each working period')
                 .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-                .withMessage('startTime must be in HH:mm:ss format (e.g., 09:00:00)'),
+                .withMessage('Start time must be in HH:mm:ss format (e.g., 09:00:00)'),
             body('Working_hours.*.endTime')
                 .if(body('isClosed').equals('false'))
                 .notEmpty()
-                .withMessage('Each working hour period must have endTime')
+                .withMessage('Please enter an end time for each working period')
                 .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-                .withMessage('endTime must be in HH:mm:ss format (e.g., 18:00:00)'),
+                .withMessage('End time must be in HH:mm:ss format (e.g., 18:00:00)'),
             body('isClosed')
                 .isBoolean()
-                .withMessage('isClosed must be a boolean'),
+                .withMessage('Please specify whether the business is closed (true or false)'),
             body().custom((value) => {
                 if (value.isClosed && value.Working_hours && value.Working_hours.length > 0) {
                     throw new Error('Working_hours should be empty when isClosed is true');
@@ -43,33 +43,33 @@ export class OpeningHoursValidators {
                 .optional()
                 .trim()
                 .isIn(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-                .withMessage('Invalid day'),
+                .withMessage('Please select a valid day of the week'),
             body('Working_hours')
                 .optional()
                 .if(body('isClosed').equals('false'))
                 .isArray({ min: 1 })
-                .withMessage('Working_hours must be a non-empty array when isClosed is false'),
+                .withMessage('Please add at least one working hour period when the business is open'),
             body('Working_hours.*.startTime')
                 .optional()
                 .if(body('isClosed').equals('false'))
                 .notEmpty()
-                .withMessage('Each working hour period must have startTime')
+                .withMessage('Please enter a start time for each working period')
                 .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-                .withMessage('startTime must be in HH:mm:ss format (e.g., 09:00:00)'),
+                .withMessage('Start time must be in HH:mm:ss format (e.g., 09:00:00)'),
             body('Working_hours.*.endTime')
                 .optional()
                 .if(body('isClosed').equals('false'))
                 .notEmpty()
-                .withMessage('Each working hour period must have endTime')
+                .withMessage('Please enter an end time for each working period')
                 .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-                .withMessage('endTime must be in HH:mm:ss format (e.g., 18:00:00)'),
+                .withMessage('End time must be in HH:mm:ss format (e.g., 18:00:00)'),
             body('isClosed')
                 .optional()
                 .isBoolean()
-                .withMessage('isClosed must be a boolean'),
+                .withMessage('Please specify whether the business is closed (true or false)'),
             body().custom((value) => {
                 if (value.isClosed && value.Working_hours && value.Working_hours.length > 0) {
-                    throw new Error('Working_hours should be empty when isClosed is true');
+                    throw new Error('Working hours should not be provided when the business is closed');
                 }
                 return true;
             })

@@ -7,42 +7,42 @@ export class VideoValidators {
             body('publicId')
                 .trim()
                 .notEmpty()
-                .withMessage('Public ID is required')
+                .withMessage('Please provide a public ID')
                 .isLength({ max: 255 })
-                .withMessage('Public ID must not exceed 255 characters'),
+                .withMessage('Public ID is too long'),
             body('secureUrl')
                 .trim()
                 .notEmpty()
-                .withMessage('Secure URL is required')
+                .withMessage('Please provide a secure URL')
                 .isURL()
-                .withMessage('Invalid URL format')
+                .withMessage('Please enter a valid URL')
                 .isLength({ max: 255 })
-                .withMessage('Secure URL must not exceed 255 characters'),
+                .withMessage('Secure URL is too long'),
             body('restaurantName')
                 .trim()
                 .notEmpty()
-                .withMessage('Name is required')
+                .withMessage('Please enter the restaurant name')
                 .isLength({ min: 2, max: 100 })
-                .withMessage('Name must be between 2 and 100 characters'),
+                .withMessage('Restaurant name must be between 2 and 100 characters'),
             body('phoneNumber')
                 .trim()
                 .notEmpty()
-                .withMessage('Phone number is required'),
+                .withMessage('Please enter the phone number'),
             // .matches(/^[0-9]{10,15}$/)
             // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
-                .withMessage('Network is required')
+                .withMessage('Please select a network')
                 .isIn(Object.values(Network))
-                .withMessage('Network must be either MTN or Syriatel'),
+                .withMessage('Please select either MTN or Syriatel'),
             body('invoiceImage')
                 .custom((_, { req }) => {
                     if (!req.file) {
-                        throw new Error('Invoice image is required');
+                        throw new Error('Please upload an invoice image');
                     }
                     const allowedTypes = ['image/jpeg', 'image/png'];
                     if (!allowedTypes.includes(req.file.mimetype)) {
-                        throw new Error('Only JPEG or PNG images are allowed');
+                        throw new Error('Please upload an image in JPEG or PNG format');
                     }
                     return true;
                 })
@@ -54,41 +54,41 @@ export class VideoValidators {
             body('publicId')
                 .trim()
                 .notEmpty()
-                .withMessage('Public ID is required')
+                .withMessage('Please provide a public ID')
                 .isLength({ max: 255 })
-                .withMessage('Public ID must not exceed 255 characters'),
+                .withMessage('Public ID is too long'),
             body('secureUrl')
                 .trim()
                 .notEmpty()
-                .withMessage('Secure URL is required')
+                .withMessage('Please provide a secure URL')
                 .isURL()
-                .withMessage('Invalid URL format')
+                .withMessage('Please enter a valid URL')
                 .isLength({ max: 255 })
-                .withMessage('Secure URL must not exceed 255 characters'),
+                .withMessage('Secure URL is too long'),
             body('restaurantName')
                 .trim()
                 .notEmpty()
-                .withMessage('Name is required')
+                .withMessage('Please enter the restaurant name')
                 .isLength({ min: 2, max: 100 })
-                .withMessage('Name must be between 2 and 100 characters'),
+                .withMessage('Restaurant name must be between 2 and 100 characters'),
             body('phoneNumber')
                 .trim()
                 .notEmpty()
-                .withMessage('Phone number is required'),
+                .withMessage('Please enter the phone number'),
             // .matches(/^[0-9]{10,15}$/)
             // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
-                .withMessage('Network is required')
+                .withMessage('Please select a network')
                 .isIn(Object.values(Network))
-                .withMessage('Network must be either MTN or Syriatel'),
+                .withMessage('Please select either MTN or Syriatel'),
             body('invoiceImage')
                 .optional()
                 .custom((_, { req }) => {
                     if (req.file) {
                         const allowedTypes = ['image/jpeg', 'image/png'];
                         if (!allowedTypes.includes(req.file.mimetype)) {
-                            throw new Error('Only JPEG or PNG images are allowed');
+                            throw new Error('Please upload an image in JPEG or PNG format');
                         }
                     }
                     return true;
