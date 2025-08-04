@@ -10,3 +10,4 @@ export * from './GetRestaurantOwnerProfileUseCase';
 export * from './LogoutuseCase';
 export * from './RefreshTokenUseCase';
 export * from './GetCustomerProfileUseCase';
+export * from './DeleteCustomerAccountUseCase';

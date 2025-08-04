@@ -498,3 +498,39 @@ paths:
           $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":
           $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+
+  /api/auth/account/customer:
+    delete:
+      tags:
+        - Authentication
+      summary: Delete customer account
+      description: |
+        Allows authenticated customers to delete their own account permanently.
+        This action cannot be undone and will remove all customer data.
+        Only customers can access this endpoint.
+      operationId: deleteCustomerAccount
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Customer account deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Customer account deleted successfully"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+        "500":
+          $ref: "./swagger-root.yaml#/components/responses/InternalServerError"

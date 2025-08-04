@@ -485,6 +485,41 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /api/auth/account/customer:
+    delete:
+      tags:
+        - Authentication
+      summary: Delete customer account
+      description: |
+        Allows authenticated customers to delete their own account permanently.
+        This action cannot be undone and will remove all customer data.
+        Only customers can access this endpoint.
+      operationId: deleteCustomerAccount
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Customer account deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Customer account deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/products:
     post:
       tags:
@@ -2473,3 +2508,16 @@ components:
                 type: number
                 description: Number of seconds to wait before making another request
                 example: 60
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Internal server error

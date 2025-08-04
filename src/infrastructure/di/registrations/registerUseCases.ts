@@ -10,7 +10,8 @@ import {
     GetCustomerProfileUseCase,
     LogoutUseCase,
     CleanupUnverifiedAccountsUseCase,
-    RefreshTokenUseCase
+    RefreshTokenUseCase,
+    DeleteCustomerAccountUseCase
 } from '@/application/use-cases/auth/index';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/application/use-cases/category';
@@ -79,6 +80,12 @@ export function registerUseCases(container: DIContainer) {
 
     container.registerTransient('getCustomerProfileUseCase', () => {
         return new GetCustomerProfileUseCase(
+            container.resolve('customerRepository')
+        );
+    });
+
+    container.registerTransient('deleteCustomerAccountUseCase', () => {
+        return new DeleteCustomerAccountUseCase(
             container.resolve('customerRepository')
         );
     });
