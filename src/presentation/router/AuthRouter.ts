@@ -10,7 +10,8 @@ import {
   verifyEmail,
   uploadProfileImage,
   updateRestaurantLocation,
-  DeleteCustomerAccountController
+  DeleteCustomerAccountController,
+  DeleteRestaurantOwnerAccountController
 } from '../controller/Users';
 import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
@@ -156,6 +157,16 @@ export class AuthRouter {
       (req: Request, res: Response) => {
         const controller = new DeleteCustomerAccountController(this.diContainer.resolve('deleteCustomerAccountUseCase'));
         controller.deleteCustomerAccount(req as AuthenticatedRequest, res);
+      }
+    );
+
+    this.router.delete(
+      '/account/restaurant-owner',
+      authMiddleware.authenticateUser,
+      authMiddleware.requireRestaurantOwner,
+      (req: Request, res: Response) => {
+        const controller = new DeleteRestaurantOwnerAccountController(this.diContainer.resolve('deleteRestaurantOwnerAccountUseCase'));
+        controller.deleteRestaurantOwnerAccount(req as AuthenticatedRequest, res);
       }
     );
 
