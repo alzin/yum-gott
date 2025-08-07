@@ -20,7 +20,6 @@ export class ValidationMiddleware {
         });
         return;
       }
-
       next();
     };
   }

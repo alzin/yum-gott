@@ -2,13 +2,16 @@ import { Router, Response, NextFunction, Request } from 'express';
 import { AuthenticatedRequest } from '../middleware/AuthMiddleware';
 import {
   getRestaurantOwnerProfile,
+  getCustomerProfile,
   registerCustomer,
   registerRestaurantOwner,
   customerLogin,
   restaurantOwnerLogin,
   verifyEmail,
   uploadProfileImage,
-  updateRestaurantLocation
+  updateRestaurantLocation,
+  DeleteCustomerAccountController,
+  DeleteRestaurantOwnerAccountController
 } from '../controller/Users';
 import { AuthValidators } from '../validators/AuthValidators';
 import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/index';
@@ -45,6 +48,16 @@ export class AuthRouter {
       (req: Request, res: Response) => {
         const controller = new getRestaurantOwnerProfile(this.diContainer.resolve('getRestaurantOwnerProfileUseCase'));
         controller.getRestaurantOwnerProfile(req as AuthenticatedRequest, res);
+      }
+    );
+
+    this.router.get(
+      '/profile/customer',
+      authMiddleware.authenticateUser,
+      authMiddleware.requireCustomer,
+      (req: Request, res: Response) => {
+        const controller = new getCustomerProfile(this.diContainer.resolve('getCustomerProfileUseCase'));
+        controller.getCustomerProfile(req as AuthenticatedRequest, res);
       }
     );
 
@@ -135,7 +148,27 @@ export class AuthRouter {
       (req: Request, res: Response) => {
         this.authController.logout(req as AuthenticatedRequest, res)
       }
-    )
+    );
+
+    this.router.delete(
+      '/account/customer',
+      authMiddleware.authenticateUser,
+      authMiddleware.requireCustomer,
+      (req: Request, res: Response) => {
+        const controller = new DeleteCustomerAccountController(this.diContainer.resolve('deleteCustomerAccountUseCase'));
+        controller.deleteCustomerAccount(req as AuthenticatedRequest, res);
+      }
+    );
+
+    this.router.delete(
+      '/account/restaurant-owner',
+      authMiddleware.authenticateUser,
+      authMiddleware.requireRestaurantOwner,
+      (req: Request, res: Response) => {
+        const controller = new DeleteRestaurantOwnerAccountController(this.diContainer.resolve('deleteRestaurantOwnerAccountUseCase'));
+        controller.deleteRestaurantOwnerAccount(req as AuthenticatedRequest, res);
+      }
+    );
 
   }
 

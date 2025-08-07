@@ -6,9 +6,9 @@ export class CategoryValidators {
             body('name')
                 .trim()
                 .notEmpty()
-                .withMessage('Category name is required')
+                .withMessage('Please enter a category name')
                 .isLength({ max: 100 })
-                .withMessage('Category name must not exceed 100 characters')
+                .withMessage('Category name is too long')
         ];
     }
 }

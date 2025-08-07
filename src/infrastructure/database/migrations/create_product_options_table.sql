@@ -1,4 +1,4 @@
-CREATE TABLE product_options (
+CREATE TABLE IF NOT EXISTS product_options (
     id UUID PRIMARY KEY,
     product_id UUID NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE product_options (
     CONSTRAINT unique_product_option_name UNIQUE (product_id, name)
 );
 
-CREATE TABLE product_option_values (
+CREATE TABLE IF NOT EXISTS product_option_values (
     id UUID PRIMARY KEY,
     option_id UUID NOT NULL,
     name VARCHAR(100) NOT NULL,

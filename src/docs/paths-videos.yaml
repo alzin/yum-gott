@@ -6,7 +6,7 @@ components:
         id:
           type: string
           format: uuid
-        customerId:
+        userId:
           type: string
           format: uuid
         publicId:
@@ -21,10 +21,12 @@ components:
         network:
           type: string
           enum: [MTN, Syriatel]
-        invoiceImageUrl:
+        invoiceImage:
           type: string
           format: uri
-          nullable: true
+        statusVideo:
+          type: string
+          enum: [pending, rejected, accepted]
         createdAt:
           type: string
           format: date-time
@@ -33,12 +35,14 @@ components:
           format: date-time
       required:
         - id
-        - customerId
+        - userId
         - publicId
         - secureUrl
         - restaurantName
         - phoneNumber
         - network
+        - invoiceImage
+        - statusVideo
         - createdAt
         - updatedAt
 
@@ -67,6 +71,45 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Video'
+      required:
+        - success
+        - message
+        - data
+
+    PaginatedVideosResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Videos retrieved successfully
+        data:
+          type: object
+          properties:
+            videos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Video'
+            pagination:
+              type: object
+              properties:
+                nextCursor:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Cursor for the next page
+                  example: "2024-01-15T10:30:00.000Z"
+                hasMore:
+                  type: boolean
+                  description: Whether there are more videos to fetch
+                  example: true
+              required:
+                - hasMore
+          required:
+            - videos
+            - pagination
       required:
         - success
         - message
@@ -307,18 +350,82 @@ paths:
 
   /api/videos/accepted:
     get:
-      summary: Get all videos with accepted status
+      summary: Get all videos with accepted status (with pagination)
       tags:
         - Videos
       security:
         - cookieAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of videos to return per page
+          example: 10
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            format: date-time
+          description: Cursor for pagination (ISO 8601 date format)
+          example: "2024-01-15T10:30:00.000Z"
       responses:
         '200':
           description: Accepted videos retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VideosResponse'
+                $ref: '#/components/schemas/PaginatedVideosResponse'
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/videos/customer/accepted:
+    get:
+      summary: Get all accepted videos for the authenticated customer
+      tags:
+        - Videos
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Customer accepted videos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Customer accepted videos retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      videos:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Video'
+                    required:
+                      - videos
+                required:
+                  - success
+                  - message
+                  - data
         '400':
           description: Bad request
           content:
@@ -327,6 +434,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (only customers can access their videos)
           content:
             application/json:
               schema:

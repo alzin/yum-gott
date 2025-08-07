@@ -91,7 +91,7 @@ export class App {
 
 
     const videoRouter = new VideoRouter();
-    this.app.use('/api/videos',videoRouter.getRouter())
+    this.app.use('/api/videos', videoRouter.getRouter())
 
     this.app.use((req: Request, res: Response) => {
       res.status(404).json({

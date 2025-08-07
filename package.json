@@ -37,7 +37,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "ts-node -r tsconfig-paths/register src/infrastructure/database/run-migration.ts",
     "setup-db": "ts-node -r tsconfig-paths/register src/infrastructure/database/setup-database.ts",
-    "swagger:bundle": "swagger-cli bundle src/docs/swagger-root.yaml -o src/docs/swagger.yaml --type yaml"  },
+    "swagger:bundle": "swagger-cli bundle src/docs/swagger-root.yaml -o src/docs/swagger.yaml --type yaml"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -34,7 +34,8 @@ export class VideoRouter {
             this.diContainer.resolve('createVideoUseCase'),
             this.diContainer.resolve('updateVideoUseCase'),
             this.diContainer.resolve('deleteVideoUseCase'),
-            this.diContainer.resolve('getAcceptedVideosUseCase')
+            this.diContainer.resolve('getAcceptedVideosUseCase'),
+            this.diContainer.resolve('getCustomerAcceptedVideosUseCase')
         );
 
         this.router.post(
@@ -78,7 +79,15 @@ export class VideoRouter {
         this.router.get(
             '/accepted',
             authMiddleware.authenticateUser,
+            VideoValidators.getAcceptedVideos(),
+            ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res: Response) => controller.getAcceptedVideos(req, res)
+        );
+
+        this.router.get(
+            '/customer/accepted',
+            authMiddleware.authenticateUser,
+            (req: AuthenticatedRequest, res: Response) => controller.getCustomerAcceptedVideos(req, res)
         );
     }
 

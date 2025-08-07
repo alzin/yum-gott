@@ -1,4 +1,4 @@
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     id UUID PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     restaurant_owner_id UUID NOT NULL,

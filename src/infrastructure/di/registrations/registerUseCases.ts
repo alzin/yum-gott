@@ -7,9 +7,12 @@ import {
     RestaurantOwnerLoginUseCase,
     UpdateRestaurantLocationUseCase,
     GetRestaurantOwnerProfileUseCase,
+    GetCustomerProfileUseCase,
     LogoutUseCase,
     CleanupUnverifiedAccountsUseCase,
-    RefreshTokenUseCase
+    RefreshTokenUseCase,
+    DeleteCustomerAccountUseCase,
+    DeleteRestaurantOwnerAccountUseCase
 } from '@/application/use-cases/auth/index';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/application/use-cases/category';
@@ -72,6 +75,24 @@ export function registerUseCases(container: DIContainer) {
 
     container.registerTransient('getRestaurantOwnerProfileUseCase', () => {
         return new GetRestaurantOwnerProfileUseCase(
+            container.resolve('restaurantOwnerRepository')
+        );
+    });
+
+    container.registerTransient('getCustomerProfileUseCase', () => {
+        return new GetCustomerProfileUseCase(
+            container.resolve('customerRepository')
+        );
+    });
+
+    container.registerTransient('deleteCustomerAccountUseCase', () => {
+        return new DeleteCustomerAccountUseCase(
+            container.resolve('customerRepository')
+        );
+    });
+
+    container.registerTransient('deleteRestaurantOwnerAccountUseCase', () => {
+        return new DeleteRestaurantOwnerAccountUseCase(
             container.resolve('restaurantOwnerRepository')
         );
     });
@@ -179,6 +200,10 @@ export function registerUseCases(container: DIContainer) {
     ));
 
     container.registerTransient('getAcceptedVideosUseCase', () => new (require('@/application/use-cases/video/GetAcceptedVideosUseCase').GetAcceptedVideosUseCase)(
+        container.resolve('IVideoRepository')
+    ));
+
+    container.registerTransient('getCustomerAcceptedVideosUseCase', () => new (require('@/application/use-cases/video/GetCustomerAcceptedVideosUseCase').GetCustomerAcceptedVideosUseCase)(
         container.resolve('IVideoRepository')
     ));
 

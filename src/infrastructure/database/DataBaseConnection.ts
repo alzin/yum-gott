@@ -1,13 +1,11 @@
 import { Pool, PoolClient } from 'pg';
 
 export class DatabaseConnection {
-  private static instance: DatabaseConnection; 
+  private static instance: DatabaseConnection;
   private pool: Pool;
 
   private constructor() {
     const connectionString = process.env.DATABASE_URL;
-
-
 
     this.pool = new Pool({
       connectionString,
@@ -58,6 +56,21 @@ export class DatabaseConnection {
     }
   }
 
+  public async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
+    const client = await this.getClient();
+    try {
+      await client.query('BEGIN');
+      const result = await callback(client);
+      await client.query('COMMIT');
+      return result;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   public async close(): Promise<void> {
     try {
       await this.pool.end();
@@ -70,5 +83,33 @@ export class DatabaseConnection {
 
   public getPool(): Pool {
     return this.pool;
+  }
+
+  // Safety method to check if a table exists
+  public async tableExists(tableName: string): Promise<boolean> {
+    try {
+      const result = await this.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = $1
+        );
+      `, [tableName]);
+      return result.rows[0].exists;
+    } catch (error) {
+      console.error(`Error checking if table ${tableName} exists:`, error);
+      return false;
+    }
+  }
+
+  // Safety method to get table row count
+  public async getTableRowCount(tableName: string): Promise<number> {
+    try {
+      const result = await this.query(`SELECT COUNT(*) FROM ${tableName}`);
+      return parseInt(result.rows[0].count);
+    } catch (error) {
+      console.error(`Error getting row count for table ${tableName}:`, error);
+      return 0;
+    }
   }
 }

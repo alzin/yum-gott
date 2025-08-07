@@ -1,4 +1,4 @@
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
     id UUID PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL,
     product_name VARCHAR(255) NOT NULL,

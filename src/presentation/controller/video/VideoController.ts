@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase, GetAcceptedVideosUseCase } from '@/application/use-cases/video/index';
+import { CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase, GetAcceptedVideosUseCase, GetCustomerAcceptedVideosUseCase } from '@/application/use-cases/video/index';
 import { AuthenticatedRequest } from '@/presentation/middleware/AuthMiddleware';
 
 export class VideoController {
@@ -7,7 +7,8 @@ export class VideoController {
         private createVideoUseCase: CreateVideoUseCase,
         private updateVideoUseCase: UpdateVideoUseCase,
         private deleteVideoUseCase: DeleteVideoUseCase,
-        private getAcceptedVideosUseCase: GetAcceptedVideosUseCase
+        private getAcceptedVideosUseCase: GetAcceptedVideosUseCase,
+        private getCustomerAcceptedVideosUseCase: GetCustomerAcceptedVideosUseCase
     ) { }
 
     async createVideo(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -116,10 +117,89 @@ export class VideoController {
 
     async getAcceptedVideos(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const videos = await this.getAcceptedVideosUseCase.execute();
-            res.status(200).json({ success: true, message: 'Videos retrieved successfully', data: videos });
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+            const cursor = req.query.cursor as string | undefined;
+            const cursor_created = req.query.cursor_created as string | undefined;
+            const cursor_id = req.query.cursor_id as string | undefined;
+
+            // Validate limit parameter
+            if (limit !== undefined && (isNaN(limit) || limit < 1 || limit > 100)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Limit must be a number between 1 and 100'
+                });
+                return;
+            }
+
+            // Validate cursor_created if provided
+            if (cursor_created) {
+                const date = new Date(cursor_created);
+                if (isNaN(date.getTime())) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'cursor_created must be a valid ISO8601 date string'
+                    });
+                    return;
+                }
+            }
+
+            const request = {
+                limit,
+                cursor,
+                cursor_created,
+                cursor_id
+            };
+
+            const result = await this.getAcceptedVideosUseCase.execute(request);
+
+            res.status(200).json({
+                success: true,
+                message: 'Videos retrieved successfully',
+                data: {
+                    videos: result.videos,
+                    pagination: {
+                        nextCursor: result.nextCursor,
+                        hasMore: result.hasMore
+                    }
+                }
+            });
         } catch (error) {
-            res.status(400).json({ success: false, message: error instanceof Error ? error.message : 'Failed to retrieve accepted videos' });
+            res.status(400).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to retrieve accepted videos'
+            });
+        }
+    }
+
+    async getCustomerAcceptedVideos(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const user = req.user;
+            if (!user || user.userType !== 'customer') {
+                res.status(403).json({
+                    success: false,
+                    message: 'Forbidden: Only customers can access their videos'
+                });
+                return;
+            }
+
+            const request = {
+                customerId: user.userId
+            };
+
+            const result = await this.getCustomerAcceptedVideosUseCase.execute(request);
+
+            res.status(200).json({
+                success: true,
+                message: 'Customer accepted videos retrieved successfully',
+                data: {
+                    videos: result.videos
+                }
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to retrieve customer accepted videos'
+            });
         }
     }
 

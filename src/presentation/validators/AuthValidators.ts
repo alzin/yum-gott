@@ -22,44 +22,44 @@ export class AuthValidators {
       body('name')
         .trim()
         .notEmpty()
-        .withMessage('Name is required')
+        .withMessage('Please enter your full name')
         .isLength({ min: 2, max: 100 })
         .withMessage('Name must be between 2 and 100 characters')
-        .matches(/^[a-zA-Z\s]+$/)
-        .withMessage('Name can only contain letters and spaces'),
+        .matches(/^[a-zA-Z0-9\s]+$/) 
+        .withMessage('Name can only contain letters, numbers, and spaces'),
       body('email')
         .trim()
         .notEmpty()
-        .withMessage('Email is required')
+        .withMessage('Please enter your email address')
         .isEmail()
-        .withMessage('Invalid email format')
+        .withMessage('Please enter a valid email address (e.g., user@example.com)')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters')
+        .withMessage('Email address is too long')
         .custom((value) => {
           const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
           const parts = value.split('@');
           if (parts.length !== 2 || !domainRegex.test(parts[1])) {
-            throw new Error('Invalid email domain (e.g., no repeated .com)');
+            throw new Error('Please enter a valid email domain');
           }
           if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
-            throw new Error('Email domain contains repeated extensions');
+            throw new Error('Email domain contains invalid extensions');
           }
           return true;
         }),
       body('mobileNumber')
         .trim()
         .notEmpty()
-        .withMessage('Mobile number is required'),
-        // .matches(/^[0-9]{10,15}$/)
-        // .withMessage('Mobile number must be 10-15 digits'),
+        .withMessage('Please enter your mobile number'),
+      // .matches(/^[0-9]{10,15}$/)
+      // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
-        .withMessage('Password is required')
+        .withMessage('Please enter a password')
         .isLength({ min: 6, max: 100 })
         .withMessage('Password must be between 6 and 100 characters')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number')
+        .withMessage('Password must include at least one lowercase letter, one uppercase letter, and one number')
     ];
   }
 
@@ -68,13 +68,13 @@ export class AuthValidators {
       body('restaurantName')
         .trim()
         .notEmpty()
-        .withMessage('Restaurant name is required')
+        .withMessage('Please enter your restaurant name')
         .isLength({ min: 2, max: 255 })
         .withMessage('Restaurant name must be between 2 and 255 characters'),
       body('organizationNumber')
         .trim()
         .notEmpty()
-        .withMessage('Organization number is required')
+        .withMessage('Please enter your organization number')
         .isLength({ min: 5, max: 50 })
         .withMessage('Organization number must be between 5 and 50 characters')
         .matches(/^[A-Z0-9]+$/)
@@ -103,8 +103,8 @@ export class AuthValidators {
         .trim()
         .notEmpty()
         .withMessage('Mobile number is required'),
-        // .matches(/^[0-9]{10,15}$/)
-        // .withMessage('Mobile number must be 10-15 digits'),
+      // .matches(/^[0-9]{10,15}$/)
+      // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
         .withMessage('Password is required')

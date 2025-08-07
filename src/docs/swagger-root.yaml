@@ -23,6 +23,8 @@ paths:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1restaurant-owner'
   /api/auth/verify:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1verify'
+  /api/auth/profile/customer:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1profile~1customer'
   /api/auth/profile/restaurant-owner:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1profile~1restaurant-owner'
   /api/auth/profile/image:
@@ -33,6 +35,10 @@ paths:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1refresh-token'
   /api/auth/logout:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1logout'
+  /api/auth/account/customer:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1account~1customer'
+  /api/auth/account/restaurant-owner:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1account~1restaurant-owner'
   # Include paths from paths-products-categories.yaml
 
   /api/products:
@@ -65,6 +71,8 @@ paths:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1{id}'
   /api/videos/accepted:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1accepted'
+  /api/videos/customer/accepted:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1customer~1accepted'
 components:
   schemas:
     RegisterCustomerRequest:
@@ -670,3 +678,16 @@ components:
                 type: number
                 description: "Number of seconds to wait before making another request"
                 example: 60
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error"
