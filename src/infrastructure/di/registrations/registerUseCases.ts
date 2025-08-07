@@ -14,6 +14,8 @@ import {
     DeleteCustomerAccountUseCase,
     DeleteRestaurantOwnerAccountUseCase
 } from '@/application/use-cases/auth/index';
+import { GetVideoFeedUseCase } from '@/application/use-cases/video-tracking/GetVideoFeedUseCase';
+import { UpdateVideoPositionUseCase } from '@/application/use-cases/video-tracking/UpdateVideoPositionUseCase';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
 import { CreateCategoryUseCase, GetCategoriesByRestaurantUseCase } from '@/application/use-cases/category';
 import { CreateProductOptionUseCase, CreateProductOptionValueUseCase, GetProductOptionsUseCase, DeleteProductOptionUseCase, DeleteProductOptionValueUseCase } from '@/application/use-cases/product-option/index';
@@ -204,6 +206,19 @@ export function registerUseCases(container: DIContainer) {
     ));
 
     container.registerTransient('getCustomerAcceptedVideosUseCase', () => new (require('@/application/use-cases/video/GetCustomerAcceptedVideosUseCase').GetCustomerAcceptedVideosUseCase)(
+        container.resolve('IVideoRepository')
+    ));
+
+    // Video Tracking UseCases
+    container.registerTransient('getVideoFeedUseCase', () => new GetVideoFeedUseCase(
+        container.resolve('IVideoRepository'),
+        container.resolve('customerRepository'),
+        container.resolve('restaurantOwnerRepository')
+    ));
+
+    container.registerTransient('updateVideoPositionUseCase', () => new UpdateVideoPositionUseCase(
+        container.resolve('customerRepository'),
+        container.resolve('restaurantOwnerRepository'),
         container.resolve('IVideoRepository')
     ));
 

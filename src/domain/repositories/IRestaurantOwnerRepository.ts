@@ -14,4 +14,5 @@ export interface IRestaurantOwnerRepository {
     updateLocation(id: string, location: { address: string; latitude: number; longitude: number }): Promise<RestaurantOwner>;
     deleteUnverifiedOlderThan(date: Date): Promise<number>;
     getRestaurantOwnerProfile(id: string): Promise<{ restaurantName: string; profileImageUrl: string | null; isActive: boolean }>;
+    updateLastSeenVideo(id: string, lastSeenVideoId: string): Promise<RestaurantOwner>;
 }

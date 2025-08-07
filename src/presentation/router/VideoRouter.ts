@@ -77,7 +77,7 @@ export class VideoRouter {
         );
 
         this.router.get(
-            '/accepted',
+            '/customer/accepted',
             authMiddleware.authenticateUser,
             VideoValidators.getAcceptedVideos(),
             ValidationMiddleware.handleValidationErrors(),
@@ -85,7 +85,7 @@ export class VideoRouter {
         );
 
         this.router.get(
-            '/customer/accepted',
+            '/accepted',
             authMiddleware.authenticateUser,
             (req: AuthenticatedRequest, res: Response) => controller.getCustomerAcceptedVideos(req, res)
         );

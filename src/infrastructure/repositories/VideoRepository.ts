@@ -177,9 +177,54 @@ export class VideoRepository implements IVideoRepository {
         return rows.map(this.mapRowToVideoEntites);
     }
 
+    async findAllAcceptedVideos(): Promise<Video[]> {
+        const query = 'SELECT * FROM videos WHERE status_video = $1 ORDER BY created_at DESC';
+        const { rows } = await this.db.query(query, [VideoStatus.ACCEPTED]);
+        return rows.map(this.mapRowToVideoEntites);
+    }
+
     async delete(id: string): Promise<void> {
         const query = 'DELETE FROM videos WHERE id = $1';
         await this.db.query(query, [id]);
+    }
+
+    async getVideosAfterId(lastSeenVideoId: string | null, limit: number, cursor?: string): Promise<Video[]> {
+        let query: string;
+        let values: any[];
+
+        if (cursor) {
+            // If cursor is provided, get videos after the cursor
+            query = `
+                SELECT * FROM videos 
+                WHERE status_video = 'accepted'
+                AND id > $1
+                ORDER BY id ASC 
+                LIMIT $2
+            `;
+            values = [cursor, limit];
+        } else if (lastSeenVideoId) {
+            // If last seen video ID is provided, get videos after that
+            query = `
+                SELECT * FROM videos 
+                WHERE status_video = 'accepted'
+                AND id > $1
+                ORDER BY id ASC 
+                LIMIT $2
+            `;
+            values = [lastSeenVideoId, limit];
+        } else {
+            // If no last seen video, get from the beginning
+            query = `
+                SELECT * FROM videos 
+                WHERE status_video = 'accepted'
+                ORDER BY id ASC 
+                LIMIT $1
+            `;
+            values = [limit];
+        }
+
+        const { rows } = await this.db.query(query, values);
+        return rows.map(this.mapRowToVideoEntites);
     }
 
     private mapRowToVideoEntites(row: any): Video {

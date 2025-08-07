@@ -139,7 +139,7 @@ export class CustomerRepository implements ICustomerRepository {
         await this.db.query(query, [id]);
     }
 
- 
+
     async existsByEmail(email: string): Promise<boolean> {
         const query = 'SELECT 1 FROM customers WHERE email = $1 LIMIT 1';
         const result = await this.db.query(query, [email]);
@@ -170,6 +170,20 @@ export class CustomerRepository implements ICustomerRepository {
         return result.rows[0];
     }
 
+    async updateLastSeenVideo(id: string, lastSeenVideoId: string): Promise<Customer> {
+        const query = `
+            UPDATE customers 
+            SET last_seen_video_id = $1
+            WHERE id = $2
+            RETURNING *
+        `;
+        const result = await this.db.query(query, [lastSeenVideoId, id]);
+        if (result.rows.length === 0) {
+            throw new Error('Customer not found');
+        }
+        return this.mapRowToCustomer(result.rows[0]);
+    }
+
     private mapRowToCustomer(row: any): Customer {
         return {
             id: row.id,
@@ -183,7 +197,8 @@ export class CustomerRepository implements ICustomerRepository {
             tokenExpiresAt: row.token_expires_at,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
-            profileImageUrl: row.profile_image_url
+            profileImageUrl: row.profile_image_url,
+            lastSeenVideoId: row.last_seen_video_id
         };
     }
 }
