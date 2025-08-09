@@ -73,6 +73,10 @@ paths:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1accepted'
   /api/videos/customer/accepted:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1customer~1accepted'
+  /api/videos/feed:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1feed'
+  /api/videos/update-position:
+    $ref: './paths-videos.yaml#/paths/~1api~1videos~1update-position'
 components:
   schemas:
     RegisterCustomerRequest:

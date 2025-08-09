@@ -17,6 +17,7 @@ class MigrationRunner {
     'create_categories_table.sql',
     'create_opening_hours_table.sql',
     'create_videos_table.sql',
+    'add_last_seen_video_tracking.sql',
   ].map(file => path.join(__dirname, 'migrations', file));
 
   private readonly dangerousKeywords = [

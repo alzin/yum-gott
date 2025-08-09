@@ -213,6 +213,20 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
         return result.rows[0];
     }
 
+    async updateLastSeenVideo(id: string, lastSeenVideoId: string): Promise<RestaurantOwner> {
+        const query = `
+            UPDATE restaurant_owners 
+            SET last_seen_video_id = $1
+            WHERE id = $2
+            RETURNING *
+        `;
+        const result = await this.db.query(query, [lastSeenVideoId, id]);
+        if (result.rows.length === 0) {
+            throw new Error('Restaurant owner not found');
+        }
+        return this.mapRowToRestaurantOwner(result.rows[0]);
+    }
+
     private mapRowToRestaurantOwner(row: any): RestaurantOwner {
         return {
             id: row.id,
@@ -230,7 +244,8 @@ export class RestaurantOwnerRepository implements IRestaurantOwnerRepository {
             profileImageUrl: row.profile_image_url,
             address: row.address,
             latitude: row.latitude,
-            longitude: row.longitude
+            longitude: row.longitude,
+            lastSeenVideoId: row.last_seen_video_id
         };
     }
 }

@@ -348,7 +348,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api/videos/accepted:
+  /api/videos/customer/accepted:
     get:
       summary: Get all videos with accepted status (with pagination)
       tags:
@@ -392,7 +392,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api/videos/customer/accepted:
+  /api/videos/accepted:
     get:
       summary: Get all accepted videos for the authenticated customer
       tags:
@@ -444,3 +444,86 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/videos/feed:
+    get:
+      summary: Get video feed after user's last seen video
+      tags:
+        - Videos
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User's unique identifier
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+          description: Number of videos to return
+        - in: query
+          name: cursor
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor for next page
+      responses:
+        '200':
+          description: List of videos after last seen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  videos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Video'
+                  next_cursor:
+                    type: string
+                  has_more:
+                    type: boolean
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+
+  /api/videos/update-position:
+    post:
+      summary: Update user's last seen video
+      tags:
+        - Videos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                last_video_id:
+                  type: string
+              required:
+                - user_id
+                - last_video_id
+      responses:
+        '200':
+          description: Position updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Bad request
+        '404':
+          description: User or video not found

@@ -173,21 +173,7 @@ export class VideoController {
 
     async getCustomerAcceptedVideos(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const user = req.user;
-            if (!user || user.userType !== 'customer') {
-                res.status(403).json({
-                    success: false,
-                    message: 'Forbidden: Only customers can access their videos'
-                });
-                return;
-            }
-
-            const request = {
-                customerId: user.userId
-            };
-
-            const result = await this.getCustomerAcceptedVideosUseCase.execute(request);
-
+            const result = await this.getCustomerAcceptedVideosUseCase.execute();
             res.status(200).json({
                 success: true,
                 message: 'Customer accepted videos retrieved successfully',

@@ -9,6 +9,7 @@ export interface BaseUser {
     createdAt?: Date;
     updatedAt?: Date;
     profileImageUrl?: string | null;
+    lastSeenVideoId?: string | null;
 }
 
 export interface Customer extends BaseUser {
@@ -21,6 +22,6 @@ export interface RestaurantOwner extends BaseUser {
     organizationNumber: string;
     email: string;
     address?: string | null;
-    latitude?: number | null; 
-    longitude?: number | null; 
+    latitude?: number | null;
+    longitude?: number | null;
 }
