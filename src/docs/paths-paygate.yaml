@@ -1,0 +1,30 @@
+paths:
+  /api/payGate:
+    get:
+      tags:
+        - PayGate
+      summary: List active pay gates
+      description: Returns all active payment gateways as an array of code/label pairs.
+      operationId: listPayGates
+      responses:
+        '200':
+          description: Active pay gates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Active pay gates
+                  data:
+                    type: array
+                    items:
+                      $ref: './swagger-root.yaml#/components/schemas/PayGate'
+        '500':
+          $ref: './swagger-root.yaml#/components/responses/InternalServerError'
+
+

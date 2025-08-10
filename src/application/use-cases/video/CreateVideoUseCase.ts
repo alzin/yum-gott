@@ -65,6 +65,7 @@ export class CreateVideoUseCase {
             network,
             invoiceImage: invoiceImageUrl,
             statusVideo: VideoStatus.PENDING,
+            likesCount: 0,
             createdAt: new Date(),
             updatedAt: new Date()
         };

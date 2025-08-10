@@ -1,4 +1,5 @@
 import { Pool, PoolClient } from 'pg';
+import { v4 as uuidv4 } from 'uuid';
 
 export class DatabaseConnection {
   private static instance: DatabaseConnection;
@@ -111,5 +112,10 @@ export class DatabaseConnection {
       console.error(`Error getting row count for table ${tableName}:`, error);
       return 0;
     }
+  }
+
+  // Utility method to generate UUIDs consistently across the app
+  public generateUUID(): string {
+    return uuidv4();
   }
 }

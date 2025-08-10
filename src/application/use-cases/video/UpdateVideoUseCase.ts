@@ -70,6 +70,7 @@ export class UpdateVideoUseCase {
             network,
             invoiceImage: invoiceImageUrl,
             statusVideo: VideoStatus.PENDING,
+            likesCount: existingVideo.likesCount ?? 0,
             createdAt: existingVideo.createdAt,
             updatedAt: new Date()
         };

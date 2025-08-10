@@ -11,7 +11,8 @@ const VIDEO_FIELD_MAPPINGS: Record<string, string> = {
     phoneNumber: 'phone_number',
     network: 'network',
     invoiceImage: 'invoice_image',
-    statusVideo: 'status_video'
+    statusVideo: 'status_video',
+    likesCount: 'likes_count'
 };
 
 export class VideoRepository implements IVideoRepository {
@@ -21,8 +22,8 @@ export class VideoRepository implements IVideoRepository {
         const query = `
             INSERT INTO videos (
                 id, user_id, public_id, secure_url, restaurantname, phone_number, 
-                network, invoice_image, status_video, created_at, updated_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                network, invoice_image, status_video, likes_count, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             RETURNING *
         `;
 
@@ -36,6 +37,7 @@ export class VideoRepository implements IVideoRepository {
             video.network,
             video.invoiceImage,
             video.statusVideo,
+            video.likesCount || 0,
             video.createdAt || new Date(),
             video.updatedAt || new Date()
         ];
@@ -238,6 +240,7 @@ export class VideoRepository implements IVideoRepository {
             network: row.network,
             invoiceImage: row.invoice_image,
             statusVideo: row.status_video,
+            likesCount: row.likes_count || 0,
             createdAt: row.created_at,
             updatedAt: row.updated_at
         };
