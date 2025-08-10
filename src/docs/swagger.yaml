@@ -2252,6 +2252,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/payGate:
+    get:
+      tags:
+        - PayGate
+      summary: List active pay gates
+      description: Returns all active payment gateways as an array of strings.
+      operationId: listPayGates
+      responses:
+        '200':
+          description: Active pay gates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Active pay gates
+                  data:
+                    type: array
+                    items:
+                      type: string
+                      example: PAYMENT_X
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     cookieAuth:
@@ -2861,6 +2889,14 @@ components:
         - userId
         - userType
         - createdAt
+    PayGate:
+      type: object
+      properties:
+        gateName:
+          type: string
+          example: PAYMENT_X
+      required:
+        - gateName
     CreateCommentRequest:
       type: object
       properties:

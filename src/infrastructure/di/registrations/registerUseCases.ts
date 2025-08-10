@@ -23,6 +23,7 @@ import { CreateOpeningHoursUseCase, GetopeningHoursUseCase } from '@/application
 import { DeleteOpeningHoursUseCase } from '@/application/use-cases/opening-hours/DeleteOpeningHoursUseCase';
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
+import { GetActivePayGatesUseCase } from '@/application/use-cases/paygate/GetActivePayGatesUseCase';
 
 export function registerUseCases(container: DIContainer) {
     // Auth UseCases
@@ -255,4 +256,9 @@ export function registerUseCases(container: DIContainer) {
     // Controllers & Middleware
     container.registerSingleton('authController', () => new AuthController());
     container.registerSingleton('authMiddleware', () => new AuthMiddleware(container.resolve('authRepository')));
+
+    // PayGate use cases
+    container.registerTransient('getActivePayGatesUseCase', () => new GetActivePayGatesUseCase(
+        container.resolve('IPayGateRepository')
+    ));
 } 

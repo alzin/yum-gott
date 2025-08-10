@@ -17,6 +17,8 @@ export class CommentValidators {
         ];
     }
 
+   
+
     static videoIdParam(): ValidationChain[] {
         return [
             param('videoId')
