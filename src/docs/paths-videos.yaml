@@ -27,6 +27,10 @@ components:
         statusVideo:
           type: string
           enum: [pending, rejected, accepted]
+        likesCount:
+          type: integer
+          description: Number of likes on the video
+          example: 42
         createdAt:
           type: string
           format: date-time
@@ -43,6 +47,7 @@ components:
         - network
         - invoiceImage
         - statusVideo
+        - likesCount
         - createdAt
         - updatedAt
 
@@ -70,7 +75,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Video'
+             $ref: './swagger-root.yaml#/components/schemas/Video'
       required:
         - success
         - message
@@ -185,19 +190,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can create videos)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
 
   /api/videos/{id}:
     put:
@@ -269,31 +274,31 @@ paths:
                     type: string
                     example: Video updated successfully
                   data:
-                    $ref: '#/components/schemas/Video'
+                    $ref: './swagger-root.yaml#/components/schemas/Video'
         '400':
           description: Bad request (validation error)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can update videos)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '404':
           description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
 
     delete:
       summary: Delete a video
@@ -328,13 +333,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can delete videos)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '404':
           description: Video not found
           content:
@@ -378,19 +383,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedVideosResponse'
+                $ref: './swagger-root.yaml#/components/schemas/PaginatedVideosResponse'
         '400':
           description: Bad request (validation error)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
 
   /api/videos/accepted:
     get:
@@ -419,7 +424,7 @@ paths:
                       videos:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Video'
+                           $ref: './swagger-root.yaml#/components/schemas/Video'
                     required:
                       - videos
                 required:
@@ -431,19 +436,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can access their videos)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './swagger-root.yaml#/components/schemas/ErrorResponse'
 
   /api/videos/feed:
     get:
@@ -482,7 +487,7 @@ paths:
                   videos:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Video'
+                      $ref: './swagger-root.yaml#/components/schemas/Video'
                   next_cursor:
                     type: string
                   has_more:

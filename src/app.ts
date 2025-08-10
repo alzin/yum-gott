@@ -6,7 +6,7 @@ import YAML from 'yamljs';
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
-import { AuthRouter, CategoryRouter, OpeningHoursRouter, ProductRouter, VideoRouter, VideoTrackingRouter } from './presentation/router/index';
+import { AuthRouter, CategoryRouter, OpeningHoursRouter, ProductRouter, VideoRouter, VideoTrackingRouter, CommentRouter, LikeRouter } from './presentation/router/index';
 import path from "path";
 // import { CleanupUnverifiedAccounts } from './infrastructure/services/CleanupUnverifiedAccounts';
 
@@ -98,6 +98,12 @@ export class App {
       DIContainer.getInstance().resolve('updateVideoPositionUseCase')
     );
     this.app.use('/api/videos', videoTrackingRouter.getRouter());
+
+    const commentRouter = new CommentRouter();
+    this.app.use('/api/comments', commentRouter.getRouter());
+
+    const likeRouter = new LikeRouter();
+    this.app.use('/api/likes', likeRouter.getRouter());
 
     this.app.use((req: Request, res: Response) => {
       res.status(404).json({

@@ -44,6 +44,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@apidevtools/swagger-cli": "^4.0.4",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.18",

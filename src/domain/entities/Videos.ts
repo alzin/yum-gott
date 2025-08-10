@@ -19,6 +19,7 @@ export interface Video {
     network: Network;
     invoiceImage: string;
     statusVideo: VideoStatus;
+    likesCount: number;
     createdAt?: Date;
     updatedAt?: Date;
 }

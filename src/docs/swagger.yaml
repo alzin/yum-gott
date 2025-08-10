@@ -1610,6 +1610,10 @@ paths:
                           - pending
                           - rejected
                           - accepted
+                      likesCount:
+                        type: integer
+                        description: Number of likes on the video
+                        example: 42
                       createdAt:
                         type: string
                         format: date-time
@@ -1626,6 +1630,7 @@ paths:
                       - network
                       - invoiceImage
                       - statusVideo
+                      - likesCount
                       - createdAt
                       - updatedAt
         '400':
@@ -1633,28 +1638,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                required:
-                  - success
-                  - message
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can create videos)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
   '/api/videos/{id}':
     put:
       summary: Update an existing video
@@ -1727,31 +1723,31 @@ paths:
                     type: string
                     example: Video updated successfully
                   data:
-                    $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
+                    $ref: '#/components/schemas/Video'
         '400':
           description: Bad request (validation error)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can update videos)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: Delete a video
       tags:
@@ -1785,25 +1781,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                required:
+                  - success
+                  - message
         '403':
           description: Forbidden (only customers can delete videos)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/paths/~1api~1videos~1%7Bid%7D/delete/responses/401/content/application~1json/schema'
   /api/videos/accepted:
     get:
       summary: Get all accepted videos for the authenticated customer
@@ -1831,7 +1836,7 @@ paths:
                       videos:
                         type: array
                         items:
-                          $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
+                          $ref: '#/components/schemas/Video'
                     required:
                       - videos
                 required:
@@ -1843,19 +1848,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden (only customers can access their videos)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
   /api/videos/customer/accepted:
     get:
       summary: Get all videos with accepted status (with pagination)
@@ -1886,55 +1891,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Videos retrieved successfully
-                  data:
-                    type: object
-                    properties:
-                      videos:
-                        type: array
-                        items:
-                          $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
-                      pagination:
-                        type: object
-                        properties:
-                          nextCursor:
-                            type: string
-                            format: date-time
-                            nullable: true
-                            description: Cursor for the next page
-                            example: '2024-01-15T10:30:00.000Z'
-                          hasMore:
-                            type: boolean
-                            description: Whether there are more videos to fetch
-                            example: true
-                        required:
-                          - hasMore
-                    required:
-                      - videos
-                      - pagination
-                required:
-                  - success
-                  - message
-                  - data
+                $ref: '#/components/schemas/PaginatedVideosResponse'
         '400':
           description: Bad request (validation error)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized (invalid or missing token)
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1videos/post/responses/400/content/application~1json/schema'
+                $ref: '#/components/schemas/ErrorResponse'
   /api/videos/feed:
     get:
       summary: Get video feed after user's last seen video
@@ -1972,7 +1941,7 @@ paths:
                   videos:
                     type: array
                     items:
-                      $ref: '#/paths/~1api~1videos/post/responses/201/content/application~1json/schema/properties/data'
+                      $ref: '#/components/schemas/Video'
                   next_cursor:
                     type: string
                   has_more:
@@ -2016,7 +1985,279 @@ paths:
           description: Bad request
         '404':
           description: User or video not found
+  /api/comments:
+    post:
+      tags:
+        - Comments
+      summary: Create a new comment on a video
+      description: Creates a new comment on a video. Requires authentication.
+      operationId: createComment
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                videoId:
+                  type: string
+                  format: uuid
+                  description: ID of the video to comment on
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                content:
+                  type: string
+                  description: Comment content
+                  minLength: 1
+                  maxLength: 1000
+                  example: Great video! The food looks amazing.
+              required:
+                - videoId
+                - content
+      responses:
+        '201':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Comment created successfully
+                  data:
+                    $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/comments/video/{videoId}':
+    get:
+      tags:
+        - Comments
+      summary: Get all comments for a video
+      description: Retrieves all comments for a specific video. This is a public endpoint.
+      operationId: getVideoComments
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the video
+          example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: Comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Comments retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '404':
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/comments/{id}':
+    delete:
+      tags:
+        - Comments
+      summary: Delete a comment
+      description: Deletes a comment. Users can only delete their own comments. Requires authentication.
+      operationId: deleteComment
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the comment to delete
+          example: 123e4567-e89b-12d3-a456-426614174001
+      responses:
+        '200':
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Comment deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - User can only delete their own comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/likes/toggle:
+    post:
+      tags:
+        - Likes
+      summary: Toggle like on a video
+      description: 'Toggles the like status on a video. If not liked, adds a like. If already liked, removes the like. Requires authentication.'
+      operationId: toggleVideoLike
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                videoId:
+                  type: string
+                  format: uuid
+                  description: ID of the video to like/unlike
+                  example: 123e4567-e89b-12d3-a456-426614174000
+              required:
+                - videoId
+      responses:
+        '200':
+          description: Like status toggled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Video liked successfully
+                  data:
+                    type: object
+                    properties:
+                      isLiked:
+                        type: boolean
+                        description: Whether the video is currently liked by the user
+                        example: true
+                      likesCount:
+                        type: integer
+                        description: Total number of likes on the video
+                        example: 43
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/likes/video/{videoId}':
+    get:
+      tags:
+        - Likes
+      summary: Get likes for a video
+      description: Retrieves all likes for a specific video. This is a public endpoint.
+      operationId: getVideoLikes
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the video
+          example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: Video likes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Video likes retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      likes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Like'
+                      totalCount:
+                        type: integer
+                        description: Total number of likes
+                        example: 42
+        '404':
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
   schemas:
     RegisterCustomerRequest:
       type: object
@@ -2549,11 +2790,232 @@ components:
           type: string
           format: date-time
           example: '2025-01-01T00:00:00Z'
-  securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: accessToken
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        content:
+          type: string
+          example: Great video! The food looks delicious.
+        videoId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174001
+        userId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174002
+        userType:
+          type: string
+          enum:
+            - customer
+            - restaurant_owner
+          example: customer
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00Z'
+      required:
+        - id
+        - content
+        - videoId
+        - userId
+        - userType
+        - createdAt
+        - updatedAt
+    Like:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        videoId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174001
+        userId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174002
+        userType:
+          type: string
+          enum:
+            - customer
+            - restaurant_owner
+          example: customer
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00Z'
+      required:
+        - id
+        - videoId
+        - userId
+        - userType
+        - createdAt
+    CreateCommentRequest:
+      type: object
+      properties:
+        videoId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174001
+        content:
+          type: string
+          example: Great video! The food looks delicious.
+      required:
+        - videoId
+        - content
+    ToggleLikeRequest:
+      type: object
+      properties:
+        videoId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174001
+      required:
+        - videoId
+    Video:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174001
+        publicId:
+          type: string
+          example: video_123
+        secureUrl:
+          type: string
+          format: uri
+          example: 'https://example.com/video.mp4'
+        restaurantName:
+          type: string
+          example: Tasty Bites
+        phoneNumber:
+          type: string
+          example: 01234567890
+        network:
+          type: string
+          enum:
+            - MTN
+            - Syriatel
+          example: MTN
+        invoiceImage:
+          type: string
+          format: uri
+          example: 'https://example.com/invoice.jpg'
+        statusVideo:
+          type: string
+          enum:
+            - pending
+            - rejected
+            - accepted
+          example: accepted
+        likesCount:
+          type: integer
+          description: Number of likes on the video
+          example: 42
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00Z'
+      required:
+        - id
+        - userId
+        - publicId
+        - secureUrl
+        - restaurantName
+        - phoneNumber
+        - network
+        - invoiceImage
+        - statusVideo
+        - likesCount
+        - createdAt
+        - updatedAt
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: An error occurred
+      required:
+        - success
+        - message
+    VideosResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Videos retrieved successfully
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Video'
+      required:
+        - success
+        - message
+        - data
+    PaginatedVideosResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Videos retrieved successfully
+        data:
+          type: object
+          properties:
+            videos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Video'
+            pagination:
+              type: object
+              properties:
+                nextCursor:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Cursor for the next page
+                  example: '2024-01-15T10:30:00.000Z'
+                hasMore:
+                  type: boolean
+                  description: Whether there are more videos to fetch
+                  example: true
+              required:
+                - hasMore
+          required:
+            - videos
+            - pagination
+      required:
+        - success
+        - message
+        - data
   responses:
     BadRequestError:
       description: Bad request

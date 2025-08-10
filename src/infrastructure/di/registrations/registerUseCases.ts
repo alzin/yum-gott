@@ -230,6 +230,28 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('restaurantOwnerRepository')
     ));
 
+    // Comment use cases
+    container.registerTransient('createCommentUseCase', () => new (require('@/application/use-cases/comment/CreateCommentUseCase').CreateCommentUseCase)(
+        container.resolve('ICommentRepository'),
+        container.resolve('IVideoRepository')
+    ));
+    container.registerTransient('getVideoCommentsUseCase', () => new (require('@/application/use-cases/comment/GetVideoCommentsUseCase').GetVideoCommentsUseCase)(
+        container.resolve('ICommentRepository')
+    ));
+    container.registerTransient('deleteCommentUseCase', () => new (require('@/application/use-cases/comment/DeleteCommentUseCase').DeleteCommentUseCase)(
+        container.resolve('ICommentRepository')
+    ));
+
+    // Like use cases
+    container.registerTransient('toggleVideoLikeUseCase', () => new (require('@/application/use-cases/like/ToggleVideoLikeUseCase').ToggleVideoLikeUseCase)(
+        container.resolve('ILikeRepository'),
+        container.resolve('IVideoRepository')
+    ));
+    container.registerTransient('getVideoLikesUseCase', () => new (require('@/application/use-cases/like/GetVideoLikesUseCase').GetVideoLikesUseCase)(
+        container.resolve('ILikeRepository'),
+        container.resolve('IVideoRepository')
+    ));
+
     // Controllers & Middleware
     container.registerSingleton('authController', () => new AuthController());
     container.registerSingleton('authMiddleware', () => new AuthMiddleware(container.resolve('authRepository')));

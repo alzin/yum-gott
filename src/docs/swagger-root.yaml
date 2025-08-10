@@ -9,6 +9,8 @@ servers:
     description: Local development server
   - url: https://yum-gott.onrender.com
     description: Production server
+
+# Paths
 paths:
   # Include paths from paths-auth-health.yaml
   /health:
@@ -77,7 +79,24 @@ paths:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1feed'
   /api/videos/update-position:
     $ref: './paths-videos.yaml#/paths/~1api~1videos~1update-position'
+  # Include paths from paths-comments-likes.yaml
+  /api/comments:
+    $ref: './paths-comments-likes.yaml#/paths/~1api~1comments'
+  /api/comments/video/{videoId}:
+    $ref: './paths-comments-likes.yaml#/paths/~1api~1comments~1video~1{videoId}'
+  /api/comments/{id}:
+    $ref: './paths-comments-likes.yaml#/paths/~1api~1comments~1{id}'
+  /api/likes/toggle:
+    $ref: './paths-comments-likes.yaml#/paths/~1api~1likes~1toggle'
+  /api/likes/video/{videoId}:
+    $ref: './paths-comments-likes.yaml#/paths/~1api~1likes~1video~1{videoId}'
+
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
   schemas:
     RegisterCustomerRequest:
       type: object
@@ -607,11 +626,223 @@ components:
           type: string
           format: date-time
           example: "2025-01-01T00:00:00Z"
-  securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: accessToken
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        content:
+          type: string
+          example: "Great video! The food looks delicious."
+        videoId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        userType:
+          type: string
+          enum: [customer, restaurant_owner]
+          example: "customer"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+      required:
+        - id
+        - content
+        - videoId
+        - userId
+        - userType
+        - createdAt
+        - updatedAt
+    Like:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        videoId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        userType:
+          type: string
+          enum: [customer, restaurant_owner]
+          example: "customer"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+      required:
+        - id
+        - videoId
+        - userId
+        - userType
+        - createdAt
+    CreateCommentRequest:
+      type: object
+      properties:
+        videoId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        content:
+          type: string
+          example: "Great video! The food looks delicious."
+      required:
+        - videoId
+        - content
+    ToggleLikeRequest:
+      type: object
+      properties:
+        videoId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      required:
+        - videoId
+    Video:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        publicId:
+          type: string
+          example: "video_123"
+        secureUrl:
+          type: string
+          format: uri
+          example: "https://example.com/video.mp4"
+        restaurantName:
+          type: string
+          example: "Tasty Bites"
+        phoneNumber:
+          type: string
+          example: "01234567890"
+        network:
+          type: string
+          enum: [MTN, Syriatel]
+          example: "MTN"
+        invoiceImage:
+          type: string
+          format: uri
+          example: "https://example.com/invoice.jpg"
+        statusVideo:
+          type: string
+          enum: [pending, rejected, accepted]
+          example: "accepted"
+        likesCount:
+          type: integer
+          description: Number of likes on the video
+          example: 42
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+      required:
+        - id
+        - userId
+        - publicId
+        - secureUrl
+        - restaurantName
+        - phoneNumber
+        - network
+        - invoiceImage
+        - statusVideo
+        - likesCount
+        - createdAt
+        - updatedAt
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "An error occurred"
+      required:
+        - success
+        - message
+    VideosResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Videos retrieved successfully
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Video'
+      required:
+        - success
+        - message
+        - data
+    PaginatedVideosResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Videos retrieved successfully
+        data:
+          type: object
+          properties:
+            videos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Video'
+            pagination:
+              type: object
+              properties:
+                nextCursor:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Cursor for the next page
+                  example: "2024-01-15T10:30:00.000Z"
+                hasMore:
+                  type: boolean
+                  description: Whether there are more videos to fetch
+                  example: true
+              required:
+                - hasMore
+          required:
+            - videos
+            - pagination
+      required:
+        - success
+        - message
+        - data
   responses:
     BadRequestError:
       description: Bad request
