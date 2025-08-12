@@ -36,7 +36,20 @@ export class CommentRepository implements ICommentRepository {
     }
 
     async findByVideoId(videoId: string): Promise<Comment[]> {
-        const query = 'SELECT * FROM comments WHERE video_id = $1 ORDER BY created_at DESC';
+        const query = `
+            SELECT 
+                c.*, 
+                CASE 
+                    WHEN c.user_type = 'customer' THEN cust.name 
+                    WHEN c.user_type = 'restaurant_owner' THEN ro.restaurant_name 
+                    ELSE NULL 
+                END AS user_name
+            FROM comments c
+            LEFT JOIN customers cust ON c.user_type = 'customer' AND c.user_id = cust.id
+            LEFT JOIN restaurant_owners ro ON c.user_type = 'restaurant_owner' AND c.user_id = ro.id
+            WHERE c.video_id = $1
+            ORDER BY c.created_at DESC
+        `;
         const result = await this.db.query(query, [videoId]);
 
         return result.rows.map((row: any) => this.mapRowToComment(row));
@@ -86,6 +99,12 @@ export class CommentRepository implements ICommentRepository {
         return result.rowCount > 0;
     }
 
+    async deleteByUser(userId: string, userType: 'customer' | 'restaurant_owner'): Promise<number> {
+        const query = 'DELETE FROM comments WHERE user_id = $1 AND user_type = $2';
+        const result = await this.db.query(query, [userId, userType]);
+        return result.rowCount || 0;
+    }
+
     async countByVideoId(videoId: string): Promise<number> {
         const query = 'SELECT COUNT(*) FROM comments WHERE video_id = $1';
         const result = await this.db.query(query, [videoId]);
@@ -98,6 +117,7 @@ export class CommentRepository implements ICommentRepository {
             videoId: row.video_id,
             userId: row.user_id,
             userType: row.user_type,
+            userName: row.user_name,
             content: row.content,
             createdAt: row.created_at,
             updatedAt: row.updated_at

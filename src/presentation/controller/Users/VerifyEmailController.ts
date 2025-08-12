@@ -8,7 +8,7 @@ export class verifyEmail {
             if (!token || typeof token !== 'string') {
                 res.status(400).json({
                     success: false,
-                    message: 'Verification token is required'
+                    message: 'رمز التحقق مطلوب'
                 });
                 return;
             }
@@ -21,19 +21,19 @@ export class verifyEmail {
                 await customerRepo.verifyEmail(token);
                 res.status(200).json({
                     success: true,
-                    message: 'Email verified successfully. You can now login.'
+                    message: 'تم تأكيد البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.'
                 });
             } catch (error) {
                 await restaurantOwnerRepo.verifyEmail(token);
                 res.status(200).json({
                     success: true,
-                    message: 'Email verified successfully. You can now login.'
+                    message: 'تم تأكيد البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.'
                 });
             }
         } catch (error) {
             res.status(400).json({
                 success: false,
-                message: error instanceof Error ? error.message : 'Verification failed'
+                message: 'فشل التحقق'
             });
         }
     };
