@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { DeleteRestaurantOwnerAccountUseCase } from "@/application/use-cases/auth";
 import { AuthenticatedRequest } from '../../../middleware/AuthMiddleware';
+import { clearAuthCookies } from '@/shared/utils/cookieUtils';
 
 export class DeleteRestaurantOwnerAccountController {
     constructor(
@@ -20,6 +21,9 @@ export class DeleteRestaurantOwnerAccountController {
             }
 
             await this.deleteRestaurantOwnerAccountUseCase.execute(restaurantOwnerId);
+
+            // Clear auth cookies after account deletion
+            clearAuthCookies(res);
 
             res.status(200).json({
                 success: true,
