@@ -25,7 +25,6 @@ export class AuthValidators {
         .withMessage('Please enter your full name')
         .isLength({ min: 2, max: 100 })
         .withMessage('Name must be between 2 and 100 characters')
-        .matches(/^[a-zA-Z0-9\s]+$/) 
         .withMessage('Name can only contain letters, numbers, and spaces'),
       body('email')
         .trim()
