@@ -1,5 +1,5 @@
 import { IFileStorageService } from '@/application/interface/IFileStorageService';
-import { ICustomerRepository , IRestaurantOwnerRepository} from '@/domain/repositories/index';
+import { ICustomerRepository, IRestaurantOwnerRepository } from '@/domain/repositories/index';
 
 export interface UploadProfileImageRequest {
     file: Express.Multer.File | undefined;
@@ -15,7 +15,7 @@ export class UploadProfileImageUseCase {
         private customerRepository: ICustomerRepository,
         private restaurantOwnerRepository: IRestaurantOwnerRepository,
         private fileStorageService: IFileStorageService
-    ) {}
+    ) { }
 
     async execute(request: UploadProfileImageRequest, userTypeFromToken: 'customer' | 'restaurant_owner'): Promise<UploadProfileImageResponse> {
         const { file, userId } = request;
@@ -24,7 +24,7 @@ export class UploadProfileImageUseCase {
         if (!file) {
             throw new Error('No file uploaded');
         }
-      
+
         let oldProfileImageUrl: string | null | undefined;
         if (userTypeFromToken === 'customer') {
             const customer = await this.customerRepository.findById(userId);
