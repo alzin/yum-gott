@@ -10,7 +10,7 @@ export class CreateCategoryUseCase {
     constructor(
         private categoryRepository: ICategoryRepository,
         private restaurantOwnerRepository: IRestaurantOwnerRepository
-    ) {}
+    ) {} 
 
     async execute(request: CreateCategoryRequest, restaurantOwnerId: string): Promise<Category> {
         const { name } = request;
