@@ -6,7 +6,7 @@ export interface CreateCategoryRequest {
     name: string;
 }
 
-export class CreateCategoryUseCase {
+export class CreateCategoryUseCase { 
     constructor(
         private categoryRepository: ICategoryRepository,
         private restaurantOwnerRepository: IRestaurantOwnerRepository
