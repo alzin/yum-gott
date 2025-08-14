@@ -9,7 +9,7 @@ servers:
     description: Local development server
   - url: https://yum-gott.onrender.com
     description: Production server
-
+ 
 # Paths
 paths:
   # Include paths from paths-auth-health.yaml
