@@ -20,7 +20,6 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Start the server
 app.start(port).catch((error) => {
   console.error('Failed to start application:', error);
   process.exit(1);
