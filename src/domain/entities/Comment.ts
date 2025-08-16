@@ -3,6 +3,7 @@ export interface Comment {
     videoId: string;
     userId: string;
     userType: 'customer' | 'restaurant_owner';
+    userName?: string;
     content: string;
     createdAt?: Date;
     updatedAt?: Date;

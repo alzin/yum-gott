@@ -90,13 +90,15 @@ export function registerUseCases(container: DIContainer) {
 
     container.registerTransient('deleteCustomerAccountUseCase', () => {
         return new DeleteCustomerAccountUseCase(
-            container.resolve('customerRepository')
+            container.resolve('customerRepository'),
+            container.resolve('ICommentRepository')
         );
     });
 
     container.registerTransient('deleteRestaurantOwnerAccountUseCase', () => {
         return new DeleteRestaurantOwnerAccountUseCase(
-            container.resolve('restaurantOwnerRepository')
+            container.resolve('restaurantOwnerRepository'),
+            container.resolve('ICommentRepository')
         );
     });
 

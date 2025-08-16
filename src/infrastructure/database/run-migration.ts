@@ -3,7 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 
-dotenv.config();
+const nodeEnv = process.env.NODE_ENV || 'development';
+const envFilePath = `.env.${nodeEnv}`;
+dotenv.config({ path: envFilePath });
 
 class MigrationRunner {
   private db: DatabaseConnection;

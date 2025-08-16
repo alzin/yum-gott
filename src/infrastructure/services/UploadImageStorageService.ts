@@ -3,7 +3,7 @@ import { IFileStorageService } from '@/application/interface/IFileStorageService
 import sharp from 'sharp';
 
 export class FileStorageService implements IFileStorageService {
-  private s3Client: S3Client; 
+  private s3Client: S3Client;
   private bucketName: string;
 
   constructor() {

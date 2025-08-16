@@ -8,4 +8,5 @@ export interface ICommentRepository {
     update(id: string, comment: Partial<Comment>): Promise<Comment | null>;
     delete(id: string): Promise<boolean>;
     countByVideoId(videoId: string): Promise<number>;
+    deleteByUser(userId: string, userType: 'customer' | 'restaurant_owner'): Promise<number>;
 }

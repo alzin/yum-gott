@@ -137,19 +137,20 @@ export class App {
           return iface.address;
         }
       }
-    }
+    } 
     return 'localhost';
   }
 
 
   public getApp(): Application {
     return this.app;
-  }
+  } 
 
   public async start(port: number = 3000): Promise<void> {
     try {
       this.app.listen(port, '0.0.0.0', () => {
-        console.log(`🚀 Server is running on http://localhost:${port}`);
+        const env = process.env.NODE_ENV || 'development';
+        console.log(`🚀 Server is running (env: ${env} - server) on http://localhost:${port}`);
         console.log(`🌐 Network URL: http://${this.getLocalIpAddress()}:${port}`);
       });
     } catch (error) {

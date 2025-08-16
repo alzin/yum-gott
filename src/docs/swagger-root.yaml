@@ -9,7 +9,7 @@ servers:
     description: Local development server
   - url: https://yum-gott.onrender.com
     description: Production server
-
+ 
 # Paths
 paths:
   # Include paths from paths-auth-health.yaml
@@ -676,6 +676,10 @@ components:
           type: string
           enum: [customer, restaurant_owner]
           example: "customer"
+        userName:
+          type: string
+          description: Display name of the commenter (customer name or restaurant name)
+          example: "John Doe"
         createdAt:
           type: string
           format: date-time
