@@ -7,8 +7,10 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local development server
-  - url: https://yum-gott.onrender.com
+  - url: https://production-server-yumgott-30534781840.europe-west1.run.app
     description: Production server
+  - url: https://yum-gott.onrender.com
+    description: Development server
 
 # Paths
 paths:

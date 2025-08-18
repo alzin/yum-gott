@@ -7,8 +7,10 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local development server
-  - url: https://yum-gott.onrender.com
+  - url: https://production-server-yumgott-30534781840.europe-west1.run.app
     description: Production server
+  - url: https://yum-gott.onrender.com
+    description: Development server
 
 paths:
   /health:
@@ -283,7 +285,23 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    $ref: "./swagger-root.yaml#/components/schemas/CustomerResponse"
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        format: uuid
+                        example: "123e4567-e89b-12d3-a456-426614174000"
+                      name:
+                        type: string
+                        example: "Ahmed Mohamed"
+                      profileImageUrl:
+                        type: string
+                        nullable: true
+                        example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg"
+                      isActive:
+                        type: boolean
+                        description: Whether the customer account is active
+                        example: true
         "401":
           $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
         "403":

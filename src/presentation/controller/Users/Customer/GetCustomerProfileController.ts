@@ -25,7 +25,7 @@ export class getCustomerProfile {
             }
             res.status(200).json({
                 success: true,
-                data: result.data
+                data: { userId: user.userId, ...result.data }
             });
         } catch (error) {
             console.error('Error getting customer profile:', error);
