@@ -192,34 +192,65 @@ export class VideoRepository implements IVideoRepository {
 
     async getVideosAfterId(lastSeenVideoId: string | null, limit: number, cursor?: string): Promise<Video[]> {
         let query: string;
-        let values: any[];
+        let values: any[] = [];
+
+        let lastSeenCreatedAt: Date | null = null;
+        let lastSeenId: string | null = null;
+        if (lastSeenVideoId) {
+            const lastSeenVideo = await this.findById(lastSeenVideoId);
+            if (lastSeenVideo) {
+                lastSeenCreatedAt = lastSeenVideo.createdAt as Date;
+                lastSeenId = lastSeenVideo.id as string;
+            }
+        }
 
         if (cursor) {
-            // If cursor is provided, get videos after the cursor
+            const cursorVideo = await this.findById(cursor);
+            if (!cursorVideo) {
+                if (lastSeenCreatedAt && lastSeenId) {
+                    query = `
+                        SELECT * FROM videos
+                        WHERE status_video = 'accepted'
+                        AND (created_at, id) < ($1, $2)
+                        ORDER BY created_at DESC, id DESC
+                        LIMIT $3
+                    `;
+                    values = [lastSeenCreatedAt, lastSeenId, limit];
+                } else {
+                    query = `
+                        SELECT * FROM videos
+                        WHERE status_video = 'accepted'
+                        ORDER BY created_at DESC, id DESC
+                        LIMIT $1
+                    `;
+                    values = [limit];
+                }
+            } else {
+                query = `
+                    SELECT * FROM videos 
+                    WHERE status_video = 'accepted'
+                    AND (created_at, id) < ($1, $2)
+                    ORDER BY created_at DESC, id DESC 
+                    LIMIT $3
+                `;
+                values = [cursorVideo.createdAt, cursorVideo.id, limit];
+            }
+        } else if (lastSeenCreatedAt && lastSeenId) {
+            // First page after last seen: strictly OLDER than last seen
             query = `
                 SELECT * FROM videos 
                 WHERE status_video = 'accepted'
-                AND id > $1
-                ORDER BY id ASC 
-                LIMIT $2
+                AND (created_at, id) < ($1, $2)
+                ORDER BY created_at DESC, id DESC 
+                LIMIT $3
             `;
-            values = [cursor, limit];
-        } else if (lastSeenVideoId) {
-            // If last seen video ID is provided, get videos after that
-            query = `
-                SELECT * FROM videos 
-                WHERE status_video = 'accepted'
-                AND id > $1
-                ORDER BY id ASC 
-                LIMIT $2
-            `;
-            values = [lastSeenVideoId, limit];
+            values = [lastSeenCreatedAt, lastSeenId, limit];
         } else {
-            // If no last seen video, get from the beginning
+            // No last seen: return newest first
             query = `
                 SELECT * FROM videos 
                 WHERE status_video = 'accepted'
-                ORDER BY id ASC 
+                ORDER BY created_at DESC, id DESC 
                 LIMIT $1
             `;
             values = [limit];

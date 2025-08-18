@@ -461,7 +461,8 @@ paths:
           required: true
           schema:
             type: string
-          description: User's unique identifier
+            format: uuid
+          description: User's unique identifier (UUID)
         - in: query
           name: limit
           required: false
@@ -475,7 +476,8 @@ paths:
           required: false
           schema:
             type: string
-          description: Pagination cursor for next page
+            format: uuid
+          description: Pagination cursor for next page. Use the `next_cursor` value returned from the previous response (UUID of the last item).
       responses:
         '200':
           description: List of videos after last seen
@@ -490,6 +492,8 @@ paths:
                       $ref: './swagger-root.yaml#/components/schemas/Video'
                   next_cursor:
                     type: string
+                    format: uuid
+                    description: Use this value as the `cursor` on the next request
                   has_more:
                     type: boolean
         '400':
@@ -511,8 +515,10 @@ paths:
               properties:
                 user_id:
                   type: string
+                  format: uuid
                 last_video_id:
                   type: string
+                  format: uuid
               required:
                 - user_id
                 - last_video_id
