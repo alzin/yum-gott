@@ -277,7 +277,23 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    $ref: '#/components/schemas/CustomerResponse'
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        format: uuid
+                        example: 123e4567-e89b-12d3-a456-426614174000
+                      name:
+                        type: string
+                        example: Ahmed Mohamed
+                      profileImageUrl:
+                        type: string
+                        nullable: true
+                        example: 'https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg'
+                      isActive:
+                        type: boolean
+                        description: Whether the customer account is active
+                        example: true
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
