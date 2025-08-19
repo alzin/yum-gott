@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { validate as isUUID } from 'uuid';
 import { IVideoFeedUseCase } from '../../../application/interface/IVideoFeedUseCase';
 import { IUpdateVideoPositionUseCase } from '../../../application/interface/IUpdateVideoPositionUseCase';
 
@@ -17,6 +18,11 @@ export class VideoTrackingController {
                 return;
             }
 
+            if (typeof user_id === 'string' && !isUUID(user_id)) {
+                res.status(400).json({ error: 'user_id must be a valid UUID' });
+                return;
+            }
+
             // Ensure limitNum is always a number
             let limitNum: number = 10;
             if (typeof limit === 'string') {
@@ -27,6 +33,13 @@ export class VideoTrackingController {
             if (isNaN(limitNum) || limitNum < 1 || limitNum > 50) {
                 res.status(400).json({ error: 'limit must be between 1 and 50' });
                 return;
+            }
+
+            if (cursor !== undefined) {
+                if (typeof cursor !== 'string' || (cursor && !isUUID(cursor))) {
+                    res.status(400).json({ error: 'cursor must be a UUID (use the previous next_cursor value)' });
+                    return;
+                }
             }
 
             const result = await this.videoFeedUseCase.execute({
@@ -57,6 +70,16 @@ export class VideoTrackingController {
 
             if (!last_video_id || typeof last_video_id !== 'string') {
                 res.status(400).json({ error: 'last_video_id is required' });
+                return;
+            }
+
+            if (!isUUID(user_id)) {
+                res.status(400).json({ error: 'user_id must be a valid UUID' });
+                return;
+            }
+
+            if (!isUUID(last_video_id)) {
+                res.status(400).json({ error: 'last_video_id must be a valid UUID' });
                 return;
             }
 
