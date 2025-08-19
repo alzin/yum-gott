@@ -503,6 +503,46 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /api/auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change password
+      description: Allows an authenticated user (customer or restaurant owner) to change their password.
+      operationId: changePassword
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+            examples:
+              changePasswordExample:
+                summary: Change password with confirmation
+                value:
+                  oldPassword: CurrentP@ss1
+                  newPassword: NewP@ssw0rd1
+                  confirmPassword: NewP@ssw0rd1
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password changed successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /api/auth/account/customer:
     delete:
       tags:
@@ -2383,6 +2423,26 @@ components:
         - address
         - latitude
         - longitude
+    ChangePasswordRequest:
+      type: object
+      properties:
+        oldPassword:
+          type: string
+          minLength: 6
+          example: CurrentP@ss1
+        newPassword:
+          type: string
+          minLength: 6
+          description: 'Must contain at least one lowercase letter, one uppercase letter, and one number'
+          example: NewP@ssw0rd1
+        confirmPassword:
+          type: string
+          minLength: 6
+          example: NewP@ssw0rd1
+      required:
+        - oldPassword
+        - newPassword
+        - confirmPassword
     RestaurantOwner:
       type: object
       properties:

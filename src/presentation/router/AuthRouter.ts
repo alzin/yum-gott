@@ -170,6 +170,15 @@ export class AuthRouter {
       }
     );
 
+    this.router.post(
+      '/change-password',
+      authMiddleware.authenticateUser,
+      SanitizationMiddleware.sanitizeChangePassword(),
+      AuthValidators.changePassword(),
+      ValidationMiddleware.handleValidationErrors(),
+      (req: Request, res: Response) => this.authController.changePassword(req as AuthenticatedRequest, res)
+    );
+
   }
 
 

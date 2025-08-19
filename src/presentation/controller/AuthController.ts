@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware';
-import { LogoutUseCase, RefreshTokenUseCase } from '@/application/use-cases/auth';
+import { LogoutUseCase, RefreshTokenUseCase, ChangePasswordUseCase } from '@/application/use-cases/auth';
 import { AuthToken } from '@/domain/entities/AuthToken';
 import { setAuthCookies } from '@/shared/utils/cookieUtils';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
@@ -8,11 +8,13 @@ import { DIContainer } from '@/infrastructure/di/DIContainer';
 export class AuthController {
   private logoutUseCase: LogoutUseCase;
   private refreshTokenUseCase: RefreshTokenUseCase;
+  private changePasswordUseCase: ChangePasswordUseCase;
 
   constructor() {
     const diContainer = DIContainer.getInstance();
     this.logoutUseCase = diContainer.resolve('logoutUseCase');
     this.refreshTokenUseCase = diContainer.resolve('refreshTokenUseCase');
+    this.changePasswordUseCase = diContainer.resolve('changePasswordUseCase');
   }
 
   refreshToken = async (req: Request, res: Response): Promise<void> => {
@@ -38,6 +40,27 @@ export class AuthController {
         success: false,
         message: error instanceof Error ? error.message : 'Invalid refresh token',
       });
+    }
+  };
+
+  changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+        return;
+      }
+
+      const { oldPassword, newPassword } = req.body as { oldPassword: string; newPassword: string };
+
+      const result = await this.changePasswordUseCase.execute(
+        { userId: user.userId, oldPassword, newPassword },
+        user.userType
+      );
+
+      res.status(200).json({ success: result.success, message: 'Password changed successfully' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error instanceof Error ? error.message : 'Failed to change password' });
     }
   };
 

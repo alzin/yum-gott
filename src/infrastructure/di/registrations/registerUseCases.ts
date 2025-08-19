@@ -2,6 +2,7 @@ import { DIContainer } from '../DIContainer';
 import {
     RegisterCustomerUseCase,
     RegisterRestaurantOwnerUseCase,
+    ChangePasswordUseCase,
     UploadProfileImageUseCase,
     CustomerLoginUseCase,
     RestaurantOwnerLoginUseCase,
@@ -66,6 +67,14 @@ export function registerUseCases(container: DIContainer) {
             container.resolve('customerRepository'),
             container.resolve('restaurantOwnerRepository'),
             container.resolve('fileStorageService')
+        );
+    });
+
+    container.registerTransient('changePasswordUseCase', () => {
+        return new ChangePasswordUseCase(
+            container.resolve('customerRepository'),
+            container.resolve('restaurantOwnerRepository'),
+            container.resolve('passwordHasher')
         );
     });
 

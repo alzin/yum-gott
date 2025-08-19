@@ -39,6 +39,8 @@ paths:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1refresh-token'
   /api/auth/logout:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1logout'
+  /api/auth/change-password:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1change-password'
   /api/auth/account/customer:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1account~1customer'
   /api/auth/account/restaurant-owner:
@@ -200,6 +202,26 @@ components:
         - address
         - latitude
         - longitude
+    ChangePasswordRequest:
+      type: object
+      properties:
+        oldPassword:
+          type: string
+          minLength: 6
+          example: "CurrentP@ss1"
+        newPassword:
+          type: string
+          minLength: 6
+          description: Must contain at least one lowercase letter, one uppercase letter, and one number
+          example: "NewP@ssw0rd1"
+        confirmPassword:
+          type: string
+          minLength: 6
+          example: "NewP@ssw0rd1"
+      required:
+        - oldPassword
+        - newPassword
+        - confirmPassword
     RestaurantOwner:
       type: object
       properties:
