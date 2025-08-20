@@ -12,4 +12,5 @@ export interface ICustomerRepository {
     deleteUnverifiedOlderThan(date: Date): Promise<number>;
     getCustomerProfile(id: string): Promise<{ name: string; profileImageUrl: string | null; isActive: boolean }>;
     updateLastSeenVideo(id: string, lastSeenVideoId: string): Promise<Customer>;
+    updateCustomerProfile(id: string, profile: Partial<Customer>): Promise<Customer>;
 }

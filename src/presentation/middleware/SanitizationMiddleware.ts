@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import xss from 'xss'; 
+import xss from 'xss';
 
 export class SanitizationMiddleware {
   static allowedFields(allowedFields: string[]) {
@@ -59,6 +59,14 @@ export class SanitizationMiddleware {
   static sanitizeProfileImageUpload() {
     return SanitizationMiddleware.allowedFields([
       'userType'
+    ]);
+  }
+
+  static sanitizeChangePassword() {
+    return SanitizationMiddleware.allowedFields([
+      'oldPassword',
+      'newPassword',
+      'confirmPassword'
     ]);
   }
 

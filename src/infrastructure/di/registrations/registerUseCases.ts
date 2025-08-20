@@ -2,6 +2,7 @@ import { DIContainer } from '../DIContainer';
 import {
     RegisterCustomerUseCase,
     RegisterRestaurantOwnerUseCase,
+    ChangePasswordUseCase,
     UploadProfileImageUseCase,
     CustomerLoginUseCase,
     RestaurantOwnerLoginUseCase,
@@ -69,6 +70,14 @@ export function registerUseCases(container: DIContainer) {
         );
     });
 
+    container.registerTransient('changePasswordUseCase', () => {
+        return new ChangePasswordUseCase(
+            container.resolve('customerRepository'),
+            container.resolve('restaurantOwnerRepository'),
+            container.resolve('passwordHasher')
+        );
+    });
+
     container.registerTransient('updateRestaurantLocationUseCase', () => {
         console.log('DIContainer: Registering updateRestaurantLocationUseCase');
         return new UpdateRestaurantLocationUseCase(
@@ -84,6 +93,13 @@ export function registerUseCases(container: DIContainer) {
 
     container.registerTransient('getCustomerProfileUseCase', () => {
         return new GetCustomerProfileUseCase(
+            container.resolve('customerRepository')
+        );
+    });
+
+    container.registerTransient('updateCustomerProfileUseCase', () => {
+        const { UpdateCustomerProfileUseCase } = require('@/application/use-cases/auth/UpdateCustomerProfileUseCase');
+        return new UpdateCustomerProfileUseCase(
             container.resolve('customerRepository')
         );
     });

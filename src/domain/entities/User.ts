@@ -15,6 +15,8 @@ export interface BaseUser {
 export interface Customer extends BaseUser {
     name: string;
     email: string;
+    about?: string | null;
+    gender?: string | null;
 }
 
 export interface RestaurantOwner extends BaseUser {

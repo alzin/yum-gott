@@ -184,6 +184,54 @@ export class CustomerRepository implements ICustomerRepository {
         return this.mapRowToCustomer(result.rows[0]);
     }
 
+    async updateCustomerProfile(id: string, profile: Partial<Customer>): Promise<Customer> {
+        const fields: string[] = [];
+        const values: any[] = [];
+        let paramCount = 1;
+
+        if (profile.name !== undefined) {
+            fields.push(`name = $${paramCount++}`);
+            values.push(profile.name);
+        }
+        if (profile.email !== undefined) {
+            fields.push(`email = $${paramCount++}`);
+            values.push(profile.email);
+        }
+        if (profile.mobileNumber !== undefined) {
+            fields.push(`mobile_number = $${paramCount++}`);
+            values.push(profile.mobileNumber);
+        }
+        if (profile.about !== undefined) {
+            fields.push(`about = $${paramCount++}`);
+            values.push(profile.about);
+        }
+        if (profile.gender !== undefined) {
+            fields.push(`gender = $${paramCount++}`);
+            values.push(profile.gender);
+        }
+        if (profile.profileImageUrl !== undefined) {
+            fields.push(`profile_image_url = $${paramCount++}`);
+            values.push(profile.profileImageUrl);
+        }
+
+        if (fields.length === 0) {
+            throw new Error('No fields to update');
+        }
+
+        values.push(id);
+        const query = `
+            UPDATE customers
+            SET ${fields.join(', ')}
+            WHERE id = $${paramCount}
+            RETURNING *
+        `;
+        const result = await this.db.query(query, values);
+        if (result.rows.length === 0) {
+            throw new Error('Customer not found');
+        }
+        return this.mapRowToCustomer(result.rows[0]);
+    }
+
     private mapRowToCustomer(row: any): Customer {
         return {
             id: row.id,

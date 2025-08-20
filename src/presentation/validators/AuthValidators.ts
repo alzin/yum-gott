@@ -150,6 +150,32 @@ export class AuthValidators {
     ];
   }
 
+  static changePassword(): ValidationChain[] {
+    return [
+      body('oldPassword')
+        .notEmpty()
+        .withMessage('Old password is required')
+        .isLength({ min: 6, max: 100 })
+        .withMessage('Old password must be between 6 and 100 characters'),
+      body('newPassword')
+        .notEmpty()
+        .withMessage('New password is required')
+        .isLength({ min: 6, max: 100 })
+        .withMessage('New password must be between 6 and 100 characters')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+        .withMessage('New password must include at least one lowercase letter, one uppercase letter, and one number'),
+      body('confirmPassword')
+        .notEmpty()
+        .withMessage('Please confirm your new password')
+        .custom((value, { req }) => {
+          if (value !== req.body.newPassword) {
+            throw new Error('Passwords do not match');
+          }
+          return true;
+        })
+    ];
+  }
+
   static updateRestaurantLocation(): ValidationChain[] {
     return [
       body('address')
@@ -186,6 +212,40 @@ export class AuthValidators {
           }
           return true;
         })
+    ];
+  }
+
+  static updateCustomerProfile(): ValidationChain[] {
+    return [
+      body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('Please enter your full name')
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Name must be between 2 and 100 characters')
+      .withMessage('Name can only contain letters, numbers, and spaces'),      body('email')
+      .trim()
+      .notEmpty()
+      .withMessage('Email is required')
+      .isEmail()
+      .withMessage('Invalid email format')
+      .normalizeEmail()
+      .isLength({ max: 255 })
+      .withMessage('Email must not exceed 255 characters')
+      .custom((value) => {
+        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const parts = value.split('@');
+        if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+          throw new Error('Invalid email domain (e.g., no repeated .com)');
+        }
+        if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+          throw new Error('Email domain contains repeated extensions');
+        }
+        return true;
+      }),      body('mobileNumber').optional().isString().withMessage('Mobile number must be a string'),
+      body('about').optional().isString().isLength({ max: 500 }).withMessage('About must not exceed 500 characters'),
+      body('gender').optional().isIn(['male', 'female']).withMessage('Gender must be male, female'),
+      // body('profileImageUrl').optional().isString().withMessage('Profile image URL must be a string'),
     ];
   }
 
