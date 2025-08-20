@@ -10,3 +10,4 @@ export * from './VerifyEmailController'
 export * from './Customer/DeleteCustomerAccountController'
 export * from './RestaurantOwner/DeleteRestaurantOwnerAccountController'
 export * from './ChangePasswordController'
+export * from './Customer/EditCustomerProfileController';

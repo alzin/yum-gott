@@ -97,6 +97,13 @@ export function registerUseCases(container: DIContainer) {
         );
     });
 
+    container.registerTransient('updateCustomerProfileUseCase', () => {
+        const { UpdateCustomerProfileUseCase } = require('@/application/use-cases/auth/UpdateCustomerProfileUseCase');
+        return new UpdateCustomerProfileUseCase(
+            container.resolve('customerRepository')
+        );
+    });
+
     container.registerTransient('deleteCustomerAccountUseCase', () => {
         return new DeleteCustomerAccountUseCase(
             container.resolve('customerRepository'),

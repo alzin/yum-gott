@@ -9,7 +9,7 @@ dotenv.config({ path: envFilePath });
 
 class MigrationRunner {
   private db: DatabaseConnection;
-
+ 
   private readonly migrationPaths = [
     'full_users_setup.sql',
     'create_products_table.sql',
@@ -23,7 +23,8 @@ class MigrationRunner {
     'add_likes_column_to_videos.sql',
     'create_comments_table.sql',
     'create_likes_table.sql',
-    'create_paygate_table.sql'
+    'create_paygate_table.sql',
+    'add_gender&about_column_to_customers.sql'
   ].map(file => path.join(__dirname, 'migrations', file));
 
   private readonly dangerousKeywords = [
