@@ -2,6 +2,7 @@ import { DIContainer } from '../DIContainer';
 import { VideoRepository, CustomerRepository, RestaurantOwnerRepository, AuthRepository, CategoryRepository, ProductRepository, ProductOptionRepository, ProductOptionValueRepository, OpeningHoursRepository, CommentRepository, LikeRepository } from '../../repositories';
 import { PayGateRepository } from '@/infrastructure/repositories/PayGateRepository';
 import { DatabaseConnection } from '../../database/DataBaseConnection';
+import { OrderRepository } from '@/infrastructure/repositories/OrderRepository';
 
 export function registerRepositories(container: DIContainer) {
     container.registerSingleton('databaseConnection', () => {
@@ -27,4 +28,5 @@ export function registerRepositories(container: DIContainer) {
     container.registerSingleton('ICommentRepository', () => new CommentRepository(container.resolve('databaseConnection')));
     container.registerSingleton('ILikeRepository', () => new LikeRepository(container.resolve('databaseConnection')));
     container.registerSingleton('IPayGateRepository', () => new PayGateRepository(container.resolve('databaseConnection')));
+    container.registerSingleton('IOrderRepository', () => new OrderRepository((container.resolve('databaseConnection') as DatabaseConnection).getPool()));
 } 

@@ -122,6 +122,10 @@ paths:
                       example: "PAYMENT_X"
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/orders:
+    $ref: './paths-orders.yaml#/paths/~1orders'
+  /api/orders/{orderId}:
+    $ref: './paths-orders.yaml#/paths/~1orders~1{orderId}'
 
 components:
   securitySchemes:

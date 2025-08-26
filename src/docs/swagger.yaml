@@ -2405,6 +2405,85 @@ paths:
                       example: PAYMENT_X
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/orders:
+    post:
+      summary: Create a new order
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                customerId:
+                  type: string
+                productId:
+                  type: string
+                orderDate:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum:
+                    - pending
+                    - paid
+                    - shipped
+                    - completed
+                    - cancelled
+                createdAt:
+                  type: string
+                  format: date-time
+                updatedAt:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1orders/post/requestBody/content/application~1json/schema'
+    get:
+      summary: Get all orders for the authenticated customer
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/paths/~1api~1orders/post/requestBody/content/application~1json/schema'
+  '/api/orders/{orderId}':
+    get:
+      summary: Get order by ID
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1api~1orders/post/requestBody/content/application~1json/schema'
 components:
   securitySchemes:
     cookieAuth:
