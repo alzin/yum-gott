@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { OrderController } from '../controller/Orders/OrderController';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import { OrderValidators } from '../validators/OrderValidators';
+import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 
 export class OrderRouter {
     private router: Router;
@@ -20,6 +22,8 @@ export class OrderRouter {
             '/',
             authMiddleware.authenticateUser,
             authMiddleware.requireCustomer,
+            OrderValidators.createOrder(),
+            ValidationMiddleware.handleValidationErrors(),
             (req: Request, res: Response) => controller.createOrder(req, res)
         );
 
@@ -27,6 +31,7 @@ export class OrderRouter {
             '/',
             authMiddleware.authenticateUser,
             authMiddleware.requireCustomer,
+            ValidationMiddleware.handleValidationErrors(),
             (req: Request, res: Response) => controller.getOrdersForCustomer(req, res)
         );
 
@@ -34,6 +39,8 @@ export class OrderRouter {
             '/:orderId',
             authMiddleware.authenticateUser,
             authMiddleware.requireCustomer,
+            OrderValidators.orderIdParam(),
+            ValidationMiddleware.handleValidationErrors(),
             (req: Request, res: Response) => controller.getOrderById(req, res)
         );
     }

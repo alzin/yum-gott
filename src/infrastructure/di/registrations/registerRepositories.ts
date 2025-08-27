@@ -28,5 +28,5 @@ export function registerRepositories(container: DIContainer) {
     container.registerSingleton('ICommentRepository', () => new CommentRepository(container.resolve('databaseConnection')));
     container.registerSingleton('ILikeRepository', () => new LikeRepository(container.resolve('databaseConnection')));
     container.registerSingleton('IPayGateRepository', () => new PayGateRepository(container.resolve('databaseConnection')));
-    container.registerSingleton('IOrderRepository', () => new OrderRepository((container.resolve('databaseConnection') as DatabaseConnection).getPool()));
+    container.registerSingleton('IOrderRepository', () => new OrderRepository(container.resolve('databaseConnection')));
 } 

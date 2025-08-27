@@ -2419,8 +2419,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
                 customerId:
                   type: string
                 productId:

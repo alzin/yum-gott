@@ -1,18 +1,17 @@
-import { Pool } from 'pg';
+import { DatabaseConnection } from '../database/DataBaseConnection';
 import { IOrderRepository } from '../../domain/repositories/IOrderRepository';
 import { Order } from '../../domain/entities/Order';
 
 export class OrderRepository implements IOrderRepository {
-    constructor(private db: Pool) { }
+    constructor(private db: DatabaseConnection) { }
 
     async create(order: Order): Promise<Order> {
         const query = `
-            INSERT INTO orders (id, customer_id, product_id, order_date, status, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+            INSERT INTO orders (customer_id, product_id, order_date, status, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, NOW(), NOW())
             RETURNING *
         `;
         const values = [
-            order.id,
             order.customerId,
             order.productId,
             order.orderDate,
