@@ -7,28 +7,28 @@ export class ProductValidators {
             body('categoryName')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter a category name')
+                .withMessage('يرجى إدخال اسم الفئة')
                 .isLength({ max: 255 })
-                .withMessage('Category name is too long'),
+                .withMessage('اسم الفئة طويل جداً'),
             body('productName')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter a product name')
+                .withMessage('يرجى إدخال اسم المنتج')
                 .isLength({ max: 255 })
-                .withMessage('Product name is too long'),
+                .withMessage('اسم المنتج طويل جداً'),
             body('description')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter a product description'),
+                .withMessage('يرجى إدخال وصف المنتج'),
             body('price')
                 .notEmpty()
-                .withMessage('Please enter a price')
+                .withMessage('يرجى إدخال السعر')
                 .isFloat({ min: 0 })
-                .withMessage('Price must be a positive number'),
+                .withMessage('يجب أن يكون السعر رقماً موجباً'),
             body('discount')
                 .optional()
                 .isFloat({ min: 0, max: 100 })
-                .withMessage('Discount must be between 0% and 100%'),
+                .withMessage('يجب أن تكون نسبة الخصم بين 0% و 100%'),
             body('sizeOptions')
                 .optional()
                 .custom((value) => {
@@ -38,18 +38,18 @@ export class ProductValidators {
                         try {
                             parsedValue = JSON.parse(value);
                         } catch (error) {
-                            throw new Error('Please provide valid size options in the correct format');
+                            throw new Error('يرجى إدخال خيارات الحجم بشكل صحيح');
                         }
                     }
                     if (!Array.isArray(parsedValue)) {
-                        throw new Error('Size options must be provided as a list');
+                        throw new Error('يجب إدخال خيارات الحجم كقائمة');
                     }
                     for (const size of parsedValue) {
                         if (!Object.values(SizeName).includes(size.name)) {
-                            throw new Error(`Please select a valid size from: ${Object.values(SizeName).join(', ')}`);
+                            throw new Error(`يرجى اختيار حجم صحيح من: ${Object.values(SizeName).join(', ')}`);
                         }
                         if (typeof size.additionalPrice !== 'number' || size.additionalPrice < 0) {
-                            throw new Error('Additional price must be zero or a positive number');
+                            throw new Error('يجب أن يكون السعر الإضافي صفراً أو رقماً موجباً');
                         }
                     }
                     return true;
@@ -57,11 +57,11 @@ export class ProductValidators {
             body('image')
                 .custom((_, { req }) => {
                     if (!req.file) {
-                        throw new Error('Please upload a product image');
+                        throw new Error('يرجى رفع صورة المنتج');
                     }
                     const allowedTypes = ['image/jpeg', 'image/png'];
                     if (!allowedTypes.includes(req.file.mimetype)) {
-                        throw new Error('Please upload an image in JPEG or PNG format');
+                        throw new Error('يرجى رفع صورة بصيغة JPEG أو PNG');
                     }
                     return true;
                 }),
@@ -74,28 +74,28 @@ export class ProductValidators {
                         try {
                             parsedValue = JSON.parse(value);
                         } catch (error) {
-                            throw new Error('Please provide valid options in the correct format');
+                            throw new Error('يرجى إدخال الخيارات بشكل صحيح');
                         }
                     }
                     if (!Array.isArray(parsedValue)) {
-                        throw new Error('Options must be provided as a list');
+                        throw new Error('يجب إدخال الخيارات كقائمة');
                     }
                     for (const option of parsedValue) {
                         if (typeof option.name !== 'string' || !option.name.trim()) {
-                            throw new Error('Each option must have a valid name');
+                            throw new Error('يجب أن يكون لكل خيار اسم صحيح');
                         }
                         if (typeof option.required !== 'boolean') {
-                            throw new Error('Each option must specify whether it is required');
+                            throw new Error('يجب تحديد ما إذا كان الخيار مطلوبًا');
                         }
                         if (!Array.isArray(option.values)) {
-                            throw new Error('Each option must have a list of possible values');
+                            throw new Error('يجب أن يكون لكل خيار قائمة بالقيم الممكنة');
                         }
                         for (const value of option.values) {
                             if (typeof value.name !== 'string' || !value.name.trim()) {
-                                throw new Error('Each option value must have a valid name');
+                                throw new Error('يجب أن يكون لكل قيمة خيار اسم صحيح');
                             }
                             if (value.additionalPrice !== undefined && (typeof value.additionalPrice !== 'number' || value.additionalPrice < 0)) {
-                                throw new Error('Additional prices must be zero or positive numbers');
+                                throw new Error('يجب أن تكون الأسعار الإضافية صفراً أو أرقاماً موجبة');
                             }
                         }
                     }
@@ -109,25 +109,25 @@ export class ProductValidators {
             body('categoryName')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter a category name')
+                .withMessage('يرجى إدخال اسم الفئة')
                 .isLength({ max: 255 })
-                .withMessage('Category name is too long'),
+                .withMessage('اسم الفئة طويل جداً'),
             body('productName')
                 .optional()
                 .trim()
                 .isLength({ max: 255 })
-                .withMessage('Product name is too long'),
+                .withMessage('اسم المنتج طويل جداً'),
             body('description')
                 .optional()
                 .trim(),
             body('price')
                 .optional()
                 .isFloat({ min: 0 })
-                .withMessage('Price must be a positive number'),
+                .withMessage('يجب أن يكون السعر رقماً موجباً'),
             body('discount')
                 .optional()
                 .isFloat({ min: 0, max: 100 })
-                .withMessage('Discount must be between 0% and 100%'),
+                .withMessage('يجب أن تكون نسبة الخصم بين 0% و 100%'),
             body('sizeOptions')
                 .optional()
                 .custom((value) => {
@@ -137,18 +137,18 @@ export class ProductValidators {
                         try {
                             parsedValue = JSON.parse(value);
                         } catch (error) {
-                            throw new Error('Please provide valid size options in the correct format');
+                            throw new Error('يرجى إدخال خيارات الحجم بشكل صحيح');
                         }
                     }
                     if (!Array.isArray(parsedValue)) {
-                        throw new Error('Size options must be provided as a list');
+                        throw new Error('يجب إدخال خيارات الحجم كقائمة');
                     }
                     for (const size of parsedValue) {
                         if (!Object.values(SizeName).includes(size.name)) {
-                            throw new Error(`Please select a valid size from: ${Object.values(SizeName).join(', ')}`);
+                            throw new Error(`يرجى اختيار حجم صحيح من: ${Object.values(SizeName).join(', ')}`);
                         }
                         if (typeof size.additionalPrice !== 'number' || size.additionalPrice < 0) {
-                            throw new Error('Additional price must be zero or a positive number');
+                            throw new Error('يجب أن يكون السعر الإضافي صفراً أو رقماً موجباً');
                         }
                     }
                     return true;
@@ -159,7 +159,7 @@ export class ProductValidators {
                     if (req.file) {
                         const allowedTypes = ['image/jpeg', 'image/png'];
                         if (!allowedTypes.includes(req.file.mimetype)) {
-                            throw new Error('Please upload an image in JPEG or PNG format');
+                            throw new Error('يرجى رفع صورة بصيغة JPEG أو PNG');
                         }
                     }
                     return true;
@@ -173,28 +173,28 @@ export class ProductValidators {
                         try {
                             parsedValue = JSON.parse(value);
                         } catch (error) {
-                            throw new Error('Invalid options format: must be a valid JSON array');
+                            throw new Error('يرجى إدخال الخيارات بشكل صحيح');
                         }
                     }
                     if (!Array.isArray(parsedValue)) {
-                        throw new Error('Options must be an array');
+                        throw new Error('يجب أن تكون الخيارات مصفوفة');
                     }
                     for (const option of parsedValue) {
                         if (typeof option.name !== 'string' || !option.name.trim()) {
-                            throw new Error('Each option must have a valid name');
+                            throw new Error('يجب أن يكون لكل خيار اسم صحيح');
                         }
                         if (typeof option.required !== 'boolean') {
-                            throw new Error('Each option must have a required boolean field');
+                            throw new Error('يجب أن يحتوي كل خيار على حقل مطلوب من نوع منطقي');
                         }
                         if (!Array.isArray(option.values)) {
-                            throw new Error('Each option must have a values array');
+                            throw new Error('يجب أن يكون لكل خيار مصفوفة قيم');
                         }
                         for (const value of option.values) {
                             if (typeof value.name !== 'string' || !value.name.trim()) {
-                                throw new Error('Each option value must have a valid name');
+                                throw new Error('يجب أن يكون لكل قيمة خيار اسم صحيح');
                             }
                             if (value.additionalPrice !== undefined && (typeof value.additionalPrice !== 'number' || value.additionalPrice < 0)) {
-                                throw new Error('Each option value additionalPrice must be a non-negative number if provided');
+                                throw new Error('يجب أن يكون السعر الإضافي لكل قيمة خيار رقماً غير سالب إذا تم إدخاله');
                             }
                         }
                     }
@@ -207,7 +207,7 @@ export class ProductValidators {
         return [
             param('id')
                 .isUUID()
-                .withMessage('Invalid product ID format')
+                .withMessage('تنسيق معرف المنتج غير صحيح')
         ];
     }
 
@@ -215,7 +215,7 @@ export class ProductValidators {
         return [
             param('productId')
                 .isUUID()
-                .withMessage('Invalid product ID format')
+                .withMessage('تنسيق معرف المنتج غير صحيح')
         ];
     }
 }

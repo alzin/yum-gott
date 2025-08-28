@@ -5,9 +5,9 @@ export class LikeValidators {
     return [
       body('videoId')
         .notEmpty()
-        .withMessage('Please provide a video ID')
+        .withMessage('يرجى إدخال معرف الفيديو')
         .isUUID()
-        .withMessage('Invalid video ID format')
+        .withMessage('تنسيق معرف الفيديو غير صحيح')
     ];
   }
 
@@ -15,7 +15,7 @@ export class LikeValidators {
     return [
       param('videoId')
         .isUUID()
-        .withMessage('Invalid video ID format')
+        .withMessage('تنسيق معرف الفيديو غير صحيح')
     ];
   }
 }

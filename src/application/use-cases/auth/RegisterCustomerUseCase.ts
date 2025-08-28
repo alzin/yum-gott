@@ -26,7 +26,7 @@ export class RegisterCustomerUseCase {
 
         const hashedPassword = await this.passwordHasher.hash(request.password);
         const verificationToken = uuidv4();
-        const tokenExpiresAt = new Date(Date.now() + ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any)); 
+        const tokenExpiresAt = new Date(Date.now() + ms(CONFIG.ACCESS_TOKEN_EXPIRATION as any));
 
         const customer: Customer = {
             name: request.name,
@@ -55,7 +55,7 @@ export class RegisterCustomerUseCase {
     private async checkExistingEmail(email: string): Promise<void> {
         const emailExists = await this.customerRepository.existsByEmail(email);
         if (emailExists) {
-            throw new Error('User already exists with this email');
+            throw new Error('يوجد مستخدم بالفعل بهذا البريد الإلكتروني');
         }
     }
 }

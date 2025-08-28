@@ -61,14 +61,14 @@ export class RegisterRestaurantOwnerUseCase {
     private async checkExistingByEmail(request: RegisterRestaurantOwnerRequest): Promise<void> {
         const emailExists = await this.restaurantOwnerRepository.existsByEmail(request.email);
         if (emailExists) {
-            throw new Error('User already exists with this email');
+            throw new Error('يوجد مستخدم بالفعل بهذا البريد الإلكتروني');
         }
 
     }
     private async checkExistingByOrganizationNumber(request: RegisterRestaurantOwnerRequest): Promise<void> {
         const OrganizationNumberExists = await this.restaurantOwnerRepository.existsByOrganizationNumber(request.organizationNumber);
         if (OrganizationNumberExists) {
-            throw new Error('User already exists with this OrganizationNumber');
+            throw new Error('يوجد مستخدم بالفعل بهذا الرقم التعريفي للمؤسسة');
         }
 
     }

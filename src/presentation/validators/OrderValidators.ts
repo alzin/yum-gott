@@ -5,9 +5,9 @@ export class OrderValidators {
         return [
             body('productId')
                 .notEmpty()
-                .withMessage('productId is required')
+                .withMessage('معرف المنتج مطلوب')
                 .isUUID()
-                .withMessage('Invalid productId format')
+                .withMessage('تنسيق معرف المنتج غير صحيح')
         ];
     }
 
@@ -15,7 +15,7 @@ export class OrderValidators {
         return [
             param('orderId')
                 .isUUID()
-                .withMessage('Invalid orderId format')
+                .withMessage('تنسيق معرف الطلب غير صحيح')
         ];
     }
 }

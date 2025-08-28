@@ -22,43 +22,43 @@ export class AuthValidators {
       body('name')
         .trim()
         .notEmpty()
-        .withMessage('Please enter your full name')
+        .withMessage('يرجى إدخال اسمك الكامل')
         .isLength({ min: 2, max: 100 })
-        .withMessage('Name must be between 2 and 100 characters')
-        .withMessage('Name can only contain letters, numbers, and spaces'),
+        .withMessage('يجب أن يكون الاسم بين 2 و 100 حرف')
+        .withMessage('يمكن أن يحتوي الاسم فقط على أحرف وأرقام ومسافات'),
       body('email')
         .trim()
         .notEmpty()
-        .withMessage('Please enter your email address')
+        .withMessage('يرجى إدخال بريدك الإلكتروني')
         .isEmail()
-        .withMessage('Please enter a valid email address (e.g., user@example.com)')
+        .withMessage('يرجى إدخال بريد إلكتروني صحيح (مثال: user@example.com)')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email address is too long')
+        .withMessage('عنوان البريد الإلكتروني طويل جداً')
         .custom((value) => {
           const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
           const parts = value.split('@');
           if (parts.length !== 2 || !domainRegex.test(parts[1])) {
-            throw new Error('Please enter a valid email domain');
+            throw new Error('يرجى إدخال نطاق بريد إلكتروني صحيح');
           }
           if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
-            throw new Error('Email domain contains invalid extensions');
+            throw new Error('نطاق البريد الإلكتروني يحتوي على امتدادات غير صحيحة');
           }
           return true;
         }),
       body('mobileNumber')
         .trim()
         .notEmpty()
-        .withMessage('Please enter your mobile number'),
+        .withMessage('يرجى إدخال رقم هاتفك المحمول'),
       // .matches(/^[0-9]{10,15}$/)
       // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
-        .withMessage('Please enter a password')
+        .withMessage('يرجى إدخال كلمة المرور')
         .isLength({ min: 6, max: 100 })
-        .withMessage('Password must be between 6 and 100 characters')
+        .withMessage('يجب أن تكون كلمة المرور بين 6 و 100 حرف')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-        .withMessage('Password must include at least one lowercase letter, one uppercase letter, and one number')
+        .withMessage('يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل، وحرف كبير واحد على الأقل، ورقم واحد على الأقل'),
     ];
   }
 
@@ -67,50 +67,50 @@ export class AuthValidators {
       body('restaurantName')
         .trim()
         .notEmpty()
-        .withMessage('Please enter your restaurant name')
+        .withMessage('يرجى إدخال اسم المطعم')
         .isLength({ min: 2, max: 255 })
-        .withMessage('Restaurant name must be between 2 and 255 characters'),
+        .withMessage('يجب أن يكون اسم المطعم بين 2 و 255 حرف'),
       body('organizationNumber')
         .trim()
         .notEmpty()
-        .withMessage('Please enter your organization number')
+        .withMessage('يرجى إدخال رقم السجل التجاري')
         .isLength({ min: 5, max: 50 })
-        .withMessage('Organization number must be between 5 and 50 characters')
+        .withMessage('يجب أن يكون رقم السجل التجاري بين 5 و 50 حرف')
         .matches(/^[A-Z0-9]+$/)
-        .withMessage('Organization number must contain only uppercase letters and numbers'),
+        .withMessage('يجب أن يحتوي رقم السجل التجاري على أحرف كبيرة وأرقام فقط'),
       body('email')
         .trim()
         .notEmpty()
-        .withMessage('Email is required')
+        .withMessage('البريد الإلكتروني مطلوب')
         .isEmail()
-        .withMessage('Invalid email format')
+        .withMessage('تنسيق البريد الإلكتروني غير صحيح')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters')
+        .withMessage('يجب ألا يتجاوز البريد الإلكتروني 255 حرفًا')
         .custom((value) => {
           const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
           const parts = value.split('@');
           if (parts.length !== 2 || !domainRegex.test(parts[1])) {
-            throw new Error('Invalid email domain (e.g., no repeated .com)');
+            throw new Error('نطاق البريد الإلكتروني غير صحيح (مثال: بدون تكرار .com)');
           }
           if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
-            throw new Error('Email domain contains repeated extensions');
+            throw new Error('نطاق البريد الإلكتروني يحتوي على امتدادات مكررة');
           }
           return true;
         }),
       body('mobileNumber')
         .trim()
         .notEmpty()
-        .withMessage('Mobile number is required'),
+        .withMessage('رقم الهاتف المحمول مطلوب'),
       // .matches(/^[0-9]{10,15}$/)
       // .withMessage('Mobile number must be 10-15 digits'),
       body('password')
         .notEmpty()
-        .withMessage('Password is required')
+        .withMessage('كلمة المرور مطلوبة')
         .isLength({ min: 6, max: 100 })
-        .withMessage('Password must be between 6 and 100 characters')
+        .withMessage('يجب أن تكون كلمة المرور بين 6 و 100 حرف')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number')
+        .withMessage('يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل، وحرف كبير واحد على الأقل، ورقم واحد على الأقل'),
     ];
   }
 
@@ -120,30 +120,30 @@ export class AuthValidators {
         .optional()
         .trim()
         .isEmail()
-        .withMessage('Invalid email format')
+        .withMessage('تنسيق البريد الإلكتروني غير صحيح')
         .normalizeEmail()
         .isLength({ max: 255 })
-        .withMessage('Email must not exceed 255 characters')
+        .withMessage('يجب ألا يتجاوز البريد الإلكتروني 255 حرفًا')
         .custom((value) => {
           if (!value) return true;
           const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
           const parts = value.split('@');
           if (parts.length !== 2 || !domainRegex.test(parts[1])) {
-            throw new Error('Invalid email domain (e.g., no repeated .com)');
+            throw new Error('نطاق البريد الإلكتروني غير صحيح (مثال: بدون تكرار .com)');
           }
           if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
-            throw new Error('Email domain contains repeated extensions');
+            throw new Error('نطاق البريد الإلكتروني يحتوي على امتدادات مكررة');
           }
           return true;
         }),
       body('password')
         .notEmpty()
-        .withMessage('Password is required')
+        .withMessage('كلمة المرور مطلوبة')
         .isLength({ min: 6 })
-        .withMessage('Password must be at least 6 characters'),
+        .withMessage('يجب ألا تقل كلمة المرور عن 6 أحرف'),
       body().custom((value) => {
         if (!value.email) {
-          throw new Error('Email is required');
+          throw new Error('البريد الإلكتروني مطلوب');
         }
         return true;
       })
@@ -154,22 +154,22 @@ export class AuthValidators {
     return [
       body('oldPassword')
         .notEmpty()
-        .withMessage('Old password is required')
+        .withMessage('كلمة المرور القديمة مطلوبة')
         .isLength({ min: 6, max: 100 })
-        .withMessage('Old password must be between 6 and 100 characters'),
+        .withMessage('يجب أن تكون كلمة المرور القديمة بين 6 و 100 حرف'),
       body('newPassword')
         .notEmpty()
-        .withMessage('New password is required')
+        .withMessage('كلمة المرور الجديدة مطلوبة')
         .isLength({ min: 6, max: 100 })
-        .withMessage('New password must be between 6 and 100 characters')
+        .withMessage('يجب أن تكون كلمة المرور الجديدة بين 6 و 100 حرف')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-        .withMessage('New password must include at least one lowercase letter, one uppercase letter, and one number'),
+        .withMessage('يجب أن تحتوي كلمة المرور الجديدة على حرف صغير واحد على الأقل، وحرف كبير واحد على الأقل، ورقم واحد على الأقل'),
       body('confirmPassword')
         .notEmpty()
-        .withMessage('Please confirm your new password')
+        .withMessage('يرجى تأكيد كلمة المرور الجديدة')
         .custom((value, { req }) => {
           if (value !== req.body.newPassword) {
-            throw new Error('Passwords do not match');
+            throw new Error('كلمتا المرور غير متطابقتين');
           }
           return true;
         })
@@ -181,21 +181,19 @@ export class AuthValidators {
       body('address')
         .trim()
         .notEmpty()
-        .withMessage('Address is required')
+        .withMessage('العنوان مطلوب')
         .isLength({ max: 255 })
-        .withMessage('Address must not exceed 255 characters'),
+        .withMessage('يجب ألا يتجاوز العنوان 255 حرفًا'),
       body('latitude')
         .notEmpty()
-        .withMessage('Latitude is required')
+        .withMessage('خط العرض مطلوب')
         .isFloat({ min: -90, max: 90 })
-        .withMessage('Latitude must be a number between -90 and 90')
-        .toFloat(),
+        .withMessage('يجب أن يكون خط العرض رقمًا بين -90 و 90'),
       body('longitude')
         .notEmpty()
-        .withMessage('Longitude is required')
+        .withMessage('خط الطول مطلوب')
         .isFloat({ min: -180, max: 180 })
-        .withMessage('Longitude must be a number between -180 and 180')
-        .toFloat()
+        .withMessage('يجب أن يكون خط الطول رقمًا بين -180 و 180'),
     ];
   }
 
@@ -204,11 +202,11 @@ export class AuthValidators {
       body('profileImage')
         .custom((_, { req }) => {
           if (!req.file) {
-            throw new Error('Profile image is required');
+            throw new Error('صورة الملف الشخصي مطلوبة');
           }
           const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
           if (!allowedTypes.includes(req.file.mimetype)) {
-            throw new Error('Only JPEG, PNG, and GIF images are allowed');
+            throw new Error('يسمح فقط بصور JPEG و PNG و GIF');
           }
           return true;
         })
@@ -218,33 +216,33 @@ export class AuthValidators {
   static updateCustomerProfile(): ValidationChain[] {
     return [
       body('name')
-      .trim()
-      .notEmpty()
-      .withMessage('Please enter your full name')
-      .isLength({ min: 2, max: 100 })
-      .withMessage('Name must be between 2 and 100 characters')
-      .withMessage('Name can only contain letters, numbers, and spaces'),      body('email')
-      .trim()
-      .notEmpty()
-      .withMessage('Email is required')
-      .isEmail()
-      .withMessage('Invalid email format')
-      .normalizeEmail()
-      .isLength({ max: 255 })
-      .withMessage('Email must not exceed 255 characters')
-      .custom((value) => {
-        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const parts = value.split('@');
-        if (parts.length !== 2 || !domainRegex.test(parts[1])) {
-          throw new Error('Invalid email domain (e.g., no repeated .com)');
-        }
-        if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
-          throw new Error('Email domain contains repeated extensions');
-        }
-        return true;
-      }),      body('mobileNumber').optional().isString().withMessage('Mobile number must be a string'),
-      body('about').optional().isString().isLength({ max: 500 }).withMessage('About must not exceed 500 characters'),
-      body('gender').optional().isIn(['male', 'female']).withMessage('Gender must be male, female'),
+        .trim()
+        .notEmpty()
+        .withMessage('يرجى إدخال اسمك الكامل')
+        .isLength({ min: 2, max: 100 })
+        .withMessage('يجب أن يكون الاسم بين 2 و 100 حرف')
+        .withMessage('يمكن أن يحتوي الاسم فقط على أحرف وأرقام ومسافات'), body('email')
+          .trim()
+          .notEmpty()
+          .withMessage('البريد الإلكتروني مطلوب')
+          .isEmail()
+          .withMessage('تنسيق البريد الإلكتروني غير صحيح')
+          .normalizeEmail()
+          .isLength({ max: 255 })
+          .withMessage('يجب ألا يتجاوز البريد الإلكتروني 255 حرفًا')
+          .custom((value) => {
+            const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const parts = value.split('@');
+            if (parts.length !== 2 || !domainRegex.test(parts[1])) {
+              throw new Error('نطاق البريد الإلكتروني غير صحيح (مثال: بدون تكرار .com)');
+            }
+            if (parts[1].includes('.com.com') || parts[1].match(/(\.\w+)\1/)) {
+              throw new Error('نطاق البريد الإلكتروني يحتوي على امتدادات مكررة');
+            }
+            return true;
+          }), body('mobileNumber').optional().isString().withMessage('يجب أن يكون رقم الهاتف المحمول نصًا'),
+      body('about').optional().isString().isLength({ max: 500 }).withMessage('يجب ألا يتجاوز الوصف 500 حرف'),
+      body('gender').optional().isIn(['male', 'female']).withMessage('يجب أن يكون الجنس ذكر أو أنثى'),
       // body('profileImageUrl').optional().isString().withMessage('Profile image URL must be a string'),
     ];
   }
