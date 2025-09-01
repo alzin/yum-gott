@@ -1,8 +1,8 @@
 import { ICommentRepository } from '@/domain/repositories/ICommentRepository';
 import { ILikeRepository } from '@/domain/repositories/ILikeRepository';
 import { IVideoRepository } from '@/domain/repositories/IVideoRepository';
-import { Comment } from '@/domain/entities/Comment';
-import { Like } from '@/domain/entities/Like';
+// import { Comment } from '@/domain/entities/Comment';
+// import { Like } from '@/domain/entities/Like';
 
 export interface VideoInteractionStats {
     likesCount: number;
@@ -55,9 +55,6 @@ export class VideoInteractionService {
     }
 
     async deleteVideoInteractions(videoId: string): Promise<void> {
-        // Delete all likes and comments for the video
-        // This will be handled by CASCADE DELETE in the database
-        // but we can also explicitly delete them if needed
         await Promise.all([
             this.likeRepository.deleteByVideoAndUser(videoId, ''),
             this.commentRepository.delete(videoId)

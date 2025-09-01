@@ -286,6 +286,8 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('IOrderRepository'),
         container.resolve('customerRepository'),
         container.resolve('IProductRepository'),
+        container.resolve('productOptionRepository'),
+        container.resolve('productOptionValueRepository')
     ));
     container.registerTransient('getOrdersForCustomerUseCase', () => new GetOrdersForCustomerUseCase(
         container.resolve('IOrderRepository')

@@ -11,7 +11,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order'
+              $ref: '#/components/schemas/CreateOrderRequest'
       responses:
         '201':
           description: Order created
@@ -59,19 +59,127 @@ paths:
 
 components:
   schemas:
+    CreateOrderRequest:
+      type: object
+      required:
+        - customerId
+        - productName
+      properties:
+        customerId:
+          type: string
+          description: The ID of the customer placing the order.
+          example: "John Doe"
+        productName:
+          type: string
+          description: The name of the product being ordered.
+          example: "Margherita Pizza"
+        status:
+          type: string
+          description: The status of the order.
+          enum: [pending, paid, shipped, completed, cancelled]
+          example: "pending"
+        orderDate:
+          type: string
+          format: date-time
+          description: The date and time the order was placed.
+          example: "2025-09-01T07:21:30.462Z"
+        selectedOptions:
+          type: array
+          description: List of selected product option values (if applicable)
+          items:
+            type: object
+            properties:
+              optionName:
+                type: string
+                example: "Toppings"
+              valueName:
+                type: string
+                example: "Extra Cheese"
     Order:
       type: object
       properties:
         customerId:
           type: string
-        productId:
-          type: string
+        product:
+          $ref: '#/components/schemas/ProductWithOptionsAndValues'
         orderDate:
           type: string
           format: date-time
         status:
           type: string
           enum: [pending, paid, shipped, completed, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProductWithOptionsAndValues:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/Product'
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              option:
+                $ref: '#/components/schemas/ProductOption'
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductOptionValue'
+    Product:
+      type: object
+      properties:
+        categoryName:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        discount:
+          type: number
+        sizeOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              additionalPrice:
+                type: number
+        restaurantOwnerId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProductOption:
+      type: object
+      properties:
+        name:
+          type: string
+        required:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProductOptionValue:
+      type: object
+      properties:
+        name:
+          type: string
+        additionalPrice:
+          type: number
         createdAt:
           type: string
           format: date-time

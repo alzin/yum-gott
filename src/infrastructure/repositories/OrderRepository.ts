@@ -7,13 +7,13 @@ export class OrderRepository implements IOrderRepository {
 
     async create(order: Order): Promise<Order> {
         const query = `
-            INSERT INTO orders (customer_id, product_id, order_date, status, created_at, updated_at)
+            INSERT INTO orders (customer_id, product_details, order_date, status, created_at, updated_at)
             VALUES ($1, $2, $3, $4, NOW(), NOW())
             RETURNING *
         `;
         const values = [
             order.customerId,
-            order.productId,
+            JSON.stringify(order.product),
             order.orderDate,
             order.status
         ];
@@ -37,7 +37,7 @@ export class OrderRepository implements IOrderRepository {
         const values: any[] = [];
         let i = 1;
         if (order.status !== undefined) { fields.push(`status = $${i++}`); values.push(order.status); }
-        if (order.productId !== undefined) { fields.push(`product_id = $${i++}`); values.push(order.productId); }
+        if (order.product !== undefined) { fields.push(`product_details = $${i++}`); values.push(JSON.stringify(order.product)); }
         if (order.orderDate !== undefined) { fields.push(`order_date = $${i++}`); values.push(order.orderDate); }
         fields.push(`updated_at = NOW()`);
         values.push(id);
@@ -54,7 +54,7 @@ export class OrderRepository implements IOrderRepository {
     private mapToOrder = (row: any): Order => ({
         id: row.id,
         customerId: row.customer_id,
-        productId: row.product_id,
+        product: row.product_details,
         orderDate: new Date(row.order_date),
         status: row.status,
         createdAt: new Date(row.created_at),

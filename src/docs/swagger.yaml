@@ -2421,8 +2421,72 @@ paths:
               properties:
                 customerId:
                   type: string
-                productId:
-                  type: string
+                product:
+                  type: object
+                  properties:
+                    product:
+                      type: object
+                      properties:
+                        categoryName:
+                          type: string
+                        productName:
+                          type: string
+                        description:
+                          type: string
+                        price:
+                          type: number
+                        discount:
+                          type: number
+                        sizeOptions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              additionalPrice:
+                                type: number
+                        restaurantOwnerId:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                    options:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          option:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              required:
+                                type: boolean
+                              createdAt:
+                                type: string
+                                format: date-time
+                              updatedAt:
+                                type: string
+                                format: date-time
+                          values:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                additionalPrice:
+                                  type: number
+                                createdAt:
+                                  type: string
+                                  format: date-time
+                                updatedAt:
+                                  type: string
+                                  format: date-time
                 orderDate:
                   type: string
                   format: date-time
