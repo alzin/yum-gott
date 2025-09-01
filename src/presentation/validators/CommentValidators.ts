@@ -5,25 +5,25 @@ export class CommentValidators {
         return [
             body('videoId')
                 .notEmpty()
-                .withMessage('Please provide a video ID')
+                .withMessage('يرجى إدخال معرف الفيديو')
                 .isUUID()
-                .withMessage('Invalid video ID format'),
+                .withMessage('تنسيق معرف الفيديو غير صحيح'),
             body('content')
                 .trim()
                 .notEmpty()
-                .withMessage('Comment content cannot be empty')
+                .withMessage('لا يمكن أن يكون محتوى التعليق فارغًا')
                 .isLength({ max: 1000 })
-                .withMessage('Comment content cannot exceed 1000 characters')
+                .withMessage('يجب ألا يتجاوز محتوى التعليق 1000 حرف')
         ];
     }
 
-   
+
 
     static videoIdParam(): ValidationChain[] {
         return [
             param('videoId')
                 .isUUID()
-                .withMessage('Invalid video ID format')
+                .withMessage('تنسيق معرف الفيديو غير صحيح')
         ];
     }
 
@@ -31,7 +31,7 @@ export class CommentValidators {
         return [
             param('id')
                 .isUUID()
-                .withMessage('Invalid comment ID format')
+                .withMessage('تنسيق معرف التعليق غير صحيح')
         ];
     }
 }

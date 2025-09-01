@@ -6,9 +6,9 @@ export class CategoryValidators {
             body('name')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter a category name')
+                .withMessage('يرجى إدخال اسم الفئة')
                 .isLength({ max: 100 })
-                .withMessage('Category name is too long')
+                .withMessage('اسم الفئة طويل جداً')
         ];
     }
 }

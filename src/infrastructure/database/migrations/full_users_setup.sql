@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS customers (
     token_expires_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    profile_image_url VARCHAR(255)
+    profile_image_url VARCHAR(255),
+    gender VARCHAR(10) NULL,
+    about VARCHAR(225) NULL
 );
 
 -- Create restaurant_owners table
@@ -102,3 +104,5 @@ BEGIN
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
 END $$;
+
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS gender VARCHAR(10) NULL;

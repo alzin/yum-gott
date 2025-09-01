@@ -7,42 +7,42 @@ export class VideoValidators {
             body('publicId')
                 .trim()
                 .notEmpty()
-                .withMessage('Please provide a public ID')
+                .withMessage('يرجى إدخال معرف عام')
                 .isLength({ max: 255 })
-                .withMessage('Public ID is too long'),
+                .withMessage('معرف عام طويل جداً'),
             body('secureUrl')
                 .trim()
                 .notEmpty()
-                .withMessage('Please provide a secure URL')
+                .withMessage('يرجى إدخال رابط آمن')
                 .isURL()
-                .withMessage('Please enter a valid URL')
+                .withMessage('يرجى إدخال رابط صحيح')
                 .isLength({ max: 255 })
-                .withMessage('Secure URL is too long'),
+                .withMessage('رابط آمن طويل جداً'),
             body('restaurantName')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter the restaurant name')
+                .withMessage('يرجى إدخال اسم المطعم')
                 .isLength({ min: 2, max: 100 })
-                .withMessage('Restaurant name must be between 2 and 100 characters'),
+                .withMessage('يجب أن يكون اسم المطعم بين 2 و 100 حرف'),
             body('phoneNumber')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter the phone number'),
+                .withMessage('يرجى إدخال رقم الهاتف'),
             // .matches(/^[0-9]{10,15}$/)
             // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
-                .withMessage('Please select a network')
+                .withMessage('يرجى اختيار الشبكة')
                 .isIn(Object.values(Network))
-                .withMessage('Please select either MTN or Syriatel'),
+                .withMessage('يرجى اختيار MTN أو Syriatel'),
             body('invoiceImage')
                 .custom((_, { req }) => {
                     if (!req.file) {
-                        throw new Error('Please upload an invoice image');
+                        throw new Error('يرجى رفع صورة الفاتورة');
                     }
                     const allowedTypes = ['image/jpeg', 'image/png'];
                     if (!allowedTypes.includes(req.file.mimetype)) {
-                        throw new Error('Please upload an image in JPEG or PNG format');
+                        throw new Error('يرجى رفع صورة بصيغة JPEG أو PNG');
                     }
                     return true;
                 })
@@ -54,41 +54,41 @@ export class VideoValidators {
             body('publicId')
                 .trim()
                 .notEmpty()
-                .withMessage('Please provide a public ID')
+                .withMessage('يرجى إدخال معرف عام')
                 .isLength({ max: 255 })
-                .withMessage('Public ID is too long'),
+                .withMessage('معرف عام طويل جداً'),
             body('secureUrl')
                 .trim()
                 .notEmpty()
-                .withMessage('Please provide a secure URL')
+                .withMessage('يرجى إدخال رابط آمن')
                 .isURL()
-                .withMessage('Please enter a valid URL')
+                .withMessage('يرجى إدخال رابط صحيح')
                 .isLength({ max: 255 })
-                .withMessage('Secure URL is too long'),
+                .withMessage('رابط آمن طويل جداً'),
             body('restaurantName')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter the restaurant name')
+                .withMessage('يرجى إدخال اسم المطعم')
                 .isLength({ min: 2, max: 100 })
-                .withMessage('Restaurant name must be between 2 and 100 characters'),
+                .withMessage('يجب أن يكون اسم المطعم بين 2 و 100 حرف'),
             body('phoneNumber')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter the phone number'),
+                .withMessage('يرجى إدخال رقم الهاتف'),
             // .matches(/^[0-9]{10,15}$/)
             // .withMessage('Phone number must be 10-15 digits'),
             body('network')
                 .notEmpty()
-                .withMessage('Please select a network')
+                .withMessage('يرجى اختيار الشبكة')
                 .isIn(Object.values(Network))
-                .withMessage('Please select either MTN or Syriatel'),
+                .withMessage('يرجى اختيار MTN أو Syriatel'),
             body('invoiceImage')
                 .optional()
                 .custom((_, { req }) => {
                     if (req.file) {
                         const allowedTypes = ['image/jpeg', 'image/png'];
                         if (!allowedTypes.includes(req.file.mimetype)) {
-                            throw new Error('Please upload an image in JPEG or PNG format');
+                            throw new Error('يرجى رفع صورة بصيغة JPEG أو PNG');
                         }
                     }
                     return true;
@@ -101,11 +101,11 @@ export class VideoValidators {
             query('limit')
                 .optional()
                 .isInt({ min: 1, max: 100 })
-                .withMessage('Limit must be a number between 1 and 100'),
+                .withMessage('يجب أن يكون الحد بين 1 و 100'),
             query('cursor')
                 .optional()
-                // .isISO8601()
-                // .withMessage('Cursor must be a valid ISO 8601 date string')
+            // .isISO8601()
+            // .withMessage('Cursor must be a valid ISO 8601 date string')
         ];
     }
 }

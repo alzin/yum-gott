@@ -2,6 +2,7 @@ import { DIContainer } from '../DIContainer';
 import {
     RegisterCustomerUseCase,
     RegisterRestaurantOwnerUseCase,
+    ChangePasswordUseCase,
     UploadProfileImageUseCase,
     CustomerLoginUseCase,
     RestaurantOwnerLoginUseCase,
@@ -24,6 +25,7 @@ import { DeleteOpeningHoursUseCase } from '@/application/use-cases/opening-hours
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 import { GetActivePayGatesUseCase } from '@/application/use-cases/paygate/GetActivePayGatesUseCase';
+import { CreateOrderUseCase, GetOrdersForCustomerUseCase, GetOrderByIdUseCase } from '@/application/use-cases/order';
 
 export function registerUseCases(container: DIContainer) {
     // Auth UseCases
@@ -69,6 +71,14 @@ export function registerUseCases(container: DIContainer) {
         );
     });
 
+    container.registerTransient('changePasswordUseCase', () => {
+        return new ChangePasswordUseCase(
+            container.resolve('customerRepository'),
+            container.resolve('restaurantOwnerRepository'),
+            container.resolve('passwordHasher')
+        );
+    });
+
     container.registerTransient('updateRestaurantLocationUseCase', () => {
         console.log('DIContainer: Registering updateRestaurantLocationUseCase');
         return new UpdateRestaurantLocationUseCase(
@@ -84,6 +94,13 @@ export function registerUseCases(container: DIContainer) {
 
     container.registerTransient('getCustomerProfileUseCase', () => {
         return new GetCustomerProfileUseCase(
+            container.resolve('customerRepository')
+        );
+    });
+
+    container.registerTransient('updateCustomerProfileUseCase', () => {
+        const { UpdateCustomerProfileUseCase } = require('@/application/use-cases/auth/UpdateCustomerProfileUseCase');
+        return new UpdateCustomerProfileUseCase(
             container.resolve('customerRepository')
         );
     });
@@ -262,5 +279,20 @@ export function registerUseCases(container: DIContainer) {
     // PayGate use cases
     container.registerTransient('getActivePayGatesUseCase', () => new GetActivePayGatesUseCase(
         container.resolve('IPayGateRepository')
+    ));
+
+    // Order use cases
+    container.registerTransient('createOrderUseCase', () => new CreateOrderUseCase(
+        container.resolve('IOrderRepository'),
+        container.resolve('customerRepository'),
+        container.resolve('IProductRepository'),
+        container.resolve('productOptionRepository'),
+        container.resolve('productOptionValueRepository')
+    ));
+    container.registerTransient('getOrdersForCustomerUseCase', () => new GetOrdersForCustomerUseCase(
+        container.resolve('IOrderRepository')
+    ));
+    container.registerTransient('getOrderByIdUseCase', () => new GetOrderByIdUseCase(
+        container.resolve('IOrderRepository')
     ));
 } 

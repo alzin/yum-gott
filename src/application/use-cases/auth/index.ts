@@ -12,3 +12,5 @@ export * from './RefreshTokenUseCase';
 export * from './GetCustomerProfileUseCase';
 export * from './DeleteCustomerAccountUseCase';
 export * from './DeleteRestaurantOwnerAccountUseCase';
+export * from './ChangePasswordUseCase';
+export * from './UpdateCustomerProfileUseCase';

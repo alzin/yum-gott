@@ -26,7 +26,7 @@ export class EmailService {
       <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
         <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           <!-- Title (EN + AR) -->
-          <h2 style="color: #4CAF50; text-align: center; margin-bottom: 8px;">Welcome to Yum-Gott! 🎉</h2>
+          <h2 style="color: #4CAF50; text-align: center; margin-bottom: 8px;">Welcome to Yum-Gott!</h2>
 
           <!-- Intro (EN + AR) -->
           <p style="font-size: 16px; color: #333; margin-bottom: 6px;">

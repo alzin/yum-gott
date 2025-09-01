@@ -1,4 +1,4 @@
-import { IRestaurantOwnerRepository , IAuthRepository } from "@/domain/repositories/index";
+import { IRestaurantOwnerRepository, IAuthRepository } from "@/domain/repositories/index";
 import { IPasswordHasher } from "@/application/interface/IPasswordHasher";
 import { LoginResponse, LoginRequest } from "@/application/interface/ILoginUseCase";
 import { JWTpayload } from "@/domain/entities/AuthToken";
@@ -13,9 +13,9 @@ export class RestaurantOwnerLoginUseCase {
 
     async execute(request: LoginRequest): Promise<LoginResponse> {
         const restaurantOwner = await this.restaurantOwnerRepository.findByEmail(request.email);
-        
+
         if (!restaurantOwner) {
-            throw new Error('Invalid credentials');
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         }
 
         // if (!restaurantOwner.isEmailVerified) {
@@ -24,7 +24,7 @@ export class RestaurantOwnerLoginUseCase {
 
         const isPasswordValid = await this.passwordHasher.compare(request.password, restaurantOwner.password);
         if (!isPasswordValid) {
-            throw new Error('Invalid credentials');
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         }
 
         const jwtPayload: JWTpayload = {

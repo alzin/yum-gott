@@ -308,6 +308,65 @@ paths:
           $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
         "404":
           $ref: "./swagger-root.yaml#/components/responses/NotFoundError"
+    put:
+      tags:
+        - Authentication
+      summary: Update customer profile
+      description: |
+        Update the authenticated customer's profile information.
+        
+        **Note:** To change your profile image, use the `POST /api/auth/profile/image` endpoint to upload a new image. The `profileImageUrl` field in this endpoint's request body is ignored and should not be set directly.
+      operationId: updateCustomerProfile
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Ahmed Mohamed"
+                email:
+                  type: string
+                  example: "ahmed@example.com"
+                mobileNumber:
+                  type: string
+                  example: "+201234567890"
+                about:
+                  type: string
+                  example: "I love food and tech."
+                gender:
+                  type: string
+                  enum: [male, female]
+                  example: "male"
+                  description: "Gender. Must be selected from the dropdown: 'male' or 'female'."
+                profileImageUrl:
+                  type: string
+                  example: "https://yum-gott-profile-images.s3.us-east-1.amazonaws.com/customer/123.jpg"
+      responses:
+        "200":
+          description: Customer profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: './swagger-root.yaml#/components/schemas/CustomerResponse'
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "./swagger-root.yaml#/components/responses/ForbiddenError"
+        "404":
+          $ref: "./swagger-root.yaml#/components/responses/NotFoundError"
 
   /api/auth/profile/restaurant-owner:
     get:
@@ -512,6 +571,47 @@ paths:
                   message:
                     type: string
                     example: "Logout successful"
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+        "401":
+          $ref: "./swagger-root.yaml#/components/responses/UnauthorizedError"
+
+  /api/auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change password
+      description: Allows an authenticated user (customer or restaurant owner) to change their password.
+      operationId: changePassword
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./swagger-root.yaml#/components/schemas/ChangePasswordRequest"
+            examples:
+              changePasswordExample:
+                summary: Change password with confirmation
+                value:
+                  oldPassword: "CurrentP@ss1"
+                  newPassword: "NewP@ssw0rd1"
+                  confirmPassword: "NewP@ssw0rd1"
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Password changed successfully"
         "400":
           $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
         "401":

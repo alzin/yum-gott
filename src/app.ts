@@ -6,7 +6,7 @@ import YAML from 'yamljs';
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan';
 import { DIContainer } from './infrastructure/di/DIContainer';
-import { AuthRouter, CategoryRouter, OpeningHoursRouter, ProductRouter, VideoRouter, VideoTrackingRouter, CommentRouter, LikeRouter, PayGateRouter } from './presentation/router/index';
+import { AuthRouter, CategoryRouter, OpeningHoursRouter, ProductRouter, VideoRouter, VideoTrackingRouter, CommentRouter, LikeRouter, PayGateRouter, OrderRouter } from './presentation/router/index';
 import path from "path";
 // import { CleanupUnverifiedAccounts } from './infrastructure/services/CleanupUnverifiedAccounts';
 
@@ -108,6 +108,9 @@ export class App {
     const payGateRouter = new PayGateRouter();
     this.app.use('/api/payGate', payGateRouter.getRouter());
 
+    const orderRouter = new OrderRouter();
+    this.app.use('/api/orders', orderRouter.getRouter());
+
     this.app.use((req: Request, res: Response) => {
       res.status(404).json({
         success: false,
@@ -137,14 +140,14 @@ export class App {
           return iface.address;
         }
       }
-    } 
+    }
     return 'localhost';
   }
 
 
   public getApp(): Application {
     return this.app;
-  } 
+  }
 
   public async start(port: number = 3000): Promise<void> {
     try {

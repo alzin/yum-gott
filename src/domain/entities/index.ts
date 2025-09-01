@@ -9,3 +9,4 @@ export * from './Videos'
 export * from './Comment'
 export * from './Like'
 export * from './PayGate'
+export * from './Order';

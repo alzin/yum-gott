@@ -46,7 +46,8 @@ export class GetVideoFeedUseCase implements IVideoFeedUseCase {
                 network: video.network,
                 invoiceImage: video.invoiceImage,
                 statusVideo: video.statusVideo,
-                createdAt: video.createdAt!
+                createdAt: video.createdAt!,
+                acceptAt: video.acceptAt
             })),
             nextCursor,
             hasMore

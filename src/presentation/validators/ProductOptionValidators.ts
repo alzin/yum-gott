@@ -5,13 +5,13 @@ export class ProductOptionValidators {
         return [
             param('productId')
                 .isUUID()
-                .withMessage('Please provide a valid product ID'),
+                .withMessage('يرجى إدخال معرف منتج صحيح'),
             body('name')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter an option name')
+                .withMessage('يرجى إدخال اسم الخيار')
                 .isLength({ max: 100 })
-                .withMessage('Option name is too long')
+                .withMessage('اسم الخيار طويل جداً')
         ];
     }
 
@@ -19,17 +19,17 @@ export class ProductOptionValidators {
         return [
             param('optionId')
                 .isUUID()
-                .withMessage('Please provide a valid option ID'),
+                .withMessage('يرجى إدخال معرف خيار صحيح'),
             body('name')
                 .trim()
                 .notEmpty()
-                .withMessage('Please enter an option value name')
+                .withMessage('يرجى إدخال اسم قيمة الخيار')
                 .isLength({ max: 100 })
-                .withMessage('Option value name is too long'),
+                .withMessage('اسم قيمة الخيار طويل جداً'),
             body('additionalPrice')
                 .optional()
                 .isFloat({ min: 0 })
-                .withMessage('Additional price must be zero or a positive number')
+                .withMessage('يجب أن يكون السعر الإضافي صفراً أو رقماً موجباً')
         ];
     }
 
@@ -37,7 +37,7 @@ export class ProductOptionValidators {
         return [
             param('optionId')
                 .isUUID()
-                .withMessage('Please provide a valid option ID')
+                .withMessage('يرجى إدخال معرف خيار صحيح')
         ];
     }
 
@@ -45,7 +45,7 @@ export class ProductOptionValidators {
         return [
             param('valueId')
                 .isUUID()
-                .withMessage('Please provide a valid value ID')
+                .withMessage('يرجى إدخال معرف قيمة صحيح')
         ];
     }
 }

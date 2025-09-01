@@ -11,3 +11,4 @@ export * from './VideoRepository'
 export * from './CommentRepository'
 export * from './LikeRepository'
 export * from './PayGateRepository'
+export * from './OrderRepository';

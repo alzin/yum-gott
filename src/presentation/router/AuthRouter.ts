@@ -18,6 +18,7 @@ import { ValidationMiddleware, SanitizationMiddleware } from '../middleware/inde
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
+import { EditCustomerProfileController } from '../controller/Users/Customer/EditCustomerProfileController';
 
 export class AuthRouter {
   private router: Router;
@@ -167,6 +168,27 @@ export class AuthRouter {
       (req: Request, res: Response) => {
         const controller = new DeleteRestaurantOwnerAccountController(this.diContainer.resolve('deleteRestaurantOwnerAccountUseCase'));
         controller.deleteRestaurantOwnerAccount(req as AuthenticatedRequest, res);
+      }
+    );
+
+    this.router.post(
+      '/change-password',
+      authMiddleware.authenticateUser,
+      SanitizationMiddleware.sanitizeChangePassword(),
+      AuthValidators.changePassword(),
+      ValidationMiddleware.handleValidationErrors(),
+      (req: Request, res: Response) => this.authController.changePassword(req as AuthenticatedRequest, res)
+    );
+
+    this.router.put(
+      '/profile/customer',
+      authMiddleware.authenticateUser,
+      authMiddleware.requireCustomer,
+      AuthValidators.updateCustomerProfile(),
+      ValidationMiddleware.handleValidationErrors(),
+      (req: Request, res: Response) => {
+        const controller = new EditCustomerProfileController(this.diContainer.resolve('updateCustomerProfileUseCase'));
+        controller.editProfile(req as AuthenticatedRequest, res);
       }
     );
 
