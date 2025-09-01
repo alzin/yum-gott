@@ -25,7 +25,8 @@ class MigrationRunner {
     'create_likes_table.sql',
     'create_paygate_table.sql',
     'add_gender&about_column_to_customers.sql',
-    'create_orders_table.sql'
+    'create_orders_table.sql',
+    'add_accept_at_to_videos.sql'
   ].map(file => path.join(__dirname, 'migrations', file));
 
   private readonly dangerousKeywords = [

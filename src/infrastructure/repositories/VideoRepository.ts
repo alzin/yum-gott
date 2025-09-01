@@ -273,7 +273,8 @@ export class VideoRepository implements IVideoRepository {
             statusVideo: row.status_video,
             likesCount: row.likes_count || 0,
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
+            acceptAt: row.accept_at
         };
     }
 }

@@ -22,4 +22,5 @@ export interface Video {
     likesCount: number;
     createdAt?: Date;
     updatedAt?: Date;
+    acceptAt?: Date;
 }
