@@ -63,38 +63,16 @@ components:
       type: object
       required:
         - customerId
-        - productName
+        - productId
       properties:
         customerId:
           type: string
           description: The ID of the customer placing the order.
-          example: "John Doe"
-        productName:
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        productId:
           type: string
-          description: The name of the product being ordered.
-          example: "Margherita Pizza"
-        status:
-          type: string
-          description: The status of the order.
-          enum: [pending, paid, shipped, completed, cancelled]
-          example: "pending"
-        orderDate:
-          type: string
-          format: date-time
-          description: The date and time the order was placed.
-          example: "2025-09-01T07:21:30.462Z"
-        selectedOptions:
-          type: array
-          description: List of selected product option values (if applicable)
-          items:
-            type: object
-            properties:
-              optionName:
-                type: string
-                example: "Toppings"
-              valueName:
-                type: string
-                example: "Extra Cheese"
+          description: The ID of the product being ordered.
+          example: "550e8400-e29b-41d4-a716-446655440000"
     Order:
       type: object
       properties:
@@ -186,3 +164,4 @@ components:
         updatedAt:
           type: string
           format: date-time
+ 

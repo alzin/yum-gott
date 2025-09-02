@@ -2418,61 +2418,45 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - customerId
+                - productId
               properties:
                 customerId:
                   type: string
-                product:
-                  type: object
-                  properties:
-                    product:
-                      type: object
-                      properties:
-                        categoryName:
-                          type: string
-                        productName:
-                          type: string
-                        description:
-                          type: string
-                        price:
-                          type: number
-                        discount:
-                          type: number
-                        sizeOptions:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                              additionalPrice:
-                                type: number
-                        restaurantOwnerId:
-                          type: string
-                        createdAt:
-                          type: string
-                          format: date-time
-                        updatedAt:
-                          type: string
-                          format: date-time
-                    options:
-                      type: array
-                      items:
+                  description: The ID of the customer placing the order.
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                productId:
+                  type: string
+                  description: The ID of the product being ordered.
+                  example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customerId:
+                    type: string
+                  product:
+                    type: object
+                    properties:
+                      product:
                         type: object
                         properties:
-                          option:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                              required:
-                                type: boolean
-                              createdAt:
-                                type: string
-                                format: date-time
-                              updatedAt:
-                                type: string
-                                format: date-time
-                          values:
+                          categoryName:
+                            type: string
+                          productName:
+                            type: string
+                          description:
+                            type: string
+                          price:
+                            type: number
+                          discount:
+                            type: number
+                          sizeOptions:
                             type: array
                             items:
                               type: object
@@ -2481,36 +2465,64 @@ paths:
                                   type: string
                                 additionalPrice:
                                   type: number
+                          restaurantOwnerId:
+                            type: string
+                          createdAt:
+                            type: string
+                            format: date-time
+                          updatedAt:
+                            type: string
+                            format: date-time
+                      options:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            option:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                required:
+                                  type: boolean
                                 createdAt:
                                   type: string
                                   format: date-time
                                 updatedAt:
                                   type: string
                                   format: date-time
-                orderDate:
-                  type: string
-                  format: date-time
-                status:
-                  type: string
-                  enum:
-                    - pending
-                    - paid
-                    - shipped
-                    - completed
-                    - cancelled
-                createdAt:
-                  type: string
-                  format: date-time
-                updatedAt:
-                  type: string
-                  format: date-time
-      responses:
-        '201':
-          description: Order created
-          content:
-            application/json:
-              schema:
-                $ref: '#/paths/~1api~1orders/post/requestBody/content/application~1json/schema'
+                            values:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  additionalPrice:
+                                    type: number
+                                  createdAt:
+                                    type: string
+                                    format: date-time
+                                  updatedAt:
+                                    type: string
+                                    format: date-time
+                  orderDate:
+                    type: string
+                    format: date-time
+                  status:
+                    type: string
+                    enum:
+                      - pending
+                      - paid
+                      - shipped
+                      - completed
+                      - cancelled
+                  createdAt:
+                    type: string
+                    format: date-time
+                  updatedAt:
+                    type: string
+                    format: date-time
     get:
       summary: Get all orders for the authenticated customer
       tags:
@@ -2525,7 +2537,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/paths/~1api~1orders/post/requestBody/content/application~1json/schema'
+                  $ref: '#/paths/~1api~1orders/post/responses/201/content/application~1json/schema'
   '/api/orders/{orderId}':
     get:
       summary: Get order by ID
@@ -2545,7 +2557,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1api~1orders/post/requestBody/content/application~1json/schema'
+                $ref: '#/paths/~1api~1orders/post/responses/201/content/application~1json/schema'
 components:
   securitySchemes:
     cookieAuth:
