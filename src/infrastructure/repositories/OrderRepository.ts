@@ -51,13 +51,24 @@ export class OrderRepository implements IOrderRepository {
         await this.db.query('DELETE FROM orders WHERE id = $1', [id]);
     }
 
-    private mapToOrder = (row: any): Order => ({
-        id: row.id,
-        customerId: row.customer_id,
-        product: row.product_details,
-        orderDate: new Date(row.order_date),
-        status: row.status,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at)
-    });
+    private mapToOrder(row: any): Order {
+        const productDetails = typeof row.product_details === 'string' 
+            ? JSON.parse(row.product_details)
+            : row.product_details;
+            
+        // Ensure selectedOptions is always an array
+        if (!productDetails.selectedOptions) {
+            productDetails.selectedOptions = [];
+        }
+            
+        return {
+            id: row.id,
+            customerId: row.customer_id,
+            product: productDetails,
+            orderDate: new Date(row.order_date),
+            status: row.status,
+            createdAt: new Date(row.created_at),
+            updatedAt: new Date(row.updated_at)
+        };
+    }
 }
