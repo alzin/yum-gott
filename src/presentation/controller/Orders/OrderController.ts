@@ -7,19 +7,39 @@ export class OrderController {
 
     async createOrder(req: Request, res: Response): Promise<void> {
         try {
-            const { productId } = req.body || {};
+            const { productId, selectedOptions = [] } = req.body || {};
             const customerId = (req as any).user?.userId;
+            
             if (!customerId) {
                 res.status(401).json({ success: false, message: 'Unauthorized' });
                 return;
             }
+            
             if (!productId) {
                 res.status(400).json({ success: false, message: 'productId is required' });
                 return;
             }
+
+            // Validate selectedOptions structure if provided
+            if (selectedOptions && !Array.isArray(selectedOptions)) {
+                res.status(400).json({ 
+                    success: false, 
+                    message: 'selectedOptions must be an array of {optionId: string, valueId: string}' 
+                });
+                return;
+            }
             const useCase = this.di.resolve('createOrderUseCase') as CreateOrderUseCase;
-            const order = await useCase.execute({ customerId, productId });
-            res.status(201).json({ success: true, message: 'Order created', data: order });
+            const order = await useCase.execute({ 
+                customerId, 
+                productId,
+                selectedOptions: selectedOptions || []
+            });
+            
+            res.status(201).json({ 
+                success: true, 
+                message: 'Order created', 
+                data: order 
+            });
         } catch (error: any) {
             res.status(400).json({ success: false, message: error.message || 'Failed to create order' });
         }

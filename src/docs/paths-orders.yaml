@@ -18,7 +18,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Order created"
+                  data:
+                    $ref: '#/components/schemas/Order'
 
     get:
       summary: Get all orders for the authenticated customer
@@ -67,31 +76,60 @@ components:
       properties:
         customerId:
           type: string
+          format: uuid
           description: The ID of the customer placing the order.
           example: "123e4567-e89b-12d3-a456-426614174000"
         productId:
           type: string
           description: The ID of the product being ordered.
           example: "550e8400-e29b-41d4-a716-446655440000"
+        selectedOptions:
+          type: array
+          description: Array of selected product options
+          items:
+            type: object
+            required:
+              - optionId
+              - valueId
+            properties:
+              optionId:
+                type: string
+                format: uuid
+                description: The ID of the selected option
+              valueId:
+                type: string
+                format: uuid
+                description: The ID of the selected option value
     Order:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique identifier of the order
         customerId:
           type: string
+          format: uuid
+          description: The ID of the customer who placed the order
         product:
           $ref: '#/components/schemas/ProductWithOptionsAndValues'
         orderDate:
           type: string
           format: date-time
+          description: The date and time when the order was placed
         status:
           type: string
           enum: [pending, paid, shipped, completed, cancelled]
+          description: The current status of the order
         createdAt:
           type: string
           format: date-time
+          description: The date and time when the order was created
         updatedAt:
           type: string
           format: date-time
+          description: The date and time when the order was last updated
+    
     ProductWithOptionsAndValues:
       type: object
       properties:
@@ -100,14 +138,34 @@ components:
         options:
           type: array
           items:
-            type: object
-            properties:
-              option:
-                $ref: '#/components/schemas/ProductOption'
-              values:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProductOptionValue'
+            $ref: '#/components/schemas/SelectedProductOptionValue'
+        selectedOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SelectedProductOptionValue'
+    
+    SelectedProductOptionValue:
+      type: object
+      properties:
+        optionId:
+          type: string
+          format: uuid
+          description: The ID of the selected option
+        optionName:
+          type: string
+          description: The name of the selected option
+        valueId:
+          type: string
+          format: uuid
+          description: The ID of the selected option value
+        valueName:
+          type: string
+          description: The name of the selected option value
+        additionalPrice:
+          type: number
+          format: float
+          description: Additional price for this option value
+          example: 2.5
     Product:
       type: object
       properties:

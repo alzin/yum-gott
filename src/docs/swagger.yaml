@@ -2424,12 +2424,30 @@ paths:
               properties:
                 customerId:
                   type: string
+                  format: uuid
                   description: The ID of the customer placing the order.
                   example: 123e4567-e89b-12d3-a456-426614174000
                 productId:
                   type: string
                   description: The ID of the product being ordered.
                   example: 550e8400-e29b-41d4-a716-446655440000
+                selectedOptions:
+                  type: array
+                  description: Array of selected product options
+                  items:
+                    type: object
+                    required:
+                      - optionId
+                      - valueId
+                    properties:
+                      optionId:
+                        type: string
+                        format: uuid
+                        description: The ID of the selected option
+                      valueId:
+                        type: string
+                        format: uuid
+                        description: The ID of the selected option value
       responses:
         '201':
           description: Order created
@@ -2438,8 +2456,58 @@ paths:
               schema:
                 type: object
                 properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Order created
+                  data:
+                    $ref: '#/paths/~1api~1orders~1%7BorderId%7D/get/responses/200/content/application~1json/schema'
+    get:
+      summary: Get all orders for the authenticated customer
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/paths/~1api~1orders~1%7BorderId%7D/get/responses/200/content/application~1json/schema'
+  '/api/orders/{orderId}':
+    get:
+      summary: Get order by ID
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the order
                   customerId:
                     type: string
+                    format: uuid
+                    description: The ID of the customer who placed the order
                   product:
                     type: object
                     properties:
@@ -2478,37 +2546,33 @@ paths:
                         items:
                           type: object
                           properties:
-                            option:
-                              type: object
-                              properties:
-                                name:
-                                  type: string
-                                required:
-                                  type: boolean
-                                createdAt:
-                                  type: string
-                                  format: date-time
-                                updatedAt:
-                                  type: string
-                                  format: date-time
-                            values:
-                              type: array
-                              items:
-                                type: object
-                                properties:
-                                  name:
-                                    type: string
-                                  additionalPrice:
-                                    type: number
-                                  createdAt:
-                                    type: string
-                                    format: date-time
-                                  updatedAt:
-                                    type: string
-                                    format: date-time
+                            optionId:
+                              type: string
+                              format: uuid
+                              description: The ID of the selected option
+                            optionName:
+                              type: string
+                              description: The name of the selected option
+                            valueId:
+                              type: string
+                              format: uuid
+                              description: The ID of the selected option value
+                            valueName:
+                              type: string
+                              description: The name of the selected option value
+                            additionalPrice:
+                              type: number
+                              format: float
+                              description: Additional price for this option value
+                              example: 2.5
+                      selectedOptions:
+                        type: array
+                        items:
+                          $ref: '#/paths/~1api~1orders~1%7BorderId%7D/get/responses/200/content/application~1json/schema/properties/product/properties/options/items'
                   orderDate:
                     type: string
                     format: date-time
+                    description: The date and time when the order was placed
                   status:
                     type: string
                     enum:
@@ -2517,47 +2581,15 @@ paths:
                       - shipped
                       - completed
                       - cancelled
+                    description: The current status of the order
                   createdAt:
                     type: string
                     format: date-time
+                    description: The date and time when the order was created
                   updatedAt:
                     type: string
                     format: date-time
-    get:
-      summary: Get all orders for the authenticated customer
-      tags:
-        - Orders
-      security:
-        - cookieAuth: []
-      responses:
-        '200':
-          description: List of orders
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/paths/~1api~1orders/post/responses/201/content/application~1json/schema'
-  '/api/orders/{orderId}':
-    get:
-      summary: Get order by ID
-      tags:
-        - Orders
-      security:
-        - cookieAuth: []
-      parameters:
-        - in: path
-          name: orderId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Order details
-          content:
-            application/json:
-              schema:
-                $ref: '#/paths/~1api~1orders/post/responses/201/content/application~1json/schema'
+                    description: The date and time when the order was last updated
 components:
   securitySchemes:
     cookieAuth:
