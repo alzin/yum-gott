@@ -72,34 +72,29 @@ components:
       type: object
       required:
         - customerId
-        - productId
+        - productIds
       properties:
         customerId:
           type: string
           format: uuid
           description: The ID of the customer placing the order.
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        productId:
-          type: string
-          description: The ID of the product being ordered.
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        selectedOptions:
+        productIds:
           type: array
-          description: Array of selected product options
           items:
-            type: object
-            required:
-              - optionId
-              - valueId
-            properties:
-              optionId:
-                type: string
-                format: uuid
-                description: The ID of the selected option
-              valueId:
-                type: string
-                format: uuid
-                description: The ID of the selected option value
+            type: string
+            format: uuid
+        optionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: OptionId per product index (optional)
+        valueIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: ValueId per product index (optional)
     Order:
       type: object
       properties:
@@ -111,8 +106,10 @@ components:
           type: string
           format: uuid
           description: The ID of the customer who placed the order
-        product:
-          $ref: '#/components/schemas/ProductWithOptionsAndValues'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
         orderDate:
           type: string
           format: date-time
@@ -138,11 +135,27 @@ components:
         options:
           type: array
           items:
-            $ref: '#/components/schemas/SelectedProductOptionValue'
+            type: object
+            properties:
+              option:
+                $ref: '#/components/schemas/ProductOption'
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductOptionValue'
         selectedOptions:
           type: array
           items:
             $ref: '#/components/schemas/SelectedProductOptionValue'
+
+    OrderItem:
+      allOf:
+        - $ref: '#/components/schemas/ProductWithOptionsAndValues'
+        - type: object
+          properties:
+            quantity:
+              type: integer
+              minimum: 1
     
     SelectedProductOptionValue:
       type: object

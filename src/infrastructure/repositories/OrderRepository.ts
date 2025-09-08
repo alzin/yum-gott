@@ -13,7 +13,7 @@ export class OrderRepository implements IOrderRepository {
         `;
         const values = [
             order.customerId,
-            JSON.stringify(order.product),
+            JSON.stringify({ items: order.items }),
             order.orderDate,
             order.status
         ];
@@ -37,7 +37,7 @@ export class OrderRepository implements IOrderRepository {
         const values: any[] = [];
         let i = 1;
         if (order.status !== undefined) { fields.push(`status = $${i++}`); values.push(order.status); }
-        if (order.product !== undefined) { fields.push(`product_details = $${i++}`); values.push(JSON.stringify(order.product)); }
+        if (order.items !== undefined) { fields.push(`product_details = $${i++}`); values.push(JSON.stringify({ items: order.items })); }
         if (order.orderDate !== undefined) { fields.push(`order_date = $${i++}`); values.push(order.orderDate); }
         fields.push(`updated_at = NOW()`);
         values.push(id);
@@ -52,19 +52,15 @@ export class OrderRepository implements IOrderRepository {
     }
 
     private mapToOrder(row: any): Order {
-        const productDetails = typeof row.product_details === 'string' 
+        const productDetails = typeof row.product_details === 'string'
             ? JSON.parse(row.product_details)
             : row.product_details;
-            
-        // Ensure selectedOptions is always an array
-        if (!productDetails.selectedOptions) {
-            productDetails.selectedOptions = [];
-        }
-            
+        const items = Array.isArray(productDetails?.items) ? productDetails.items : [];
+
         return {
             id: row.id,
             customerId: row.customer_id,
-            product: productDetails,
+            items,
             orderDate: new Date(row.order_date),
             status: row.status,
             createdAt: new Date(row.created_at),

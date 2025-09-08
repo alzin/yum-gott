@@ -2420,34 +2420,29 @@ paths:
               type: object
               required:
                 - customerId
-                - productId
+                - productIds
               properties:
                 customerId:
                   type: string
                   format: uuid
                   description: The ID of the customer placing the order.
-                  example: 123e4567-e89b-12d3-a456-426614174000
-                productId:
-                  type: string
-                  description: The ID of the product being ordered.
-                  example: 550e8400-e29b-41d4-a716-446655440000
-                selectedOptions:
+                productIds:
                   type: array
-                  description: Array of selected product options
                   items:
-                    type: object
-                    required:
-                      - optionId
-                      - valueId
-                    properties:
-                      optionId:
-                        type: string
-                        format: uuid
-                        description: The ID of the selected option
-                      valueId:
-                        type: string
-                        format: uuid
-                        description: The ID of the selected option value
+                    type: string
+                    format: uuid
+                optionIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: OptionId per product index (optional)
+                valueIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: ValueId per product index (optional)
       responses:
         '201':
           description: Order created
@@ -2508,67 +2503,104 @@ paths:
                     type: string
                     format: uuid
                     description: The ID of the customer who placed the order
-                  product:
-                    type: object
-                    properties:
-                      product:
-                        type: object
-                        properties:
-                          categoryName:
-                            type: string
-                          productName:
-                            type: string
-                          description:
-                            type: string
-                          price:
-                            type: number
-                          discount:
-                            type: number
-                          sizeOptions:
-                            type: array
-                            items:
+                  items:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            product:
                               type: object
                               properties:
-                                name:
+                                categoryName:
                                   type: string
-                                additionalPrice:
+                                productName:
+                                  type: string
+                                description:
+                                  type: string
+                                price:
                                   type: number
-                          restaurantOwnerId:
-                            type: string
-                          createdAt:
-                            type: string
-                            format: date-time
-                          updatedAt:
-                            type: string
-                            format: date-time
-                      options:
-                        type: array
-                        items:
-                          type: object
+                                discount:
+                                  type: number
+                                sizeOptions:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      name:
+                                        type: string
+                                      additionalPrice:
+                                        type: number
+                                restaurantOwnerId:
+                                  type: string
+                                createdAt:
+                                  type: string
+                                  format: date-time
+                                updatedAt:
+                                  type: string
+                                  format: date-time
+                            options:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  option:
+                                    type: object
+                                    properties:
+                                      name:
+                                        type: string
+                                      required:
+                                        type: boolean
+                                      createdAt:
+                                        type: string
+                                        format: date-time
+                                      updatedAt:
+                                        type: string
+                                        format: date-time
+                                  values:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        name:
+                                          type: string
+                                        additionalPrice:
+                                          type: number
+                                        createdAt:
+                                          type: string
+                                          format: date-time
+                                        updatedAt:
+                                          type: string
+                                          format: date-time
+                            selectedOptions:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  optionId:
+                                    type: string
+                                    format: uuid
+                                    description: The ID of the selected option
+                                  optionName:
+                                    type: string
+                                    description: The name of the selected option
+                                  valueId:
+                                    type: string
+                                    format: uuid
+                                    description: The ID of the selected option value
+                                  valueName:
+                                    type: string
+                                    description: The name of the selected option value
+                                  additionalPrice:
+                                    type: number
+                                    format: float
+                                    description: Additional price for this option value
+                                    example: 2.5
+                        - type: object
                           properties:
-                            optionId:
-                              type: string
-                              format: uuid
-                              description: The ID of the selected option
-                            optionName:
-                              type: string
-                              description: The name of the selected option
-                            valueId:
-                              type: string
-                              format: uuid
-                              description: The ID of the selected option value
-                            valueName:
-                              type: string
-                              description: The name of the selected option value
-                            additionalPrice:
-                              type: number
-                              format: float
-                              description: Additional price for this option value
-                              example: 2.5
-                      selectedOptions:
-                        type: array
-                        items:
-                          $ref: '#/paths/~1api~1orders~1%7BorderId%7D/get/responses/200/content/application~1json/schema/properties/product/properties/options/items'
+                            quantity:
+                              type: integer
+                              minimum: 1
                   orderDate:
                     type: string
                     format: date-time
