@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
-import { DIContainer } from '@/infrastructure/di/DIContainer';
 import { CreateOrderUseCase, GetOrdersForCustomerUseCase, GetOrderByIdUseCase } from '@/application/use-cases/order';
 
 export class OrderController {
-    private di = DIContainer.getInstance();
+    constructor(
+        private createOrderUseCase: CreateOrderUseCase,
+        private getOrdersForCustomerUseCase: GetOrdersForCustomerUseCase,
+        private getOrderByIdUseCase: GetOrderByIdUseCase
+    ) { }
 
     async createOrder(req: Request, res: Response): Promise<void> {
         try {
@@ -14,8 +17,7 @@ export class OrderController {
                 return;
             }
 
-            const useCase = this.di.resolve('createOrderUseCase') as CreateOrderUseCase;
-            const order = await useCase.execute({
+            const order = await this.createOrderUseCase.execute({
                 customerId,
                 productIds,
                 optionIds,
@@ -24,7 +26,7 @@ export class OrderController {
 
             res.status(201).json({
                 success: true,
-                message: 'Order created',
+                message: 'Order created successfully',
                 data: order
             });
         } catch (error: any) {
@@ -39,8 +41,7 @@ export class OrderController {
                 res.status(401).json({ success: false, message: 'Unauthorized' });
                 return;
             }
-            const useCase = this.di.resolve('getOrdersForCustomerUseCase') as GetOrdersForCustomerUseCase;
-            const orders = await useCase.execute(customerId);
+            const orders = await this.getOrdersForCustomerUseCase.execute(customerId);
             res.status(200).json({ success: true, message: 'Orders retrieved', data: orders });
         } catch (error: any) {
             res.status(400).json({ success: false, message: error.message || 'Failed to get orders' });
@@ -50,8 +51,7 @@ export class OrderController {
     async getOrderById(req: Request, res: Response): Promise<void> {
         try {
             const { orderId } = req.params;
-            const useCase = this.di.resolve('getOrderByIdUseCase') as GetOrderByIdUseCase;
-            const order = await useCase.execute(orderId);
+            const order = await this.getOrderByIdUseCase.execute(orderId);
             if (!order) {
                 res.status(404).json({ success: false, message: 'Order not found' });
                 return;

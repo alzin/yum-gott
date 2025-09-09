@@ -1,16 +1,5 @@
-import { IOrderRepository } from '@/domain/repositories/IOrderRepository';
-import { ICustomerRepository } from '@/domain/repositories/ICustomerRepository';
-import { IProductRepository } from '@/domain/repositories/IProductRepository';
-import { IProductOptionRepository } from '@/domain/repositories/IProductOptionRepository';
-import { IProductOptionValueRepository } from '@/domain/repositories/IProductOptionValueRepository';
-import {
-    Order,
-    CreateOrderDTO,
-    ProductWithOptionsAndValues,
-    SelectedProductOptionValue,
-    OrderItem
-} from '@/domain/entities/Order';
-
+import { IOrderRepository, ICustomerRepository, IProductRepository, IProductOptionRepository, IProductOptionValueRepository } from '@/domain/repositories';
+import { Order, CreateOrderDTO, ProductWithOptionsAndValues, SelectedProductOptionValue, } from '@/domain/entities/Order';
 
 export class CreateOrderUseCase {
     constructor(
@@ -52,7 +41,7 @@ export class CreateOrderUseCase {
             groupedSelections.set(productId, arr);
         }
 
-        const items: OrderItem[] = await Promise.all(Array.from(groupedSelections.entries()).map(async ([productId, selections]) => {
+        const items: ProductWithOptionsAndValues[] = await Promise.all(Array.from(groupedSelections.entries()).map(async ([productId, selections]) => {
             const product = await this.productRepository.findById(productId);
             if (!product) {
                 throw new Error(`Product not found: ${productId}`);
@@ -68,7 +57,7 @@ export class CreateOrderUseCase {
             const processedSelectedOptions: SelectedProductOptionValue[] = [];
             if (selections && selections.length > 0) {
                 if (optionsWithValues.length === 0) {
-                    throw new Error('This product has no options. Remove selected options from your request or create product options first.');
+                    throw new Error('This product has no options. Remove selected options from your request.');
                 }
                 const optionMap = new Map(optionsWithValues.map(ov => [ov.option.id, ov]));
                 for (const { optionId, valueId } of selections) {
@@ -96,7 +85,7 @@ export class CreateOrderUseCase {
                 options: optionsWithValues,
                 selectedOptions: processedSelectedOptions
             };
-            return { ...productWithOptions } as OrderItem;
+            return { ...productWithOptions } as ProductWithOptionsAndValues;
         }));
 
         const order: Omit<Order, 'id'> = {

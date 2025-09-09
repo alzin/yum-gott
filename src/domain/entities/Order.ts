@@ -24,13 +24,10 @@ export interface ProductWithOptionsAndValues {
     selectedOptions: SelectedProductOptionValue[];
 }
 
-export interface OrderItem extends ProductWithOptionsAndValues {
-}
-
 export interface Order {
     id?: string;
-    customerId: string; // references Customer.id
-    items: OrderItem[]; // embedded multiple product details
+    customerId: string;
+    items: ProductWithOptionsAndValues[];
     orderDate: Date;
     status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
     createdAt?: Date;

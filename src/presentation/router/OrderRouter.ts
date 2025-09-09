@@ -16,7 +16,11 @@ export class OrderRouter {
 
     private setupRoutes(): void {
         const authMiddleware = this.diContainer.authMiddleware;
-        const controller = new OrderController();
+        const controller = new OrderController(
+            this.diContainer.resolve('createOrderUseCase'),
+            this.diContainer.resolve('getOrdersForCustomerUseCase'),
+            this.diContainer.resolve('getOrderByIdUseCase')
+        );
 
         this.router.post(
             '/',
