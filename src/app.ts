@@ -5,13 +5,15 @@ import swaggerUi from "swagger-ui-express";
 import YAML from 'yamljs';
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan';
-import { DIContainer } from './infrastructure/di/DIContainer';
 import { AuthRouter, CategoryRouter, OpeningHoursRouter, ProductRouter, VideoRouter, VideoTrackingRouter, CommentRouter, LikeRouter, PayGateRouter, OrderRouter } from './presentation/router/index';
 import path from "path";
+import { Server as HttpServer } from 'http';
+import { DIContainer } from './infrastructure/di/DIContainer';
 // import { CleanupUnverifiedAccounts } from './infrastructure/services/CleanupUnverifiedAccounts';
 
 export class App {
   private app: Application;
+  private server?: HttpServer;
   // private diContainer: DIContainer;
   private setupMiddleware(): void {
     this.app.use(helmet());
@@ -151,7 +153,20 @@ export class App {
 
   public async start(port: number = 3000): Promise<void> {
     try {
-      this.app.listen(port, '0.0.0.0', () => {
+      this.server = require('http').createServer(this.app);
+
+      // Attach socket gateway
+      try {
+        const notifier = DIContainer.getInstance().resolve('realtimeNotifier') as any;
+        if (notifier && typeof notifier.attach === 'function') {
+          notifier.attach(this.server);
+          console.log('Realtime notifier attached');
+        }
+      } catch (e) {
+        console.error('Failed to attach realtime notifier', e);
+      }
+
+      this.server!.listen(port, '0.0.0.0', () => {
         const env = process.env.NODE_ENV || 'development';
         console.log(`🚀 Server is running (env: ${env} - server) on http://localhost:${port}`);
         console.log(`🌐 Network URL: http://${this.getLocalIpAddress()}:${port}`);

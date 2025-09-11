@@ -1,5 +1,6 @@
 import { IOrderRepository, ICustomerRepository, IProductRepository, IProductOptionRepository, IProductOptionValueRepository } from '@/domain/repositories';
 import { Order, CreateOrderDTO, ProductWithOptionsAndValues, SelectedProductOptionValue, } from '@/domain/entities/Order';
+import { IRealtimeNotifier } from '@/application/interface/IRealtimeNotifier';
 
 export class CreateOrderUseCase {
     constructor(
@@ -8,6 +9,7 @@ export class CreateOrderUseCase {
         private productRepository: IProductRepository,
         private productOptionRepository: IProductOptionRepository,
         private productOptionValueRepository: IProductOptionValueRepository,
+        private notifier?: IRealtimeNotifier,
     ) { }
 
     async execute(createOrderDto: CreateOrderDTO): Promise<Order> {
@@ -97,7 +99,16 @@ export class CreateOrderUseCase {
             updatedAt: new Date()
         };
 
-        return this.orderRepository.create(order);
+        const created = await this.orderRepository.create(order as any);
+
+        try {
+            const ownerIds = Array.from(new Set(items.map(i => i.product.restaurantOwnerId)));
+            await this.notifier?.notifyOwnersOrderCreated(ownerIds, created);
+        } catch (e) {
+            console.error('Failed to notify owners about order creation', e);
+        }
+
+        return created;
     }
 
 
