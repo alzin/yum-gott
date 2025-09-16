@@ -19,7 +19,8 @@ export class OrderRouter {
         const controller = new OrderController(
             this.diContainer.resolve('createOrderUseCase'),
             this.diContainer.resolve('getOrdersForCustomerUseCase'),
-            this.diContainer.resolve('getOrderByIdUseCase')
+            this.diContainer.resolve('getOrderByIdUseCase'),
+            this.diContainer.resolve('updateOrderStatusUseCase')
         );
 
         this.router.post(
@@ -46,6 +47,15 @@ export class OrderRouter {
             OrderValidators.orderIdParam(),
             ValidationMiddleware.handleValidationErrors(),
             (req: Request, res: Response) => controller.getOrderById(req, res)
+        );
+
+        this.router.patch(
+            '/:orderId/status',
+            authMiddleware.authenticateUser,
+            authMiddleware.requireRestaurantOwner,
+            OrderValidators.updateStatus(),
+            ValidationMiddleware.handleValidationErrors(),
+            (req: Request, res: Response) => controller.updateOrderStatus(req, res)
         );
     }
 

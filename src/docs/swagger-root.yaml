@@ -126,6 +126,8 @@ paths:
     $ref: './paths-orders.yaml#/paths/~1orders'
   /api/orders/{orderId}:
     $ref: './paths-orders.yaml#/paths/~1orders~1{orderId}'
+  /api/orders/{orderId}/status:
+    $ref: './paths-orders.yaml#/paths/~1orders~1{orderId}~1status'
 
 components:
   securitySchemes:

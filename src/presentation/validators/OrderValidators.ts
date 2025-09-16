@@ -38,4 +38,15 @@ export class OrderValidators {
                 .withMessage('تنسيق معرف الطلب غير صحيح')
         ];
     }
+
+    static updateStatus(): ValidationChain[] {
+        return [
+            param('orderId')
+                .isUUID()
+                .withMessage('تنسيق معرف الطلب غير صحيح'),
+            body('status')
+                .isIn(['pending', 'paid', 'shipped', 'completed', 'cancelled'])
+                .withMessage('قيمة الحالة غير صالحة')
+        ];
+    }
 }

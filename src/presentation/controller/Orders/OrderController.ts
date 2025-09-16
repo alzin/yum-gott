@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
-import { CreateOrderUseCase, GetOrdersForCustomerUseCase, GetOrderByIdUseCase } from '@/application/use-cases/order';
+import { CreateOrderUseCase, GetOrdersForCustomerUseCase, GetOrderByIdUseCase, UpdateOrderStatusUseCase } from '@/application/use-cases/order';
 
 export class OrderController {
     constructor(
         private createOrderUseCase: CreateOrderUseCase,
         private getOrdersForCustomerUseCase: GetOrdersForCustomerUseCase,
-        private getOrderByIdUseCase: GetOrderByIdUseCase
+        private getOrderByIdUseCase: GetOrderByIdUseCase,
+        private updateOrderStatusUseCase?: UpdateOrderStatusUseCase
     ) { }
 
     async createOrder(req: Request, res: Response): Promise<void> {
@@ -61,4 +62,26 @@ export class OrderController {
             res.status(400).json({ success: false, message: error.message || 'Failed to get order' });
         }
     }
-}
+
+    async updateOrderStatus(req: Request, res: Response): Promise<void> {
+        try {
+            const { orderId } = req.params as any;
+            const { status } = req.body || {};
+            const ownerId = (req as any).user?.userId as string;
+            if (!ownerId) {
+                res.status(401).json({ success: false, message: 'Unauthorized' });
+                return;
+            }
+            if (!this.updateOrderStatusUseCase) {
+                res.status(500).json({ success: false, message: 'UpdateOrderStatusUseCase not registered' });
+                return;
+            }
+            const updated = await this.updateOrderStatusUseCase.execute({ orderId, ownerId, nextStatus: status });
+            res.status(200).json({ success: true, message: 'Order status updated', data: updated });
+        } catch (error: any) {
+            const message = error?.message || 'Failed to update order status';
+            const isForbidden = typeof message === 'string' && message.startsWith('Forbidden');
+            const isNotFound = message === 'Order not found';
+            res.status(isForbidden ? 403 : isNotFound ? 404 : 400).json({ success: false, message });
+        }
+    }}

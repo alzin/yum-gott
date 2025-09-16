@@ -2622,6 +2622,114 @@ paths:
                     type: string
                     format: date-time
                     description: The date and time when the order was last updated
+  '/api/orders/{orderId}/status':
+    patch:
+      summary: Update order status
+      description: Allows a restaurant owner to update the status of an order.
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the order to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - pending
+                    - paid
+                    - shipped
+                    - completed
+                    - cancelled
+                  description: New status for the order.
+              required:
+                - status
+      responses:
+        '200':
+          description: Order status updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Order status updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 123e4567-e89b-12d3-a456-426614174000
+                      status:
+                        type: string
+                        example: accepted
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid input data
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthorized access
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Forbidden access
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Resource not found
 components:
   securitySchemes:
     cookieAuth:
