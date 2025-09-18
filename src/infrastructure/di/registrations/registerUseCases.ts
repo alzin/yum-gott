@@ -297,6 +297,7 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('IOrderRepository')
     ));
     container.registerTransient('updateOrderStatusUseCase', () => new UpdateOrderStatusUseCase(
-        container.resolve('IOrderRepository')
+        container.resolve('IOrderRepository'),
+        container.resolve('realtimeNotifier')
     ));
 } 

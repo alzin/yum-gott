@@ -1,10 +1,10 @@
 import { IOrderRepository } from '@/domain/repositories/IOrderRepository';
 import { Order } from '@/domain/entities/Order';
-
+import { IRealtimeNotifier } from '@/application/interface/IRealtimeNotifier';
 type OrderStatus = Order['status'];
 
 export class UpdateOrderStatusUseCase {
-    constructor(private orderRepository: IOrderRepository) { }
+    constructor(private orderRepository: IOrderRepository, private notifier?: IRealtimeNotifier) { }
 
     private isTransitionAllowed(current: OrderStatus, next: OrderStatus): boolean {
         const allowed: Record<OrderStatus, OrderStatus[]> = {
@@ -43,6 +43,7 @@ export class UpdateOrderStatusUseCase {
         }
 
         const updated = await this.orderRepository.update(orderId, { status: nextStatus });
+        await this.notifier?.notifyCustomerOrderStatusChanged(order.customerId, updated);
         return updated;
     }
 }

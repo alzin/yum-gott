@@ -69,7 +69,7 @@ paths:
   /orders/{orderId}/status:
     patch:
       summary: Update order status
-      description: Allows a restaurant owner to update the status of an order.
+      description: Allows a restaurant owner to update the status of an order. Only the status can be updated => [pending, paid, shipped, completed, cancelled]
       tags:
         - Orders
       security:

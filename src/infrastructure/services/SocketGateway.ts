@@ -73,6 +73,16 @@ export class SocketGateway implements IRealtimeNotifier {
             });
         }
     }
+    async notifyCustomerOrderStatusChanged(customerId: string, order: any): Promise<void> {
+        if (!this.io) return;
+        this.io.to(this.getCustomerRoom(customerId)).emit('order:status_changed', {
+            orderId: order.id,
+            status: order.status
+        });
+    }
+    private getCustomerRoom(customerId: string): string {
+        return `customer:${customerId}`;
+    }
 }
 
 
