@@ -84,4 +84,5 @@ export class OrderController {
             const isNotFound = message === 'Order not found';
             res.status(isForbidden ? 403 : isNotFound ? 404 : 400).json({ success: false, message });
         }
-    }}
+    }
+}

@@ -39,6 +39,9 @@ export class SocketGateway implements IRealtimeNotifier {
             if (user?.userType === 'restaurant_owner') {
                 const room = this.getOwnerRoom(user.userId);
                 socket.join(room);
+            } else if (user?.userType === 'customer') {
+                const room = this.getCustomerRoom(user.userId);
+                socket.join(room);
             }
 
             socket.on('subscribe:owner', (ownerId: string) => {
@@ -75,6 +78,14 @@ export class SocketGateway implements IRealtimeNotifier {
     }
     async notifyCustomerOrderStatusChanged(customerId: string, order: any): Promise<void> {
         if (!this.io) return;
+        try {
+            console.log('[realtime] Emitting order:status_changed', {
+                customerId,
+                orderId: order?.id,
+                status: order?.status,
+                at: new Date().toISOString()
+            });
+        } catch (_) { }
         this.io.to(this.getCustomerRoom(customerId)).emit('order:status_changed', {
             orderId: order.id,
             status: order.status
