@@ -37,7 +37,7 @@
     "start:prod": "cross-env NODE_ENV=production nodemon --watch src --ext ts,json,yaml,yml --exec ts-node -r tsconfig-paths/register src/index.ts",
     "start:dev": "cross-env NODE_ENV=development nodemon --watch src --ext ts,json,yaml,yml --exec ts-node -r tsconfig-paths/register src/index.ts",
     "migrate:dev": "cross-env NODE_ENV=development ts-node -r tsconfig-paths/register src/infrastructure/database/run-migration.ts",
-    "migrate:prod": "cross-env NODE_ENV=production ts-node -r tsconfig-paths/register src/infrastructure/database/run-migration.ts",
+    "migrate:prod": "cross-env NODE_ENV=productions ts-node -r tsconfig-paths/register src/infrastructure/database/run-migration.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "ts-node -r tsconfig-paths/register src/infrastructure/database/run-migration.ts",
     "setup-db": "ts-node -r tsconfig-paths/register src/infrastructure/database/setup-database.ts",

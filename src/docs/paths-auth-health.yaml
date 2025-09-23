@@ -11,6 +11,8 @@ servers:
     description: Production server
   - url: https://yum-gott.onrender.com
     description: Development server
+  - url: https://production-server-yumgott.onrender.com
+    description: Production server
 
 paths:
   /health:
