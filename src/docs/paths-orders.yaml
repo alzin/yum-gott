@@ -11,14 +11,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrderRequest'
+              $ref: "#/components/schemas/CreateOrderRequest"
       responses:
-        '201':
+        "201":
           description: Order created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Order created"
+                  data:
+                    $ref: "#/components/schemas/Order"
 
     get:
       summary: Get all orders for the authenticated customer
@@ -27,14 +36,14 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: List of orders
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Order'
+                  $ref: "#/components/schemas/Order"
 
   /orders/{orderId}:
     get:
@@ -50,86 +59,188 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Order details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: "#/components/schemas/Order"
+
+  /orders/{orderId}/status:
+    patch:
+      summary: Update order status
+      description: Allows a restaurant owner to update the status of an order. Only the status can be updated => [pending, paid, shipped, completed, cancelled]
+      tags:
+        - Orders
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the order to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [pending, paid, shipped, completed, cancelled]
+                  description: New status for the order.
+              required:
+                - status
+      responses:
+        "200":
+          description: Order status updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Order status updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "123e4567-e89b-12d3-a456-426614174000"
+                      status:
+                        type: string
+                        example: "accepted"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     CreateOrderRequest:
       type: object
       required:
         - customerId
-        - productName
+        - productIds
       properties:
         customerId:
           type: string
+          format: uuid
           description: The ID of the customer placing the order.
-          example: "John Doe"
-        productName:
-          type: string
-          description: The name of the product being ordered.
-          example: "Margherita Pizza"
-        status:
-          type: string
-          description: The status of the order.
-          enum: [pending, paid, shipped, completed, cancelled]
-          example: "pending"
-        orderDate:
-          type: string
-          format: date-time
-          description: The date and time the order was placed.
-          example: "2025-09-01T07:21:30.462Z"
-        selectedOptions:
+        productIds:
           type: array
-          description: List of selected product option values (if applicable)
           items:
-            type: object
-            properties:
-              optionName:
-                type: string
-                example: "Toppings"
-              valueName:
-                type: string
-                example: "Extra Cheese"
+            type: string
+            format: uuid
+        optionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: OptionId per product index (optional)
+        valueIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: ValueId per product index (optional)
     Order:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique identifier of the order
         customerId:
           type: string
-        product:
-          $ref: '#/components/schemas/ProductWithOptionsAndValues'
+          format: uuid
+          description: The ID of the customer who placed the order
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
         orderDate:
           type: string
           format: date-time
+          description: The date and time when the order was placed
         status:
           type: string
           enum: [pending, paid, shipped, completed, cancelled]
+          description: The current status of the order
         createdAt:
           type: string
           format: date-time
+          description: The date and time when the order was created
         updatedAt:
           type: string
           format: date-time
+          description: The date and time when the order was last updated
     ProductWithOptionsAndValues:
       type: object
       properties:
         product:
-          $ref: '#/components/schemas/Product'
+          $ref: "#/components/schemas/Product"
         options:
           type: array
           items:
             type: object
             properties:
               option:
-                $ref: '#/components/schemas/ProductOption'
+                $ref: "#/components/schemas/ProductOption"
               values:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProductOptionValue'
+                  $ref: "#/components/schemas/ProductOptionValue"
+        selectedOptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelectedProductOptionValue"
+    OrderItem:
+      allOf:
+        - $ref: "#/components/schemas/ProductWithOptionsAndValues"
+        - type: object
+          properties:
+            quantity:
+              type: integer
+              minimum: 1
+    SelectedProductOptionValue:
+      type: object
+      properties:
+        optionId:
+          type: string
+          format: uuid
+          description: The ID of the selected option
+        optionName:
+          type: string
+          description: The name of the selected option
+        valueId:
+          type: string
+          format: uuid
+          description: The ID of the selected option value
+        valueName:
+          type: string
+          description: The name of the selected option value
+        additionalPrice:
+          type: number
+          format: float
+          description: Additional price for this option value
+          example: 2.5
     Product:
       type: object
       properties:
@@ -186,3 +297,64 @@ components:
         updatedAt:
           type: string
           format: date-time
+    BadRequestError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Invalid input data"
+    UnauthorizedError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Unauthorized access"
+    ForbiddenError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Forbidden access"
+    NotFoundError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Resource not found"
+  responses:
+    BadRequestError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequestError'
+    UnauthorizedError:
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+    ForbiddenError:
+      description: Forbidden access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForbiddenError'
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundError'

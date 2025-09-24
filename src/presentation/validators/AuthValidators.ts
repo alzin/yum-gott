@@ -32,7 +32,7 @@ export class AuthValidators {
         .withMessage('يرجى إدخال بريدك الإلكتروني')
         .isEmail()
         .withMessage('يرجى إدخال بريد إلكتروني صحيح (مثال: user@example.com)')
-        .normalizeEmail()
+        .normalizeEmail({ gmail_remove_dots: false })
         .isLength({ max: 255 })
         .withMessage('عنوان البريد الإلكتروني طويل جداً')
         .custom((value) => {
@@ -84,7 +84,7 @@ export class AuthValidators {
         .withMessage('البريد الإلكتروني مطلوب')
         .isEmail()
         .withMessage('تنسيق البريد الإلكتروني غير صحيح')
-        .normalizeEmail()
+        .normalizeEmail({ gmail_remove_dots: false })
         .isLength({ max: 255 })
         .withMessage('يجب ألا يتجاوز البريد الإلكتروني 255 حرفًا')
         .custom((value) => {

@@ -25,7 +25,7 @@ import { DeleteOpeningHoursUseCase } from '@/application/use-cases/opening-hours
 import { AuthController } from '@/presentation/controller/AuthController';
 import { AuthMiddleware } from '@/presentation/middleware/AuthMiddleware';
 import { GetActivePayGatesUseCase } from '@/application/use-cases/paygate/GetActivePayGatesUseCase';
-import { CreateOrderUseCase, GetOrdersForCustomerUseCase, GetOrderByIdUseCase } from '@/application/use-cases/order';
+import { CreateOrderUseCase, GetOrdersForCustomerUseCase, GetOrderByIdUseCase, UpdateOrderStatusUseCase } from '@/application/use-cases/order';
 
 export function registerUseCases(container: DIContainer) {
     // Auth UseCases
@@ -287,12 +287,17 @@ export function registerUseCases(container: DIContainer) {
         container.resolve('customerRepository'),
         container.resolve('IProductRepository'),
         container.resolve('productOptionRepository'),
-        container.resolve('productOptionValueRepository')
+        container.resolve('productOptionValueRepository'),
+        container.resolve('realtimeNotifier')
     ));
     container.registerTransient('getOrdersForCustomerUseCase', () => new GetOrdersForCustomerUseCase(
         container.resolve('IOrderRepository')
     ));
     container.registerTransient('getOrderByIdUseCase', () => new GetOrderByIdUseCase(
         container.resolve('IOrderRepository')
+    ));
+    container.registerTransient('updateOrderStatusUseCase', () => new UpdateOrderStatusUseCase(
+        container.resolve('IOrderRepository'),
+        container.resolve('realtimeNotifier')
     ));
 } 

@@ -20,10 +20,10 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async generateToken(payload: JWTpayload): Promise<AuthToken> {
-    const accessToken = jwt.sign(payload, this.JWT_SECRET, {
+    const accessToken = jwt.sign(payload, this.JWT_SECRET, { 
       expiresIn: this.ACCESS_TOKEN_EXPIRY as any,
     });
-
+ 
     const refreshToken = jwt.sign(payload, this.REFRESH_SECRET, {
       expiresIn: this.REFRESH_TOKEN_EXPIRY as any,
     });

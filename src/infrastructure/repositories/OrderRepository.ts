@@ -13,7 +13,7 @@ export class OrderRepository implements IOrderRepository {
         `;
         const values = [
             order.customerId,
-            JSON.stringify(order.product),
+            JSON.stringify({ items: order.items }),
             order.orderDate,
             order.status
         ];
@@ -37,7 +37,7 @@ export class OrderRepository implements IOrderRepository {
         const values: any[] = [];
         let i = 1;
         if (order.status !== undefined) { fields.push(`status = $${i++}`); values.push(order.status); }
-        if (order.product !== undefined) { fields.push(`product_details = $${i++}`); values.push(JSON.stringify(order.product)); }
+        if (order.items !== undefined) { fields.push(`product_details = $${i++}`); values.push(JSON.stringify({ items: order.items })); }
         if (order.orderDate !== undefined) { fields.push(`order_date = $${i++}`); values.push(order.orderDate); }
         fields.push(`updated_at = NOW()`);
         values.push(id);
@@ -51,13 +51,20 @@ export class OrderRepository implements IOrderRepository {
         await this.db.query('DELETE FROM orders WHERE id = $1', [id]);
     }
 
-    private mapToOrder = (row: any): Order => ({
-        id: row.id,
-        customerId: row.customer_id,
-        product: row.product_details,
-        orderDate: new Date(row.order_date),
-        status: row.status,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at)
-    });
+    private mapToOrder(row: any): Order {
+        const productDetails = typeof row.product_details === 'string'
+            ? JSON.parse(row.product_details)
+            : row.product_details;
+        const items = Array.isArray(productDetails?.items) ? productDetails.items : [];
+
+        return {
+            id: row.id,
+            customerId: row.customer_id,
+            items,
+            orderDate: new Date(row.order_date),
+            status: row.status,
+            createdAt: new Date(row.created_at),
+            updatedAt: new Date(row.updated_at)
+        };
+    }
 }

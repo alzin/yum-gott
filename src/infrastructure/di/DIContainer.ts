@@ -156,7 +156,7 @@ export class DIContainer {
     this.factories.set(key, factory);
     this.singletons.add(key);
   }
-  
+
 
   public registerTransient<T>(key: string, factory: DependencyFactory<T>): void {
     this.factories.set(key, factory);
