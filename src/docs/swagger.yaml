@@ -676,6 +676,105 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/auth/otp/request:
+    post:
+      tags:
+        - Authentication
+      summary: Request OTP via SMS
+      description: 'Sends a one-time password (OTP) via SMS to the provided phone number (e.g., Syrian +963 numbers).'
+      operationId: requestOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: '+963912345678'
+              required:
+                - phone
+            examples:
+              validRequest:
+                summary: Valid OTP request
+                value:
+                  phone: '+963912345678'
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP sent
+                  code:
+                    type: string
+                    description: One-time password returned for testing/non-production purposes
+                    example: '123456'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid phone number
+  /api/auth/otp/verify:
+    post:
+      tags:
+        - Authentication
+      summary: Verify OTP code
+      description: Verifies the OTP code sent to the user's phone number.
+      operationId: verifyOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: '+963912345678'
+                code:
+                  type: string
+                  example: '123456'
+              required:
+                - phone
+                - code
+            examples:
+              validVerify:
+                summary: Valid OTP verification
+                value:
+                  phone: '+963912345678'
+                  code: '123456'
+      responses:
+        '200':
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP verified
+        '400':
+          description: Invalid or expired OTP
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid or expired OTP
   /api/products:
     post:
       tags:

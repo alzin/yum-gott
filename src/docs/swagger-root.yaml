@@ -47,6 +47,10 @@ paths:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1account~1customer'
   /api/auth/account/restaurant-owner:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1account~1restaurant-owner'
+  /api/auth/otp/request:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1otp~1request'
+  /api/auth/otp/verify:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1otp~1verify'
   # Include paths from paths-products-categories.yaml
 
   /api/products:
