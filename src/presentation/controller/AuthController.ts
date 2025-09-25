@@ -4,6 +4,34 @@ import { LogoutUseCase, RefreshTokenUseCase, ChangePasswordUseCase } from '@/app
 import { AuthToken } from '@/domain/entities/AuthToken';
 import { setAuthCookies } from '@/shared/utils/cookieUtils';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
+import { OtpVerificationUseCase } from '../../application/use-cases/auth/OtpVerificationUseCase';
+import { UnimtxSmsService } from '../../infrastructure/services/UnimtxSmsService';
+import { InMemoryOtpVerificationRepository } from '../../infrastructure/repositories/OtpVerificationRepository';
+
+const otpService = new UnimtxSmsService();
+const otpRepo = new InMemoryOtpVerificationRepository();
+const otpUseCase = new OtpVerificationUseCase(otpService, otpRepo);
+
+export const requestOtp = async (req: any, res: any) => {
+
+  const { phone } = req.body;
+  try {
+    await otpUseCase.requestOtp(phone);
+    res.status(200).json({ message: 'OTP sent' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const verifyOtp = async (req: any, res: any) => {
+  const { phone, code } = req.body;
+  try {
+    await otpUseCase.verifyOtp(phone, code);
+    res.status(200).json({ message: 'OTP verified' });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+};
 
 export class AuthController {
   private logoutUseCase: LogoutUseCase;
@@ -99,4 +127,4 @@ export class AuthController {
   private setAuthCookies(res: Response, authToken: AuthToken): void {
     setAuthCookies(res, authToken);
   }
-}
+}  

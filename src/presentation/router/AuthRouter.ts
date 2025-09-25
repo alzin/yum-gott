@@ -19,6 +19,7 @@ import { DIContainer } from '@/infrastructure/di/DIContainer';
 import multer from 'multer';
 import { AuthController } from '../controller/AuthController';
 import { EditCustomerProfileController } from '../controller/Users/Customer/EditCustomerProfileController';
+import { requestOtp, verifyOtp } from '../controller/AuthController';
 
 export class AuthRouter {
   private router: Router;
@@ -149,6 +150,15 @@ export class AuthRouter {
       (req: Request, res: Response) => {
         this.authController.logout(req as AuthenticatedRequest, res)
       }
+    );
+
+    this.router.post(
+      '/otp/request',
+      (req: Request, res: Response) => requestOtp(req, res)
+    );
+    this.router.post(
+      '/otp/verify',
+      (req: Request, res: Response) => verifyOtp(req, res)
     );
 
     this.router.delete(

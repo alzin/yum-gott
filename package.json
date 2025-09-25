@@ -24,6 +24,7 @@
     "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",
     "tsyringe": "^4.10.0",
+    "uni-sdk": "^0.3.0",
     "uuid": "^11.1.0",
     "xss": "^1.0.15",
     "yamljs": "^0.3.0"
