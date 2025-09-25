@@ -16,8 +16,8 @@ export const requestOtp = async (req: any, res: any) => {
 
   const { phone } = req.body;
   try {
-    await otpUseCase.requestOtp(phone);
-    res.status(200).json({ message: 'OTP sent' });
+    const result = await otpUseCase.requestOtp(phone);
+    res.status(200).json({ message: 'OTP sent', code: result.code });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

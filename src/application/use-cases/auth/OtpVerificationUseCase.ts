@@ -12,6 +12,7 @@ export class OtpVerificationUseCase {
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
         await this.otpRepo.saveOtp(phone, code, expiresAt);
         await this.otpService.sendOtp(phone, code);
+        return { code, expiresAt };
     }
 
     async verifyOtp(phone: string, code: string) {

@@ -726,6 +726,10 @@ paths:
                   message:
                     type: string
                     example: OTP sent
+                  code:
+                    type: string
+                    description: One-time password returned for testing/non-production purposes
+                    example: '123456'
         "400":
           description: Invalid request
           content:
