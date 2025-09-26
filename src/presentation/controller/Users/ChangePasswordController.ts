@@ -13,6 +13,11 @@ export class ChangePasswordController {
                 return;
             }
 
+            if (user.userType === 'guest') {
+                res.status(403).json({ success: false, message: 'Guests cannot change password' });
+                return;
+            }
+
             const { oldPassword, newPassword } = req.body as { oldPassword: string; newPassword: string };
 
             const result = await this.changePasswordUseCase.execute(

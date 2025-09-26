@@ -41,6 +41,7 @@ export class VideoRouter {
         this.router.post(
             '/',
             authMiddleware.authenticateUser,
+            authMiddleware.requireNonGuest,
             this.upload.single('invoiceImage'),
             SanitizationMiddleware.allowedFields([
                 'publicId',
@@ -57,6 +58,7 @@ export class VideoRouter {
         this.router.put(
             '/:id',
             authMiddleware.authenticateUser,
+            authMiddleware.requireNonGuest,
             this.upload.single('invoiceImage'),
             SanitizationMiddleware.allowedFields([
                 'publicId',
@@ -73,6 +75,7 @@ export class VideoRouter {
         this.router.delete(
             '/:id',
             authMiddleware.authenticateUser,
+            authMiddleware.requireNonGuest,
             (req: AuthenticatedRequest, res: Response) => controller.deleteVideo(req, res)
         );
 

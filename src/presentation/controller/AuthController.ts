@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware';
 import { LogoutUseCase, RefreshTokenUseCase, ChangePasswordUseCase } from '@/application/use-cases/auth';
+import { GuestLoginUseCase } from '@/application/use-cases/auth/GuestLoginUseCase';
 import { AuthToken } from '@/domain/entities/AuthToken';
 import { setAuthCookies } from '@/shared/utils/cookieUtils';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
@@ -37,12 +38,14 @@ export class AuthController {
   private logoutUseCase: LogoutUseCase;
   private refreshTokenUseCase: RefreshTokenUseCase;
   private changePasswordUseCase: ChangePasswordUseCase;
+  private guestLoginUseCase: GuestLoginUseCase;
 
   constructor() {
     const diContainer = DIContainer.getInstance();
     this.logoutUseCase = diContainer.resolve('logoutUseCase');
     this.refreshTokenUseCase = diContainer.resolve('refreshTokenUseCase');
     this.changePasswordUseCase = diContainer.resolve('changePasswordUseCase');
+    this.guestLoginUseCase = diContainer.resolve('guestLoginUseCase');
   }
 
   refreshToken = async (req: Request, res: Response): Promise<void> => {
@@ -71,11 +74,26 @@ export class AuthController {
     }
   };
 
+  guestLogin = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const result = await this.guestLoginUseCase.execute(req.body);
+      this.setAuthCookies(res, result.authToken);
+      res.status(200).json({ success: true, message: 'Guest login successful' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error instanceof Error ? error.message : 'Guest login failed' });
+    }
+  };
+
   changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const user = req.user;
       if (!user) {
         res.status(401).json({ success: false, message: 'Unauthorized' });
+        return;
+      }
+
+      if (user.userType === 'guest') {
+        res.status(403).json({ success: false, message: 'Guests cannot change password' });
         return;
       }
 

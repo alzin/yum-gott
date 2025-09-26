@@ -26,6 +26,7 @@ export class CommentRouter {
         this.router.post(
             '/',
             authMiddleware.authenticateUser,
+            authMiddleware.requireNonGuest,
             SanitizationMiddleware.allowedFields(['videoId', 'content']),
             ...CommentValidators.createComment(),
             ValidationMiddleware.handleValidationErrors(),
@@ -44,6 +45,7 @@ export class CommentRouter {
         this.router.delete(
             '/:id',
             authMiddleware.authenticateUser,
+            authMiddleware.requireNonGuest,
             ...CommentValidators.commentIdParam(),
             ValidationMiddleware.handleValidationErrors(),
             (req: AuthenticatedRequest, res) => controller.deleteComment(req, res)

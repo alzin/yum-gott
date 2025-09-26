@@ -15,7 +15,11 @@ export class CommentController {
         try {
             const { videoId, content } = req.body;
             const userId = req.user!.userId;
-            const userType = req.user!.userType;
+            if (req.user!.userType === 'guest') {
+                res.status(403).json({ success: false, message: 'Guests cannot create comments' });
+                return;
+            }
+            const userType = req.user!.userType as 'customer' | 'restaurant_owner';
 
             const result = await this.createCommentUseCase.execute({
                 videoId,
@@ -107,7 +111,11 @@ export class CommentController {
         try {
             const { id } = req.params;
             const userId = req.user!.userId;
-            const userType = req.user!.userType;
+            if (req.user!.userType === 'guest') {
+                res.status(403).json({ success: false, message: 'Guests cannot delete comments' });
+                return;
+            }
+            const userType = req.user!.userType as 'customer' | 'restaurant_owner';
 
             const result = await this.deleteCommentUseCase.execute({
                 commentId: id,

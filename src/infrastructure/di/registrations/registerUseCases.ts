@@ -15,6 +15,7 @@ import {
     DeleteCustomerAccountUseCase,
     DeleteRestaurantOwnerAccountUseCase
 } from '@/application/use-cases/auth/index';
+import { GuestLoginUseCase } from '@/application/use-cases/auth/GuestLoginUseCase';
 import { GetVideoFeedUseCase } from '@/application/use-cases/video-tracking/GetVideoFeedUseCase';
 import { UpdateVideoPositionUseCase } from '@/application/use-cases/video-tracking/UpdateVideoPositionUseCase';
 import { CreateProductUseCase, GetProductUseCase, GetProductsByRestaurantUseCase, UpdateProductUseCase, DeleteProductUseCase } from '@/application/use-cases/product';
@@ -60,6 +61,12 @@ export function registerUseCases(container: DIContainer) {
             container.resolve('restaurantOwnerRepository'),
             container.resolve('authRepository'),
             container.resolve('passwordHasher')
+        );
+    });
+
+    container.registerTransient('guestLoginUseCase', () => {
+        return new GuestLoginUseCase(
+            container.resolve('authRepository')
         );
     });
 

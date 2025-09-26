@@ -25,6 +25,7 @@ export class LikeRouter {
         this.router.post(
             '/toggle',
             authMiddleware.authenticateUser,
+            authMiddleware.requireNonGuest,
             SanitizationMiddleware.allowedFields(['videoId']),
             body('videoId').isUUID().withMessage('Invalid video ID format'),
             ValidationMiddleware.handleValidationErrors(),
