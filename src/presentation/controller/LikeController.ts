@@ -13,7 +13,11 @@ export class LikeController {
         try {
             const { videoId } = req.body;
             const userId = req.user!.userId;
-            const userType = req.user!.userType;
+            if (req.user!.userType === 'guest') {
+                res.status(403).json({ success: false, message: 'Guests cannot like videos' });
+                return;
+            }
+            const userType = req.user!.userType as 'customer' | 'restaurant_owner';
 
             const result = await this.toggleVideoLikeUseCase.execute({
                 videoId,

@@ -5,14 +5,14 @@ import { Response } from 'express';
 export interface LogoutRequest {
     refreshToken: string;
     userId: string;
-    userType: 'customer' | 'restaurant_owner';
+    userType: 'customer' | 'restaurant_owner' | 'guest';
     accessToken: string;
 }
 
 export interface LogoutResponse {
     success: boolean;
     message: string;
-} 
+}
 
 export class LogoutUseCase {
     constructor(private authRepository: IAuthRepository) { }

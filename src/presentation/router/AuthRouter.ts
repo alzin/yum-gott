@@ -116,6 +116,11 @@ export class AuthRouter {
     );
 
     this.router.post(
+      '/login/guest',
+      (req: Request, res: Response) => this.authController.guestLogin(req, res)
+    );
+
+    this.router.post(
       '/profile/image',
       this.upload.single('profileImage'),
       authMiddleware.authenticateUser,

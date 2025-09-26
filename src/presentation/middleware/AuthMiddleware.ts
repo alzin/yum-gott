@@ -45,6 +45,18 @@ export class AuthMiddleware {
     next();
   };
 
+  requireNonGuest = (req: Request, res: Response, next: NextFunction): void => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user || authReq.user.userType === 'guest') {
+      res.status(403).json({
+        success: false,
+        message: 'Forbidden: Guests are not allowed to perform this action',
+      });
+      return;
+    }
+    next();
+  };
+
   authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       let token = this.extractToken(req);

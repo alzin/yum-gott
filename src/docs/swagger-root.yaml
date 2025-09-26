@@ -27,6 +27,8 @@ paths:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1customer'
   /api/auth/login/restaurant-owner:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1restaurant-owner'
+  /api/auth/login/guest:
+    $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1login~1guest'
   /api/auth/verify:
     $ref: './paths-auth-health.yaml#/paths/~1api~1auth~1verify'
   /api/auth/profile/customer:

@@ -266,6 +266,60 @@ paths:
         "429":
           $ref: "./swagger-root.yaml#/components/responses/TooManyRequestsError"
 
+  /api/auth/login/guest:
+    post:
+      tags:
+        - Authentication
+      summary: Guest login
+      description: Issues guest JWT tokens as HTTP-only cookies to allow viewing videos without a full account.
+      operationId: loginGuest
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  type: string
+                  description: Optional device identifier to stabilize guest sessions
+                  example: device-7b2f3c1a
+            examples:
+              withDeviceId:
+                summary: Provide a custom deviceId
+                value:
+                  deviceId: device-7b2f3c1a
+              withoutDeviceId:
+                summary: Let server generate guest ID
+                value: {}
+      responses:
+        "200":
+          description: Guest login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Guest login successful
+              examples:
+                success:
+                  summary: Successful guest login
+                  value:
+                    success: true
+                    message: Guest login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: accessToken=...; refreshToken=...;
+        "400":
+          $ref: "./swagger-root.yaml#/components/responses/BadRequestError"
+
   /api/auth/profile/customer:
     get:
       tags:
